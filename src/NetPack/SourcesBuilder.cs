@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 
 namespace NetPack
@@ -8,7 +9,7 @@ namespace NetPack
 
         private readonly IFileProvider _sourceFileProvider;
         private readonly IHostingEnvironment _hostingEnv;
-        private readonly Sources _sources;
+       // private readonly Sources _sources;
 
         public SourcesBuilder(IHostingEnvironment hostingEnv) : this(hostingEnv.ContentRootFileProvider)
         {
@@ -18,16 +19,25 @@ namespace NetPack
         public SourcesBuilder(IFileProvider sourceFileProvider)
         {
             _sourceFileProvider = sourceFileProvider;
-            _sources = new Sources();
+           // _sources = new Sources();
+            SourceFiles = new List<SourceFile>();
         }
 
         public SourcesBuilder Include(string filePath)
         {
             var file = _sourceFileProvider.EnsureFile(filePath);
-            _sources.AddFile(file);
+            AddFile(file);
             return this;
         }
 
-        public Sources Sources => _sources;
+        public void AddFile(IFileInfo file)
+        {
+            var sourceFile = new SourceFile(file);
+            SourceFiles.Add(sourceFile);
+        }
+
+
+        public List<SourceFile> SourceFiles { get; }
+       
     }
 }

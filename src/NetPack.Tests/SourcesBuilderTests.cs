@@ -17,7 +17,7 @@ namespace NetPack.Tests
                 .Include("wwwroot/somefile.ts")
                 .Include("wwwroot/someOtherfile.ts");
 
-            Assert.True(sut.Sources.SourceFiles.Count == 2);
+            Assert.True(sut.SourceFiles.Count == 2);
 
         }
 
