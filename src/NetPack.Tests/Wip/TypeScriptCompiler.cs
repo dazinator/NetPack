@@ -10,15 +10,15 @@ namespace NetPack.Tests
         // helper class to add parameters to the compiler
         public class Options
         {
-            private static Options @default;
+            private static Options _defaultOptions;
             public static Options Default
             {
                 get
                 {
-                    if (@default == null)
-                        @default = new Options();
+                    if (_defaultOptions == null)
+                        _defaultOptions = new Options();
 
-                    return @default;
+                    return _defaultOptions;
                 }
             }
 

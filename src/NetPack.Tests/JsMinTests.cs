@@ -22,7 +22,7 @@ namespace NetPack.Tests
             var fileInfo = fileProvider.GetFileInfo("wwwroot/somefile.js");
 
             var sut = new JsMinifier();
-            var context = new FileProcessContext(new SourceFile(fileInfo));
+            var context = new FileProcessContext(new SourceFile(fileInfo, "wwwroot"));
 
             var result = await sut.ProcessInputAsync(context);
 
