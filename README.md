@@ -21,12 +21,76 @@ With NetPack, once you have added the `NetPack` NuGet package to your project, i
  services.AddNetPack();
  ```
  
-Now, you need to construct a `Pipeline`. Think of this a number of `Pipe`s connected to together, where each `Pipe` does something you need it to when some contents pass through it. Later, we will pour some `IFileInfo`'s into the pipe for processing, and the processed `IFileInfo`'s will come out the other end.
+Next, you need to construct a `Pipeline` for your assets. Think of this as just a number of `Pipe`s connected to together, where each `Pipe` "does something" that you need it to when some contents pass through it. 
 
-Think sending typescript files in, and them coming out as a single minified js `IFileInfo`. 
+```csharp
 
-So how is your application able to serve up the output?
+ app.UseNetPackPipeLine(builder =>
+                    builder.AddTypeScriptPipe(tsConfig =>
+                    {
+                        tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                        tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                        tsConfig.NoImplicitAny = true;
+                        tsConfig.RemoveComments = true;
+                        tsConfig.SourceMap = true;
+                    })
+                    .AddPipe(new BundlePipe("/somedir/bundle1.js"))
+                );
 
-NetPack has an `IFileProvider` that it wraps your existing applications `IHostingEnvironment.ContentRootFileProvider` with. NetPack's `IFileProvider` provides access to all of the `IFileInfo`'s that have been output from it's `PipeLine`s. This allows allows your asp.net core application to see these files, and it doesn't care that they are held in memory. 
+```
 
-Lastly NetPack has a `Watch` feature. This allows it to automatically re-process a pipeline when any of it's contetns changes. This results in updated `IFileInfo`s otuput from the pipeline whenever you make a change. This allows you to edit a .ts file, and refresh the browser to see the change.
+NetPack comes with a number of diffrent `Pipe`s out of the box that you can use for common tasks. For example, the `TypeScriptCompilationPipe` will compile any  `.ts` `IFileInfo`'s that pass through it, and output the corresponding `.js` `IFileInfo`s for the compiled js files.
+
+
+Once we have a `Pipeline` defined, we need to give it some source files to process.
+
+```
+
+           var fileProvider = HostingEnvironment.ContentRootFileProvider;
+
+            var sources = new SourcesBuilder(fileProvider);
+            sources
+                .Include("wwwroot/somefile.ts")
+                .Include("wwwroot/someOtherfile.ts")
+                .Sources;
+                
+                app.UseNetPackPipeLine(builder =>
+                    builder.AddTypeScriptPipe(tsConfig =>
+                    {
+                        tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                        tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                        tsConfig.NoImplicitAny = true;
+                        tsConfig.RemoveComments = true;
+                        tsConfig.SourceMap = true;
+                    })
+                    .AddPipe(new BundlePipe("/somedir/bundle1.js"))
+                    .Pipeline()
+                    .SetSourceFiles(sources)
+                );
+
+
+```
+
+Those files will now be put through the pipeline, and the resulting `IFileInfo` (in this case /somedir/bundle1.js) will be visible to asp.net via the `HostingEnvironment.ContentRootFileProvider`.
+
+Lastly, if we want to automatically rebuild the bundle file whenever we change a source file, we can add a `Watch` call like this:
+
+```
+                app.UseNetPackPipeLine(builder =>
+                    builder.AddTypeScriptPipe(tsConfig =>
+                    {
+                        tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                        tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                        tsConfig.NoImplicitAny = true;
+                        tsConfig.RemoveComments = true;
+                        tsConfig.SourceMap = true;
+                    })
+                    .AddPipe(new BundlePipe("/somedir/bundle1.js"))
+                    .Pipeline()
+                    .SetSourceFiles(sources).Watch()
+                );
+
+
+```
+
+
