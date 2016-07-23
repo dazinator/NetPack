@@ -1,5 +1,5 @@
 # NetPack
-
+(STILL IN DEVELOPMENT)
 ### What problem does it solve?
 
 When developing an ASP.NET Core application, you want to be able to edit files like typescript files, js files, and css files in your project, and then see the changes reflected in your browser, without having to rebuild or restart your application. 
