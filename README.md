@@ -4,7 +4,7 @@
 
 When developing an ASP.NET Core application, you want to be able to edit files like typescript files, js files, and css files in your project, and then see the changes reflected in your browser, without having to rebuild or restart your application. 
 
-There are many solutions to this but they often require you to learn third party tooling and define external build processes like Gulp, Grunt or WebPack etc. Each one of these comes with a fair learning curve, additional complexity, and changes to your build and compilation processes (Team City etc) to be made to accomodate them. They are also not suitable if you want to include files that are not on physical dsik but accessible throuhg an IFileProvider at application runtime, for example, if your application as `embedded` files.
+There are many solutions to this but they often require you to learn third party tooling and define external build processes like Gulp, Grunt or WebPack etc. Each one of these comes with a fair learning curve, additional complexity (config files etc), and changes to your project's build and compilation processes to accomodate them (hooks in project.json, or additional Team City build steps for example). They are also not suitable if you want to include files that are not on physical dsik but accessible throuhg an IFileProvider at application runtime, for example, if your application as `embedded` files.
 
 # NetPack is different
 
