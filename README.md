@@ -4,7 +4,7 @@
 
 When developing an ASP.NET Core application, you want to be able to edit files like typescript files, js files, and css files in your project, and then see the changes reflected in your browser, without having to rebuild or restart your application. 
 
-There are many solutions to this but they often use third party tooling, like Gulp, Grunt, WebPack etc. In addition to this, they also often require you to start some external web server process to serve the files up to the browser.
+There are many solutions to this but they often require you to learn third party tooling, like Gulp, Grunt, WebPack etc. With each new tool that you introduce, the complexity of your solution grows. NetPack's aim is to keep things very simple, but without compromising on flexibility where its needed.
 
 # NetPack is different
 
