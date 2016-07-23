@@ -4,17 +4,29 @@
 
 When developing an ASP.NET Core application, you want to be able to edit files like typescript files, js files, and css files in your project, and then see the changes reflected in your browser, without having to rebuild or restart your application. 
 
-There are many solutions to this but they often require you to learn third party tooling, like Gulp, Grunt, WebPack etc. With each new tool that you introduce, the complexity of your solution grows. NetPack's aim is to keep things very simple, but without compromising on flexibility where its needed.
+There are many solutions to this but they often require you to learn third party tooling and define external build processes like Gulp, Grunt or WebPack etc. Each one of these comes with a fair learning curve, additional complexity, and changes to your build and compilation processes to be made to accomodate them. They are also not suitable if you want to do runtime minification / bundling pre-processing.
 
 # NetPack is different
 
-NetPack runs within your ASP.NET Core application, because you configure it in your `startup.cs.`
-NetPack can see, and process, any file that it can access via your applications `IFileProvider`. This means not only can it see files on the physical disk (like the .ts files you are editing), it can also see files that are embedded in assemblies (thanks to EmbeddedFileProvider) or from any other source for which there is an IFileProvider implementation (feel free to write your own).
+NetPack runs within your ASP.NET Core application, because you configure it in your `startup.cs.`. It's capable of seeing all the assets that your application can see via the `IFileProvider` concept. This abtsraction means files are not restricted to those on the physical disk, but could live in plugin assemblies (embedded), azure blob storage, or from any other source for which there is an IFileProvider implementation (feel free to write your own).
 
-NetPack is also different, because it does not need to write processed files to the physical disk in order for your application to see them and serve them up to the browser. This means it can compile your assets in memory, which is faster.
+NetPack is also different, because it prefers in memory processing of files. It does not need to write output to physical disk in order for your asp.net core application to serve them up to the browser. This means it can avoid disk IO for a bit of a perfomance boost (in theory! not got any perf metrics to back this up yet!)
+
 
 # How does it work?
 
-With NetPack you first define a `PipeLine` which basically consists of the processing steps you want to be applied to your assets. You then define the assets that you want to be sent through the `PipeLine` and they will come out the other end of the pipeline - as a processed set of `IFileInfo` objects. Think sending typescript files in, and them coming out as a single mnified js file. NetPack has an `IFileProvider` that you hook up with your applications `IHostingEnvironment.ContentRootFileProvider` and this allows asp.net core to see the files output from the pipeline, as if they were physical files on disk, but really they live in memory. 
+With NetPack, once you have added the `NetPack` NuGet package to your project, in `startup.cs` you:
 
-Lastly NetPack has a `Watch` feature, so it can detect any change to any input files, and re-process the pipleine automatically.
+```
+ services.AddNetPack();
+ ```
+ 
+Now, you need to construct a `Pipeline`. Think of this a number of `Pipe`s connected to together, where each `Pipe` does something you need it to when some contents pass through it. Later, we will pour some `IFileInfo`'s into the pipe for processing, and the processed `IFileInfo`'s will come out the other end.
+
+Think sending typescript files in, and them coming out as a single minified js `IFileInfo`. 
+
+So how is your application able to serve up the output?
+
+NetPack has an `IFileProvider` that it wraps your existing applications `IHostingEnvironment.ContentRootFileProvider` with. NetPack's `IFileProvider` provides access to all of the `IFileInfo`'s that have been output from it's `PipeLine`s. This allows allows your asp.net core application to see these files, and it doesn't care that they are held in memory. 
+
+Lastly NetPack has a `Watch` feature. This allows it to automatically re-process a pipeline when any of it's contetns changes. This results in updated `IFileInfo`s otuput from the pipeline whenever you make a change. This allows you to edit a .ts file, and refresh the browser to see the change.
