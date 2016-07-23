@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
+using NetPack.Extensions;
 using NetPack.Pipes;
 using NetPack.Requirements;
 
@@ -10,11 +11,17 @@ namespace NetPack.Tests
     {
         private INodeServices _nodeServices;
         private NodeJsRequirement _nodeJsRequirement;
+        private TypeScriptPipeOptions tsOptions;
 
         public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement)
         {
             _nodeServices = nodeServices;
             _nodeJsRequirement = nodeJsRequirement;
+        }
+
+        public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement, TypeScriptPipeOptions tsOptions) : this(nodeServices, nodeJsRequirement)
+        {
+            this.tsOptions = tsOptions;
         }
 
         public async Task ProcessAsync(IPipelineContext context)

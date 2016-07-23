@@ -1,13 +1,17 @@
 ﻿using System;
-using NetPack.Pipes;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Builder;
 
-namespace NetPack.Tests
+namespace NetPack.Pipes
 {
     public class PipeLineBuilder
     {
-        public PipeLineBuilder()
+        public PipeLineBuilder(IApplicationBuilder appBuilder)
         {
+            ApplicationBuilder = appBuilder;
         }
+
+        public IApplicationBuilder ApplicationBuilder { get; set; }
 
         public PipeLineBuilder AddPipe(IPipe typescriptCompileStep)
         {

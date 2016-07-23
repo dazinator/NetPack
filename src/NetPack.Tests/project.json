@@ -12,7 +12,10 @@
     "Microsoft.AspNetCore.NodeServices": "1.0.0-beta-000007",
     "Microsoft.AspNetCore.TestHost": "1.0.0"
   },
-  "buildOptions": { "copyToOutput": "netpack-typescript.js" },
+  "buildOptions": {
+    "copyToOutput": "netpack-typescript.js",
+    "embed": "netpack-typescript.js"
+  },
 
   "frameworks": {
     "net452": {
