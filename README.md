@@ -80,27 +80,33 @@ So firstly we must call `services.AddNetPack()` to register the NetPack services
 
 Next, we configure a `Pipeline` for our assets. Configuring a pipeline consists of:
 
-1. Specifying the files you want to be processed by the pipeline.  
+1. Specifying the files you want to be processed by this pipeline.  
 2. Defining the `Pipe`'s in the pipeline, these are the things that actually process the files and produce new outputs.
 
-Each `Pipe` in the pipeline takes some inputs, and "does something" to them, and produces particular outputs. The outputs of one pipe are provided as the inputs for the next pipe. 
+Each `Pipe` in the pipeline takes some inputs, and "does something" to them, and produces particular outputs. The outputs of one pipe are provided as the inputs for the next pipe. The outputs from the final pipe in the pipeline, are `IFileInfo`s that represent the final processed outputs, and are made visible to your applications `StaticFiles` middleware so that they can be served up to the browser.
 
-So we start by defining the inputs for our pipeline:
+Note: You can define multiple seperate / isolated pipelines if you wish. Just make multiple calls to  `app.UseContentPipeLine()` for each pipeline you want to define.
+                
+So we start by defining the inputs for the pipeline:
 
 ```
 
-                         .WithInput((inputBuilder) 
+                       app.UseContentPipeLine(pipelineBuilder =>
+                {
+                    return pipelineBuilder
+                        .WithInput((inputBuilder) 
                                      => inputBuilder
                                         .Include("wwwroot/somefile.ts")
                                         .Include("wwwroot/someOtherfile.ts"))
 
 ```
 
-Under the hood this is using the `IHostingEnvironment.ContentFileProvider` to resolve these `IFileInfo`'s.
+Under the hood this is resolving those files using the `IHostingEnvironment.ContentFileProvider`, however you can use an override to specify another `IFileProvider` to use if you wish.
 
-Here we are specifying the files that we want our pipeline to process. In this case we have specified some typescript files only.
+Here we have now specified the files that we want our pipeline to process. 
+In this case we have specified some typescript files only.
 
-Next we define the `Pipe`'s in our pipeline, in sequence. We can keep adding more pipes by using the `.AddPipe(IPipe)` method, or helpful extension methods such as `.AddTypeScriptPipe(options)`.
+Next we define the `Pipe`'s in the pipeline, in the order we want them to process in. We can keep adding more pipes by using the `.AddPipe(IPipe)` method, or helpful extension methods such as `.AddTypeScriptPipe(options)`.
 
 ```csharp
 // shortened for brevity.
@@ -111,7 +117,7 @@ Next we define the `Pipe`'s in our pipeline, in sequence. We can keep adding mor
              .BuildPipeLine();
 ```
 
-NetPack comes with a number of diffrent `Pipe`s out of the box that you can use for common tasks. For example, the `TypeScriptCompilePipe` will compile any inputs that pass through it (You can think of these inputs as `IFileInfo`s) that have a `.ts` file extension. For each one it will compile it to javascript, and then add an `IFileInfo` representing the javascript to it's outputs. It does not output the `.ts` file passed in. If an input file is not a `.ts` file, then it will simply add it directly to it's outputs allowing it to flow through the pipe untouched.
+NetPack comes with a number of diffrent `Pipe`s out of the box that you can use for common tasks. For example, the `TypeScriptCompilePipe` will compile any inputs that pass through it (You can think of `inputs` as a bunch of `IFileInfo`s) and it will detect the ones that have a `.ts` file extension. For each `.ts` file it will compile it to a javascript file, and then add an `IFileInfo` representing the javascript file to it's outputs. It does not output the original `.ts` file in this case. If an input file is not a `.ts` file, then it outputs it directly allowing it to flow through the pipe untouched.
 
 Lastly, we call `.UsePipelineOutputAsStaticFiles();` which hooks up the outputs of the Pipeline to the aspnetcore `StaticFiles` middleware, allowing your application to serve up the `outputs` of our pipeline to the browser. 
 
