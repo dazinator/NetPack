@@ -26,10 +26,19 @@ namespace NetPack
             {
                 var path = file.GetPath();
                 var changeToken = FileProvider.Watch(path);
-                changeToken.RegisterChangeCallback((obj =>
+
+                changeToken.RegisterChangeCallback((a) =>
                 {
+                    var newFileInfo = (IFileInfo) a;
+                    file.Update(newFileInfo);
                     action(file);
-                }), file);
+                }, file);
+
+
+                //changeToken.RegisterChangeCallback((obj =>
+                //{
+                //    action(file);
+                //}), file);
             }
         }
 

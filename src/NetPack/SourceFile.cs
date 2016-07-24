@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.Extensions.FileProviders;
 
 namespace NetPack
@@ -11,7 +12,7 @@ namespace NetPack
             FileInfo = fileInfo;
         }
 
-        public IFileInfo FileInfo { get; }
+        public IFileInfo FileInfo { get; protected set; }
 
         public string Directory { get; }
 
@@ -19,5 +20,11 @@ namespace NetPack
         {
             return $"{Directory}/{FileInfo.Name}";
         }
+
+        public void Update(IFileInfo fileInfo)
+        {
+            FileInfo = fileInfo;
+        }
+
     }
 }
