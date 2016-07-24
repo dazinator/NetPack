@@ -71,7 +71,7 @@ Once we have a `Pipeline` defined, we need to give it some source files to proce
 
 ```
 
-Those files will now be put through the pipeline, and the resulting `IFileInfo` (in this case /somedir/bundle1.js) will be visible to asp.net via the `HostingEnvironment.ContentRootFileProvider`.
+Those files will now be put through the pipeline, and some `IFileInfo` will fall out the other end (in this case /somedir/bundle1.js). The outputs are visible to asp.net via a custom `IFileProvider` that NetPack provides. NetPack hooks this FileProvider up automatically for you, by wrapping your existing `HostingEnvironment.WebRootFileProvider` with it's own that can resolve pipeline outputs.
 
 Lastly, if we want to automatically rebuild the bundle file whenever we change a source file, we can add a `Watch` call like this:
 
