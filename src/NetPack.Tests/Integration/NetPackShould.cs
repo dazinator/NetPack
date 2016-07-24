@@ -55,7 +55,7 @@ namespace NetPack.Tests.Integration
             // it doesn't physically exist on disk, it has been produced in memory
             // as a result of the netpack pipeline processing typescript files
             // in our application, configured in the applications startup.cs
-           
+
             // Act
             var responseString = await GetResponseString("wwwroot/somefile.js");
 
@@ -93,7 +93,7 @@ namespace NetPack.Tests.Integration
 
             Assert.NotEqual(originalFileContents, updatedFileContents);
             Assert.True(updatedFileContents.Contains("// modified on"));
-         
+
 
         }
 
@@ -110,22 +110,26 @@ namespace NetPack.Tests.Integration
 
 
                 var mockDisposable = new Moq.Mock<IDisposable>();
-                var callBacks = new List<Action<object>>();
+                var callBacks = new Dictionary<string, List<Action<object>>>();
                 var changeTokens = new Dictionary<string, Moq.Mock<IChangeToken>>();
 
                 var mockFileProvider = TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" }, new[] { TestUtils.TsContentOne, TestUtils.TsContentTwo },
-                    s =>
+                    filePath =>
                     {
                         var mockChangeToken = new Moq.Mock<IChangeToken>();
                         mockChangeToken.SetupAllProperties();
                         mockChangeToken.Setup(a => a.RegisterChangeCallback(It.IsAny<Action<Object>>(), It.IsAny<object>()))
-                   .Returns<Action<object>, object>((a, b) =>
+                   .Returns<Action<object>, object>((callback, b) =>
                    {
-                       callBacks.Add(a);
+                       if (!callBacks.ContainsKey(filePath))
+                       {
+                           callBacks[filePath] = new List<Action<object>>();
+                       }
+                       callBacks[filePath].Add(callback);
                        return mockDisposable.Object;
                    });
 
-                        changeTokens.Add(s, mockChangeToken);
+                        changeTokens.Add(filePath, mockChangeToken);
                         return mockChangeToken.Object;
                     });
 
@@ -166,23 +170,15 @@ namespace NetPack.Tests.Integration
                             foreach (var value in values)
                             {
 
-                                // wrappedFileProvider.Files
 
-                                //   var pipelineManager = a.RequestServices.GetService<PipelineManager>();
-                                //   var fileProvider = new NetPackPipelineManagerFileProvider(pipelineManager);
-                                //  var sourceFile = fileProvider.GetSourceFile(value);
-
-                                // var fileInfo = env.ContentRootFileProvider.GetFileInfo(value);
                                 var changeToken = changeTokens[value];
                                 changeToken.SetupGet(x => x.HasChanged).Returns(true);
 
                                 string fileName = value;
-                                //string dir = "";
                                 var lastIndex = value.LastIndexOf("/");
                                 if (lastIndex > -1)
                                 {
                                     fileName = value.Substring(lastIndex + 1);
-                                    // dir = value.Substring(0, value.Length - lastIndex);
                                 }
 
                                 var existingFile = wrappedFileProvider.GetFileInfo(value);
@@ -198,13 +194,12 @@ namespace NetPack.Tests.Integration
                                     var changedFileInfo = new StringFileInfo(modifiedContents, fileName);
                                     wrappedFileProvider.Files[value] = changedFileInfo;
 
-                                    foreach (var callback in callBacks)
+                                    var onChangedCallbacks = callBacks[value];
+                                    foreach (var callback in onChangedCallbacks)
                                     {
-
+                                        // trigerring the change callbacks for the token, 
+                                        // all subscribers will be notified that this file has changed.
                                         callback.Invoke(changedFileInfo);
-                                        //sourceFile.FileInfo;
-                                        //var changedFile = new SourceFile(, sourceFile.Directory);
-
                                     }
                                 }
 
