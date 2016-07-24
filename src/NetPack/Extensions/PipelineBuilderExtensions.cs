@@ -2,23 +2,16 @@
 using System.IO;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
+using NetPack.Pipeline;
 using NetPack.Pipes;
 using NetPack.Requirements;
-using NetPack.Tests;
 
 namespace NetPack.Extensions
 {
-
-    public class TypeScriptPipeOptions
-    {
-
-    }
-
-
     public static class PipelineBuilderExtensions
     {
 
-        public static PipeLineBuilder AddTypeScriptPipe(this PipeLineBuilder builder, Action<TypeScriptPipeOptions> configureOptions)
+        public static IPipelineBuilder AddTypeScriptPipe(this IPipelineBuilder builder, Action<TypeScriptPipeOptions> configureOptions)
         {
             var appServices = builder.ApplicationBuilder.ApplicationServices;
             var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
@@ -29,7 +22,7 @@ namespace NetPack.Extensions
             var tsOptions = new TypeScriptPipeOptions();
             configureOptions(tsOptions);
             var pipe = new TypeScriptCompilePipe(nodeServices, nodeJsRequirement, tsOptions);
-           
+
             builder.AddPipe(pipe);
             return builder;
         }

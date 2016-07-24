@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.FileProviders;
-
-namespace NetPack.Pipes
+﻿namespace NetPack.Pipeline
 {
     public interface IPipelineContext
     {

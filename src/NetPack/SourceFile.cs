@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.FileProviders;
+﻿using System;
+using Microsoft.Extensions.FileProviders;
 
 namespace NetPack
 {
@@ -13,5 +14,10 @@ namespace NetPack
         public IFileInfo FileInfo { get; }
 
         public string Directory { get; }
+
+        public string GetPath()
+        {
+            return $"{Directory}/{FileInfo.Name}";
+        }
     }
 }

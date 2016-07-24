@@ -1,31 +1,34 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
-using NetPack.Extensions;
-using NetPack.Pipes;
+using NetPack.Pipeline;
 using NetPack.Requirements;
 
-namespace NetPack.Tests
+namespace NetPack.Pipes
 {
     public class TypeScriptCompilePipe : IPipe
     {
         private INodeServices _nodeServices;
         private NodeJsRequirement _nodeJsRequirement;
-        private TypeScriptPipeOptions tsOptions;
+        private TypeScriptPipeOptions _tsOptions;
 
-        public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement)
+        public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement) : this(nodeServices, nodeJsRequirement, new TypeScriptPipeOptions())
+        {
+
+        }
+
+        public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement, TypeScriptPipeOptions tsOptions)
         {
             _nodeServices = nodeServices;
             _nodeJsRequirement = nodeJsRequirement;
-        }
-
-        public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement, TypeScriptPipeOptions tsOptions) : this(nodeServices, nodeJsRequirement)
-        {
-            this.tsOptions = tsOptions;
+            _tsOptions = new TypeScriptPipeOptions();
         }
 
         public async Task ProcessAsync(IPipelineContext context)
         {
+
+            //  var resultString = await _nodeServices.InvokeAsync<string>("./netpack-typescript", "yo");
+
             foreach (var inputFile in context.Input)
             {
                 // only interested in typescript files.
@@ -36,8 +39,13 @@ namespace NetPack.Tests
                 {
                     using (var reader = new StreamReader(inputFileInfo.CreateReadStream()))
                     {
-                        var text = reader.ReadToEnd();
-                        var result = await _nodeServices.InvokeAsync<Result>("./netpack-typescript", text);
+
+                        var requestDto = new TypescriptCompileRequestDto();
+                        requestDto.TypescriptCode = reader.ReadToEnd();
+                        requestDto.Options = _tsOptions;
+                        requestDto.FilePath = inputFile.GetPath();
+
+                        var result = await _nodeServices.InvokeAsync<TypeScriptCompileResult>("./netpack-typescript", requestDto);
 
                         var fileName = System.IO.Path.GetFileNameWithoutExtension(inputFileInfo.Name);
                         var outputFileName = fileName + ".js";
@@ -57,8 +65,11 @@ namespace NetPack.Tests
         }
     }
 
-    public class Result
+    public class TypescriptCompileRequestDto
     {
-        public string Code { get; set; }
+        public string TypescriptCode { get; set; }
+        public TypeScriptPipeOptions Options { get; set; }
+        public string FilePath { get; set; }
+
     }
 }

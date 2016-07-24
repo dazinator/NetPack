@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Microsoft.Extensions.FileProviders;
 
-namespace NetPack
+namespace NetPack.Extensions
 {
     public static class FileProviderExtensions
     {

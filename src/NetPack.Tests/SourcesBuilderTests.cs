@@ -12,12 +12,12 @@ namespace NetPack.Tests
 
             var fileProvider = TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" });
 
-            var sut = new SourcesBuilder(fileProvider);
+            var sut = new PipelineInputBuilder(fileProvider);
             sut
                 .Include("wwwroot/somefile.ts")
                 .Include("wwwroot/someOtherfile.ts");
 
-            Assert.True(sut.SourceFiles.Count == 2);
+            Assert.True(sut.Input.Files.Count == 2);
 
         }
 

@@ -15,6 +15,8 @@ using NetPack.Requirements;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using NetPack.Extensions;
+using NetPack.Pipeline;
+using Newtonsoft.Json;
 
 namespace NetPack.Tests.Integration
 {
@@ -41,6 +43,7 @@ namespace NetPack.Tests.Integration
             {
                 request += "?" + querystring;
             }
+            
             var response = await _client.GetAsync(request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
@@ -55,7 +58,7 @@ namespace NetPack.Tests.Integration
             var responseString = await GetResponseString();
 
             // Assert
-         //   Assert.Equal("Pass in a number to check in the form /checkprime?5", responseString);
+            //   Assert.Equal("Pass in a number to check in the form /checkprime?5", responseString);
 
         }
 
@@ -87,12 +90,19 @@ namespace NetPack.Tests.Integration
             {
                 var nodeServices = context.RequestServices.GetService<INodeServices>();
                 var nodeJsRequirement = context.RequestServices.GetService<NodeJsRequirement>();
+
+                //if (context.Request.Query.ContainsKey())
+                //{
+                    
+
+                //}
+
                 var pipe = new TypeScriptCompilePipe(nodeServices, nodeJsRequirement);
                 var pipelineContext = new PipelineContext();
                 pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
 
                 await pipe.ProcessAsync(pipelineContext);
-
+                
                 var builder = new StringBuilder();
 
                 foreach (var output in pipelineContext.OutputFiles)
@@ -107,7 +117,7 @@ namespace NetPack.Tests.Integration
 
                 await context.Response.WriteAsync(builder.ToString());
 
-                
+
             });
 
         }

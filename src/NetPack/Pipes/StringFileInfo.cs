@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
 
-namespace NetPack.Tests
+namespace NetPack.Pipes
 {
     public class StringFileInfo : IFileInfo
     {
