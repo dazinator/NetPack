@@ -49,7 +49,7 @@ namespace NetPack.Tests
                                                          .Include("wwwroot/someOtherfile.ts")
                                                          .Input)
                               .WatchInputForChanges()
-                              .PipeLine;
+                              .BuildPipeLine();
 
             // assert
             Assert.NotNull(pipeLine);

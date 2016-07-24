@@ -9,6 +9,8 @@ namespace NetPack.Pipeline
     {
         PipelineInput Input { get; }
 
+        PipelineOutput Output { get; set; }
+
         List<IPipe> Pipes { get; }
 
         Task<PipelineOutput> FlushAsync();

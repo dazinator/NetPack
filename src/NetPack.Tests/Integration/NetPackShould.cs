@@ -1,19 +1,13 @@
-using System.IO;
+using System;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.NodeServices;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using NetPack.Pipeline;
 using NetPack.Pipes;
-using NetPack.Requirements;
 using Xunit;
 using NetPack.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 
 namespace NetPack.Tests.Integration
 {
@@ -28,7 +22,8 @@ namespace NetPack.Tests.Integration
         {
             // Arrange
             _server = new TestServer(new WebHostBuilder()
-                .UseStartup<Startup>());
+                .UseStartup<Startup>()
+                .UseContentRoot(Environment.CurrentDirectory));
             _client = _server.CreateClient();
         }
 
@@ -49,12 +44,15 @@ namespace NetPack.Tests.Integration
         [Fact]
         public async void Serve_Files_Output_From_Pipeline()
         {
-
+            // This test shows that when we request a .js file, we get one, even though
+            // it doesn't physically exist on disk, it has been produced in memory
+            // as a result of the netpack pipeline processing typescript files
+            // which is configured in the applications startup.cs
             // Act
             var responseString = await GetResponseString("wwwroot/somefile.js");
-            Assert.False(string.IsNullOrWhiteSpace(responseString));
+
             // Assert
-            //   Assert.Equal("Pass in a number to check in the form /checkprime?5", responseString);
+            Assert.False(string.IsNullOrWhiteSpace(responseString));
 
         }
 
@@ -63,7 +61,6 @@ namespace NetPack.Tests.Integration
 
             public void ConfigureServices(IServiceCollection services)
             {
-              
                 services.AddNetPack();
             }
 
@@ -86,25 +83,14 @@ namespace NetPack.Tests.Integration
                         //.AddPipe(someOtherPipe)
                         .WithInput((inputBuilder) =>
                             inputBuilder.Include("wwwroot/somefile.ts")
-                                        .Include("wwwroot/someOtherfile.ts")
-                                        .Input)
-                        .PipeLine;
+                                .Include("wwwroot/someOtherfile.ts")
+                                .Input)
+                        .BuildPipeLine();
 
                     return pipeLine;
 
-                });
-
-                app.UseStaticFiles();
-
-
-                //app.Run(async (context) =>
-                //{
-
-                //    var path = context.Request.Path.ToString();
-                //    await context.Response.WriteAsync("<div>Inside middleware defined using app.Run</div>");
-
-                //});
-
+                })
+                .UseNetPackStaticFiles();
             }
         }
 

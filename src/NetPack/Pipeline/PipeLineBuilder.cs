@@ -64,13 +64,11 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public IPipeLine PipeLine
+        public IPipeLine BuildPipeLine()
         {
-            get
-            {
-                var pipeLine = new Pipeline(Sources, Pipes, this.WachInput);
-                return pipeLine;
-            }
+            var pipeLine = new Pipeline(Sources, Pipes, this.WachInput);
+            return pipeLine;
+
         }
     }
 

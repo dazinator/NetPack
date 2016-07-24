@@ -31,6 +31,8 @@ namespace NetPack.Pipeline
 
         public PipelineInput Input { get; set; }
 
+        public PipelineOutput Output { get; set; }
+
         public List<IPipe> Pipes { get; set; }
 
         /// <summary>
@@ -51,12 +53,12 @@ namespace NetPack.Pipeline
             // whatever is currently the inputs for the "next" pipe (even though we dont have any more pipe)
             // is actually the output we want to return from the pipe.
             var output = new PipelineOutput(context.InputFiles);
+            Output = output;
 
             FlushCount = FlushCount + 1;
             HasFlushed = true;
 
             return output; 
-
 
         }
 

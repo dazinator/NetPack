@@ -29,7 +29,7 @@ namespace NetPack.Tests
         /// <returns></returns>
         public static IFileProvider GetMockFileProvider(string[] filePaths, string[] contents)
         {
-            return GetMockFileProvider(filePaths, null, null);
+            return GetMockFileProvider(filePaths, contents, null);
         }
 
 
