@@ -2,16 +2,37 @@
 
 ### What problem does it solve?
 
-When developing an ASP.NET Core application, you want to be able to edit files like typescript files, js files, and css files in your project, and then see the changes reflected in your browser, without having to rebuild or restart your application. 
+When developing an ASP.NET Core application, you often have content files in your project like:-
 
-There are many solutions to this but they often require you to learn third party tooling and define external build processes like Gulp, Grunt or WebPack etc. Each one of these comes with a fair learning curve, additional complexity (config files etc), and changes to your project's build and compilation processes to accomodate them (hooks in project.json, or additional Team City build steps for example). They are also not suitable if you want to process files that are not necessarily on physical disk, but accessible at runtime, through your applications `IFileProvider`, for example, perhaps your application has some `embedded` css files.
+- Typescript
+- Javascript
+- Css
+- Sass
+- Less
 
-# NetPack is different
+`NetPack` allows you to:
 
-NetPack runs within your ASP.NET Core application, because you configure it in your `startup.cs.`. It's capable of seeing all the assets that your application can see via the `IFileProvider` concept. This abtsraction means files are not restricted to those on the physical disk, but could live in plugin assemblies (embedded), azure blob storage, or from any other source for which there is an IFileProvider implementation (feel free to write your own).
+1. Perform runtime pre-processing of these files, by defining a `Pipeline` using a C# fluent API.
+2. Watches for changes, and re-processes the pipeline when you edit files. This enables you to edit a file, and refresh your browser and immediately see the change.
+3. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
+   (can be embedded etc)
 
-NetPack is also different, because it prefers in memory processing of files. It does not need to write output to physical disk in order for your asp.net core application to serve them up to the browser. This means it can avoid disk IO for a bit of a perfomance boost (in theory! not got any perf metrics to back this up yet!)
+`NetPack` doesn't write to the physical disk. Instead it performs all pre-processing in memory, and integrates with `StaticFiles` middleware so that asp.net core can serve up the outputs of the pipeline (i.e your modified / preprocessed files) directly from memory. This is purely for performance gain of not having to use disk IO.
 
+
+# NetPack is different from Gulp / WebPack / Grunt etc etc
+
+NetPack runs within your ASP.NET Core application to perform pre-processing at runtime. This gives it several big advantages, and one minor disadvantage over pefroming pre-processing at build time.
+
+Disadvantages:
+
+1. It has to preprocess your files at runtime when your application starts up, which means there is a small performance cost on startup.
+
+
+Advantages:
+
+1. `NetPack` can access all files from your applications virtual directory, provided by the `IFileProvider` - which means it can access files from anywhere, not just the physical directory. For example, you can use `NetPack` to pre-process assets (css files etc) that might be embedded in plugin assemblies, loaded dynamically at runtime.
+2. `NetPack` integrates your applications `StaticFiles` middleware to allow pre-processed files to be served up from memory. This means it does not need to write anything out to physical disk.
 
 # How does it work?
 
@@ -55,16 +76,16 @@ Let me show you a startup.cs file, and then i'll break it down..
 
 ```
 
-So firstly we must `services.AddNetPack()` to register the NetPack services with the DI system.
+So firstly we must call `services.AddNetPack()` to register the NetPack services with the DI system.
 
-Next, we can configure a `Pipeline` for our assets. Configuring a pipeline consists of:
+Next, we configure a `Pipeline` for our assets. Configuring a pipeline consists of:
 
-1. Specifying the files to be processed by the pipeline.  
-2. Specifying the `Pipe`'s in the pipeline.
+1. Specifying the files you want to be processed by the pipeline.  
+2. Defining the `Pipe`'s in the pipeline, these are the things that actually process the files and produce new outputs.
 
-Each `Pipe` in the pipeline takes some inputs, and the "does something" to them, and produces particular outputs. The outputs of one pipe are provided as the inputs for the next pipe. 
+Each `Pipe` in the pipeline takes some inputs, and "does something" to them, and produces particular outputs. The outputs of one pipe are provided as the inputs for the next pipe. 
 
-So we start by defining the inputs:
+So we start by defining the inputs for our pipeline:
 
 ```
 
@@ -75,9 +96,11 @@ So we start by defining the inputs:
 
 ```
 
-Here we include the files that we want our pipeline to process. In this case it's some typescript files only.
+Under the hood this is using the `IHostingEnvironment.ContentFileProvider` to resolve these `IFileInfo`'s.
 
-Next we add some `Pipe`'s in sequence to define the pipeline. We can keep adding more pipes by using the `.AddPipe(IPipe)` method, or helpful extension methods such as `.AddTypeScriptPipe(options)`.
+Here we are specifying the files that we want our pipeline to process. In this case we have specified some typescript files only.
+
+Next we define the `Pipe`'s in our pipeline, in sequence. We can keep adding more pipes by using the `.AddPipe(IPipe)` method, or helpful extension methods such as `.AddTypeScriptPipe(options)`.
 
 ```csharp
 // shortened for brevity.
@@ -88,13 +111,19 @@ Next we add some `Pipe`'s in sequence to define the pipeline. We can keep adding
              .BuildPipeLine();
 ```
 
-NetPack comes with a number of diffrent `Pipe`s out of the box that you can use for common tasks. For example, the `TypeScriptCompilePipe` will compile any inputs that pass through it that have a `.ts` file extension. For each one it will compile it to javascript, and then output the corresponding javascript as an output. If a file is input that isn't a `.ts` file, then it will simply be ignored and allowed to flow through the pipe untouched.
+NetPack comes with a number of diffrent `Pipe`s out of the box that you can use for common tasks. For example, the `TypeScriptCompilePipe` will compile any inputs that pass through it (You can think of these inputs as `IFileInfo`s) that have a `.ts` file extension. For each one it will compile it to javascript, and then add an `IFileInfo` representing the javascript to it's outputs. It does not output the `.ts` file passed in. If an input file is not a `.ts` file, then it will simply add it directly to it's outputs allowing it to flow through the pipe untouched.
 
-Lastly, we call `.UsePipelineOutputAsStaticFiles();` which hooks up some `StaticFiles` middleware that can serve up the `outputs` of our pipeline. In this case it will be the compiled '.js` files. 
+Lastly, we call `.UsePipelineOutputAsStaticFiles();` which hooks up the outputs of the Pipeline to the aspnetcore `StaticFiles` middleware, allowing your application to serve up the `outputs` of our pipeline to the browser. 
 
-The outputs are not actually written to disk, they are held in memory for better performance.
+We can now do this on our page:
 
-Lastly, if we want the pipeline to automatically re-process our files (to produce updated outputs) when our inputs change (i.e whenever we edit one of the files), we can just add a `WatchInputForChanges()` call like this:
+```
+ <script type="text/javascript" src="/wwwroot/somefile.js")"></script>
+```
+
+The outputs of a pipeline are not actually written to disk. If you look for `/wwwroot/somefile.js` on disk, you wont see it! They are held in memory for better performance.
+
+Lastly, if we want our pipeline to automatically re-process all of the input files, when an input file is changed (to produce updated outputs), we can just add a `WatchInputForChanges()` call like this:
 
 ```
 
@@ -121,6 +150,8 @@ Lastly, if we want the pipeline to automatically re-process our files (to produc
                 .UsePipelineOutputAsStaticFiles();
 
 ```
+
+Now whenever we edit `wwwroot/somefile.ts` or `wwwroot/someOtherfile.ts` with our application running, the pipeline will automatically re-run agains the up to date inputs. This will effectively spit out a new `wwwroot/somefile.js` and `wwwroot/someOtherfile.js` file in memory, and when we refresh the browser thats referencing those files, we see the change.
 
 
 
