@@ -24,10 +24,10 @@ namespace NetPack.Tests
 
 
             var mockFileProvider =
-                TestUtils.GetMockFileProvider(new[] {"wwwroot/somefile.ts", "wwwroot/someOtherfile.ts"},
-                    new[] {TestUtils.TsContentOne, TestUtils.TsContentTwo});
+                TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" },
+                    new[] { TestUtils.TsContentOne, TestUtils.TsContentTwo });
             mockHostingEnv.Object.ContentRootFileProvider = mockFileProvider;
-            
+
             services.AddSingleton<IHostingEnvironment>(mockHostingEnv.Object);
 
             var serviceProvider = services.BuildServiceProvider();
@@ -41,15 +41,16 @@ namespace NetPack.Tests
             var mockAnotherPipe = new Mock<IPipe>();
             mockAnotherPipe.SetupAllProperties();
 
-            var sut = new PipeLineBuilder(app);
-            var pipeLine = sut.AddPipe(mockPipe.Object)
-                              .AddPipe(mockAnotherPipe.Object)
-                              .WithInput((inputBuilder) =>
+            var sut = (IPipelineConfigurationBuilder)new PipelineConfigurationBuilder(app);
+
+            var pipeLine = sut.WithInput((inputBuilder) =>
                                              inputBuilder.Include("wwwroot/somefile.ts")
-                                                         .Include("wwwroot/someOtherfile.ts")
-                                                         .Input)
-                              .WatchInputForChanges()
-                              .BuildPipeLine();
+                                                         .Include("wwwroot/someOtherfile.ts"))
+                                                         .WatchInputForChanges()
+                                                         .DefinePipeline()
+                                                            .AddPipe(mockPipe.Object)
+                                                            .AddPipe(mockAnotherPipe.Object)
+                                                         .BuildPipeLine();
 
             // assert
             Assert.NotNull(pipeLine);

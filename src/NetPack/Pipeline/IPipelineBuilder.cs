@@ -5,15 +5,13 @@ using NetPack.Pipes;
 
 namespace NetPack.Pipeline
 {
-    public interface IPipelineBuilder
+    public interface IPipelineConfigurationBuilder
     {
         IApplicationBuilder ApplicationBuilder { get; set; }
 
-        PipeLineBuilder AddPipe(IPipe pipe);
+        IPipelineInputOptionsBuilder WithInput(PipelineInput sources);
 
-        IPipelineInputBuilder WithInput(PipelineInput sources);
-
-        IPipelineInputBuilder WithInput(Func<PipelineInputBuilder, PipelineInput> sourcesBuilder, IFileProvider fileProvider = null);
+        IPipelineInputOptionsBuilder WithInput(Action<PipelineInputBuilder> sourcesBuilder, IFileProvider fileProvider = null);
 
 
     }

@@ -30,8 +30,8 @@ namespace NetPack
             return services;
         }
 
-        public static INetPackApplicationBuilder UseNetPackPipeLine(this IApplicationBuilder appBuilder,
-            Func<IPipelineBuilder, IPipeLine> createPipeline)
+        public static INetPackApplicationBuilder UseContentPipeLine(this IApplicationBuilder appBuilder,
+            Func<IPipelineConfigurationBuilder, IPipeLine> createPipeline)
         {
             //var staticFilesOptions = appBuilder.ApplicationServices.GetService<IOptions<StaticFileOptions>>();
             //if (staticFilesOptions == null)
@@ -48,7 +48,7 @@ namespace NetPack
             }
 
 
-            var builder = new PipeLineBuilder(appBuilder);
+            var builder = new PipelineConfigurationBuilder(appBuilder);
             var pipeLine = createPipeline(builder);
             pipeLineManager.AddPipeLine(pipeLine);
 
@@ -59,7 +59,7 @@ namespace NetPack
             return new NetPackApplicationBuilder(appBuilder, pipeLine);
         }
 
-        public static IApplicationBuilder UseNetPackStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "")
+        public static IApplicationBuilder UsePipelineOutputAsStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "")
         {
 
             // NetPackPipelineFileProvider

@@ -13,7 +13,7 @@ namespace NetPack.Tests.Integration
 {
     public class NetPackShould
     {
-        
+
 
         private readonly TestServer _server;
         private readonly HttpClient _client;
@@ -70,27 +70,27 @@ namespace NetPack.Tests.Integration
                 var mockFileProvider = TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" }, new[] { TestUtils.TsContentOne, TestUtils.TsContentTwo });
                 env.ContentRootFileProvider = mockFileProvider;
 
-                app.UseNetPackPipeLine(pipelineBuilder =>
+                app.UseContentPipeLine(pipelineBuilder =>
                 {
-                    var pipeLine = pipelineBuilder.AddTypeScriptPipe(tsConfig =>
-                    {
-                        tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                        tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                        tsConfig.NoImplicitAny = true;
-                        tsConfig.RemoveComments = true;
-                        tsConfig.SourceMap = true;
-                    })
+                    return pipelineBuilder
                         //.AddPipe(someOtherPipe)
-                        .WithInput((inputBuilder) =>
-                            inputBuilder.Include("wwwroot/somefile.ts")
-                                .Include("wwwroot/someOtherfile.ts")
-                                .Input)
+                        .WithInput((inputBuilder) 
+                                     => inputBuilder
+                                        .Include("wwwroot/somefile.ts")
+                                        .Include("wwwroot/someOtherfile.ts"))
+                                        .WatchInputForChanges()
+                        .DefinePipeline()
+                            .AddTypeScriptPipe(tsConfig =>
+                                     {
+                                         tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                                         tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                                         tsConfig.NoImplicitAny = true;
+                                         tsConfig.RemoveComments = true;
+                                         tsConfig.SourceMap = true;
+                                     })
                         .BuildPipeLine();
-
-                    return pipeLine;
-
                 })
-                .UseNetPackStaticFiles();
+                .UsePipelineOutputAsStaticFiles();
             }
         }
 

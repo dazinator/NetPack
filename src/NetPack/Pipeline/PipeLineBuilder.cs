@@ -8,9 +8,9 @@ using NetPack.Pipes;
 
 namespace NetPack.Pipeline
 {
-    public class PipeLineBuilder : IPipelineBuilder, IPipelineInputBuilder
+    public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineInputOptionsBuilder, IPipelineBuilder
     {
-        public PipeLineBuilder(IApplicationBuilder appBuilder)
+        public PipelineConfigurationBuilder(IApplicationBuilder appBuilder)
         {
             ApplicationBuilder = appBuilder;
             Pipes = new List<IPipe>();
@@ -22,24 +22,24 @@ namespace NetPack.Pipeline
 
         public List<IPipe> Pipes { get; set; }
 
-        public PipeLineBuilder AddPipe(IPipe pipe)
+        public IPipelineBuilder AddPipe(IPipe pipe)
         {
             Pipes.Add(pipe);
             return this;
         }
 
-        public IPipelineInputBuilder WithInput(PipelineInput sources)
+        public IPipelineInputOptionsBuilder WithInput(PipelineInput sources)
         {
             Sources = sources;
             return this;
         }
 
-        public IPipelineInputBuilder WithInput(Func<PipelineInputBuilder, PipelineInput> sourcesBuilder, IFileProvider fileProvider = null)
+        public IPipelineInputOptionsBuilder WithInput(Action<PipelineInputBuilder> sourcesBuilder, IFileProvider fileProvider = null)
         {
             var sourcesFileProvider = fileProvider ?? GetDefaultFileProvider();
             var builder = new PipelineInputBuilder(sourcesFileProvider);
-            var sources = sourcesBuilder(builder);
-            Sources = sources;
+            sourcesBuilder(builder);
+            Sources = builder.Input;
             return this;
         }
 
@@ -58,10 +58,20 @@ namespace NetPack.Pipeline
 
         public bool WachInput { get; protected set; }
 
-        public IPipelineInputBuilder WatchInputForChanges()
+        public IPipelineInputOptionsBuilder WatchInputForChanges()
         {
             this.WachInput = true;
             return this;
+        }
+
+        public IPipelineBuilder DefinePipeline()
+        {
+            return this;
+        }
+
+        IPipelineBuilder IPipelineBuilder.AddPipe(IPipe pipe)
+        {
+            return AddPipe(pipe);
         }
 
         public IPipeLine BuildPipeLine()
