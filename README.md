@@ -13,7 +13,7 @@ When developing an ASP.NET Core application, you often have content files in you
 `NetPack` allows you to:
 
 1. Perform runtime pre-processing of these files, by defining a `Pipeline` using a C# fluent API.
-2. Watches for changes, and re-processes the pipeline when changes to files are detected. This enables you to edit a file, and refresh your browser and immediately see the change.
+2. Watches for changes, and re-processes the pipeline when changes to files are detected. This enables you to edit a source file, then refresh your browser and see the updated output from the pipeline.
 3. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
    (can be embedded etc)
 
