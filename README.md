@@ -22,7 +22,7 @@ When developing an ASP.NET Core application, you often have content files in you
 
 # NetPack is different from Gulp / WebPack / Grunt etc etc
 
-NetPack runs within your ASP.NET Core application to perform pre-processing at runtime. This gives it several big advantages, and one minor disadvantage over pefroming pre-processing at build time.
+NetPack runs within your ASP.NET Core application to perform pre-processing at runtime. This gives it some advantages, and one minor disadvantage over pefroming pre-processing at build time.
 
 Disadvantages:
 
