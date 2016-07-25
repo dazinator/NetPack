@@ -23,5 +23,6 @@ namespace NetPack.Pipeline
         bool HasFlushed { get; }
 
        // bool IsFlushing { get; }
+        void Initialise();
     }
 }

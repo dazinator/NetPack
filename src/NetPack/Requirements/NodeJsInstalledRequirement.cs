@@ -20,7 +20,7 @@ namespace NetPack.Requirements
                 // and display errors if any
                 psi.RedirectStandardError = true;
                 psi.RedirectStandardOutput = true;
-              
+
                 p.StartInfo = psi;
 
                 p.Start();
@@ -37,5 +37,20 @@ namespace NetPack.Requirements
                     throw new NodeJsNotInstalledException(errorMessage);
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            if (obj.GetType() == typeof(NodeJsRequirement))
+            {
+                return true;
+            }
+            return false;
+        }
+
+       
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NetPack.Pipes;
+using NetPack.Requirements;
 
 namespace NetPack.Pipeline
 {
@@ -9,10 +10,11 @@ namespace NetPack.Pipeline
     {
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
 
-        public Pipeline(PipelineInput input, List<IPipe> pipes, bool watch)
+        public Pipeline(PipelineInput input, List<IPipe> pipes, bool watch, List<IRequirement> requirements)
         {
             Input = input;
             Pipes = pipes;
+            Requirements = requirements;
 
             if (watch)
             {
@@ -20,8 +22,12 @@ namespace NetPack.Pipeline
                 // files of the pipeline again.
                 input.WatchFiles(async a =>
                 {
-                    // leave some delay?
-                    await this.FlushAsync();
+                // leave some delay?
+                    if (HasFlushed) // only bother doing when initialised, cos we do a flush on initialise.
+                    {
+                        await this.FlushAsync();
+                    }
+                   
                 });
             }
 
@@ -35,13 +41,37 @@ namespace NetPack.Pipeline
 
         public List<IPipe> Pipes { get; set; }
 
+        public List<IRequirement> Requirements { get; set; }
+
+        public void Initialise()
+        {
+            // run checks for requirements.
+            EnsureRequirements();
+            // Trigger the pipeline to be flushed if it hasn't already.
+            // we want to block becausewe dont want the app to finish starting
+            // before all assets have been processed..
+            if (!HasFlushed)
+            {
+                FlushAsync().Wait(DefaultFlushTimeout);
+                // await pipeline.FlushAsync();
+            }
+        }
+
+        private void EnsureRequirements()
+        {
+            foreach (var requirement in Requirements)
+            {
+                requirement.Check();
+            }
+        }
+
         /// <summary>
         /// Processes the current input through the pipes in the pipeline, and returns the output of the pipeline.
         /// </summary>
         /// <returns></returns>
         public async Task<PipelineOutput> FlushAsync()
         {
-            
+
             var context = new PipelineContext(Input.Files);
 
             foreach (var pipe in Pipes)
@@ -58,7 +88,7 @@ namespace NetPack.Pipeline
             FlushCount = FlushCount + 1;
             HasFlushed = true;
 
-            return output; 
+            return output;
 
         }
 

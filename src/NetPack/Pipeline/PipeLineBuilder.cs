@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipes;
+using NetPack.Requirements;
 
 namespace NetPack.Pipeline
 {
@@ -14,11 +15,14 @@ namespace NetPack.Pipeline
         {
             ApplicationBuilder = appBuilder;
             Pipes = new List<IPipe>();
+            Requirements = new List<IRequirement>();
         }
 
         public IApplicationBuilder ApplicationBuilder { get; set; }
 
         //public IFileProvider FileProvider { get; set; }
+
+        public List<IRequirement> Requirements { get; set; }
 
         public List<IPipe> Pipes { get; set; }
 
@@ -76,9 +80,18 @@ namespace NetPack.Pipeline
 
         public IPipeLine BuildPipeLine()
         {
-            var pipeLine = new Pipeline(Sources, Pipes, this.WachInput);
+            var pipeLine = new Pipeline(Sources, Pipes, this.WachInput, Requirements);
             return pipeLine;
 
+        }
+
+        public IPipelineBuilder IncludeRequirement(IRequirement requirement)
+        {
+            if (!Requirements.Contains(requirement))
+            {
+                Requirements.Add(requirement);
+            }
+            return this;
         }
     }
 

@@ -44,14 +44,7 @@ namespace NetPack.Pipeline
 
         public void AddPipeLine(IPipeLine pipeline)
         {
-            // Trigger the pipeline to be flushed if it hasn't already.
-            // we want to block becausewe dont want the app to finish starting
-            // before all assets have been processed..
-            if (!pipeline.HasFlushed)
-            {
-                pipeline.FlushAsync().Wait(new TimeSpan(0,5,0));
-               // await pipeline.FlushAsync();
-            }
+            pipeline.Initialise();
             PipeLines.Add(pipeline);
         }
 
