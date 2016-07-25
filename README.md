@@ -33,6 +33,7 @@ Advantages:
 
 1. `NetPack` can access all files from your applications virtual directory, provided by the `IFileProvider` - which means it can access files from anywhere, not just the physical directory. For example, you can use `NetPack` to pre-process assets (css files etc) that might be embedded in plugin assemblies, loaded dynamically at runtime.
 2. `NetPack` integrates your applications `StaticFiles` middleware to allow pre-processed files to be served up from memory. This means it does not need to write anything out to physical disk.
+3. You don't have to worry about running a seprate filewatcher or dev server process, just start your app running as normal.
 
 # How does it work?
 
