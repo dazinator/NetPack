@@ -1,6 +1,6 @@
 using Microsoft.Extensions.FileProviders;
 
-namespace NetPack.Pipeline
+namespace NetPack.File
 {
     public interface INetPackPipelineFileProvider : IFileProvider
     {

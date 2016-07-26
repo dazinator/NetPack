@@ -15,6 +15,7 @@ using NetPack.Requirements;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using NetPack.Extensions;
+using NetPack.File;
 using NetPack.Pipeline;
 using Newtonsoft.Json;
 

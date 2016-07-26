@@ -1,4 +1,6 @@
-﻿namespace NetPack.Pipeline
+﻿using NetPack.File;
+
+namespace NetPack.Pipeline
 {
     public interface IPipelineContext
     {

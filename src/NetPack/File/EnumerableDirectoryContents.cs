@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Extensions.FileProviders;
 
-namespace NetPack.Pipeline
+namespace NetPack.File
 {
     internal class EnumerableDirectoryContents : IDirectoryContents
     {

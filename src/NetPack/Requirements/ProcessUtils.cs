@@ -41,7 +41,7 @@ namespace NetPack.Requirements
 
             var exePath = paths
                 .Select(x => Path.Combine(x, exe))
-                .FirstOrDefault(x => File.Exists(x));
+                .FirstOrDefault(x => System.IO.File.Exists(x));
 
             return exePath;
 

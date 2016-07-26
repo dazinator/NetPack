@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using NetPack.File;
 
 namespace NetPack
 {

@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.FileProviders;
 using Moq;
+using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes;
 using NetPack.Requirements;

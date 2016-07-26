@@ -1,3 +1,4 @@
+using NetPack.File;
 using Xunit;
 using Xunit.Abstractions;
 

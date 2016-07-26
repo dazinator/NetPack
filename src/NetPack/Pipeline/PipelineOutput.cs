@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using NetPack.File;
 
 namespace NetPack.Pipeline
 {

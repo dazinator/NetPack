@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.FileProviders;
+using NetPack.File;
 
-namespace NetPack
+namespace NetPack.Pipeline
 {
     public class PipelineInput
     {

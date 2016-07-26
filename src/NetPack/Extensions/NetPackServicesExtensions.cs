@@ -1,18 +1,14 @@
 using System;
-using System.Collections;
-using System.IO;
-using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
-using NetPack.Extensions;
+using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 
+// ReSharper disable once CheckNamespace
+// Extension method put in root namespace for discoverability purposes.
 namespace NetPack
 {
     public static class NetPackServicesExtensions

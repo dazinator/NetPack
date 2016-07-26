@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
+using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 
@@ -26,8 +27,8 @@ namespace NetPack.Pipes
 
         public async Task ProcessAsync(IPipelineContext context)
         {
-
-            //  var resultString = await _nodeServices.InvokeAsync<string>("./netpack-typescript", "yo");
+            // todo: read script from embedded resource and use string as temp file:
+            //  _entryPointScript = new StringAsTempFile("some script");
 
             foreach (var inputFile in context.Input)
             {

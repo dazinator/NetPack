@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
+using NetPack.Pipeline;
 
-namespace NetPack.Pipeline
+namespace NetPack.File
 {
     public class NetPackPipelineFileProvider : INetPackPipelineFileProvider
     {

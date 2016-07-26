@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using NetPack.Extensions;
 
-namespace NetPack
+namespace NetPack.Pipeline
 {
     public class PipelineInputBuilder
     {

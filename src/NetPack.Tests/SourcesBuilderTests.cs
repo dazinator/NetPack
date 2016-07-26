@@ -1,5 +1,6 @@
 using System.IO;
 using Microsoft.Extensions.FileProviders;
+using NetPack.Pipeline;
 using Xunit;
 
 namespace NetPack.Tests

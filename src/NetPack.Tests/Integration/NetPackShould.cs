@@ -14,6 +14,7 @@ using Moq;
 using NetPack.Pipes;
 using Xunit;
 using NetPack.Extensions;
+using NetPack.File;
 using NetPack.Pipeline;
 
 namespace NetPack.Tests.Integration

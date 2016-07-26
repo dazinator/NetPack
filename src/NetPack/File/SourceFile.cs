@@ -1,8 +1,6 @@
-﻿using System;
-using System.Net;
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 
-namespace NetPack
+namespace NetPack.File
 {
     public class SourceFile
     {
