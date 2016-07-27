@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.FileProviders;
-using NetPack.Extensions;
 
 namespace NetPack.Pipeline
 {

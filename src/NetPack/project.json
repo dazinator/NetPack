@@ -2,8 +2,10 @@
   "version": "1.0.0-*",
 
   "buildOptions": {
-    "copyToOutput": "netpack-typescript.js",
-    "embed": "netpack-typescript.js"
+    "embed": {
+      "include": "Embedded"
+    },
+    "define": []
   },
 
   "dependencies": {
@@ -18,7 +20,8 @@
 
   "frameworks": {
     "netstandard1.6": {
-      "imports": "dnxcore50"
+      "imports": "dnxcore50",
+      "buildOptions": {"define": ["NETSTANDARD"]}
     },
     "net452": {
 

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Requirements;
+using NetPack.Utils;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -22,6 +23,7 @@ namespace NetPack
             services.AddSingleton<IRequirement>(new NodeJsRequirement());
             services.AddSingleton<PipelineManager>();
             services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
+            services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
 
             return services;
         }

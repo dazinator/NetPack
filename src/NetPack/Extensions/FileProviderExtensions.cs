@@ -1,11 +1,12 @@
 ﻿using System.IO;
 using Microsoft.Extensions.FileProviders;
 
-namespace NetPack.Extensions
+namespace NetPack
 {
+    // ReSharper disable once CheckNamespace
+    // Extension method put in root namespace for discoverability purposes.
     public static class FileProviderExtensions
     {
-
         public static IFileInfo EnsureFile(this IFileProvider fileProvider, string path)
         {
             var file = fileProvider.GetFileInfo(path);
@@ -20,6 +21,14 @@ namespace NetPack.Extensions
             else
             {
                 throw new FileNotFoundException($"No such file exists: {0}", path);
+            }
+        }
+
+        public static string ReadAllContent(this IFileInfo fileInfo)
+        {
+            using (var reader = new StreamReader(fileInfo.CreateReadStream()))
+            {
+                return reader.ReadToEnd();
             }
         }
 

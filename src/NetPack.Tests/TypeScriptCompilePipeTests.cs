@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using System.IO;
+using System.Reflection;
 using Microsoft.AspNetCore.NodeServices;
-using Microsoft.Extensions.FileProviders;
 using Moq;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes;
 using NetPack.Requirements;
+using NetPack.Utils;
 using Xunit;
 
 namespace NetPack.Tests
@@ -14,7 +14,7 @@ namespace NetPack.Tests
     public class TypeScriptCompilePipeTests
     {
 
-        
+
 
         [Fact]
         public async void Processes_TypescriptFiles_And_Outputs_Js_Files()
@@ -22,7 +22,7 @@ namespace NetPack.Tests
 
             // arrange
             var mockNodeInstance = new Moq.Mock<INodeServices>();
-            mockNodeInstance.Setup(a => a.InvokeAsync<TypeScriptCompileResult>(It.IsAny<string>(), It.IsAny<TypescriptCompileRequestDto>()))
+            mockNodeInstance.Setup(a => a.InvokeAsync<TypeScriptCompileResult>(It.IsAny<string>(), It.IsAny<TypeScriptCompilePipe.TypescriptCompileRequestDto>()))
                             .ReturnsAsync(new TypeScriptCompileResult() { Code = "Compiled code" });
 
             var mockJsRequirement = new Moq.Mock<NodeJsRequirement>();
@@ -33,8 +33,13 @@ namespace NetPack.Tests
                 new SourceFile(new StringFileInfo(TestUtils.TsContentOne, "somefile.ts"), "/SomeFolder")
             };
 
-            IPipe sut = new TypeScriptCompilePipe(mockNodeInstance.Object, mockJsRequirement.Object);
-            
+            var embeddedScript = new StringFileInfo("some embedded script", "netpack-typescript");
+
+            var mockEmbeddedResources = new Moq.Mock<IEmbeddedResourceProvider>();
+            mockEmbeddedResources.Setup(a => a.GetResourceFile(It.IsAny<Assembly>(), It.IsAny<string>())).Returns(embeddedScript);
+
+            IPipe sut = new TypeScriptCompilePipe(mockNodeInstance.Object, mockEmbeddedResources.Object);
+
             var pipelineContext = new Moq.Mock<IPipelineContext>();
             pipelineContext.Setup(a => a.Input).Returns(testInputFiles);
 
@@ -46,7 +51,6 @@ namespace NetPack.Tests
 
             // act
             await sut.ProcessAsync(pipelineContext.Object);
-
 
             // assert
 
@@ -63,7 +67,7 @@ namespace NetPack.Tests
         }
 
 
-     
+
 
 
     }

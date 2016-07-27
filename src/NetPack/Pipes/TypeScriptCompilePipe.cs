@@ -1,52 +1,59 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.File;
 using NetPack.Pipeline;
-using NetPack.Requirements;
+using NetPack.Utils;
+using System.Reflection;
 
 namespace NetPack.Pipes
 {
     public class TypeScriptCompilePipe : IPipe
     {
         private INodeServices _nodeServices;
-        private NodeJsRequirement _nodeJsRequirement;
-        private TypeScriptPipeOptions _tsOptions;
+        private TypeScriptPipeOptions _options;
+        private IEmbeddedResourceProvider _embeddedResourceProvider;
 
-        public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement) : this(nodeServices, nodeJsRequirement, new TypeScriptPipeOptions())
+
+        public TypeScriptCompilePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
         {
 
         }
 
-        public TypeScriptCompilePipe(INodeServices nodeServices, NodeJsRequirement nodeJsRequirement, TypeScriptPipeOptions tsOptions)
+        public TypeScriptCompilePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, TypeScriptPipeOptions options)
         {
             _nodeServices = nodeServices;
-            _nodeJsRequirement = nodeJsRequirement;
-            _tsOptions = new TypeScriptPipeOptions();
+            _embeddedResourceProvider = embeddedResourceProvider;
+            _options = options;
         }
 
         public async Task ProcessAsync(IPipelineContext context)
         {
             // todo: read script from embedded resource and use string as temp file:
-            //  _entryPointScript = new StringAsTempFile("some script");
 
-            foreach (var inputFile in context.Input)
+            Assembly assy = ReflectionUtils.GetAssemblyFromType(this.GetType());
+            var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+            var scriptContent = script.ReadAllContent();
+
+            using (var nodeScript = new StringAsTempFile(scriptContent))
             {
-                // only interested in typescript files.
-                var inputFileInfo = inputFile.FileInfo;
-
-                var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
-                if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
+                foreach (var inputFile in context.Input)
                 {
-                    using (var reader = new StreamReader(inputFileInfo.CreateReadStream()))
+                    // only interested in typescript files.
+                    var inputFileInfo = inputFile.FileInfo;
+
+                    var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
+                    if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
                     {
+                        var contents = inputFileInfo.ReadAllContent();
 
                         var requestDto = new TypescriptCompileRequestDto();
-                        requestDto.TypescriptCode = reader.ReadToEnd();
-                        requestDto.Options = _tsOptions;
+                        requestDto.TypescriptCode = contents;
+                        requestDto.Options = _options;
                         requestDto.FilePath = inputFile.GetPath();
 
-                        var result = await _nodeServices.InvokeAsync<TypeScriptCompileResult>("./netpack-typescript", requestDto);
+                        var result = await _nodeServices.InvokeAsync<TypeScriptCompileResult>(nodeScript.FileName, requestDto);
 
                         var fileName = System.IO.Path.GetFileNameWithoutExtension(inputFileInfo.Name);
                         var outputFileName = fileName + ".js";
@@ -54,23 +61,29 @@ namespace NetPack.Pipes
                         // output the js file in the same directory.
                         var fileinfo = new StringFileInfo(result.Code, outputFileName);
                         context.AddOutput(new SourceFile(fileinfo, inputFile.Directory));
+
                     }
-                }
-                else
-                {
-                    // allow file to flow through pipeline untouched as its not a .ts file.
-                    context.AddOutput(inputFile);
+                    else
+                    {
+                        // allow file to flow through pipeline untouched as its not a .ts file.
+                        context.AddOutput(inputFile);
+                    }
+
                 }
 
             }
+
+           
+        }
+
+        public class TypescriptCompileRequestDto
+        {
+            public string TypescriptCode { get; set; }
+            public TypeScriptPipeOptions Options { get; set; }
+            public string FilePath { get; set; }
+
         }
     }
 
-    public class TypescriptCompileRequestDto
-    {
-        public string TypescriptCode { get; set; }
-        public TypeScriptPipeOptions Options { get; set; }
-        public string FilePath { get; set; }
-
-    }
+   
 }

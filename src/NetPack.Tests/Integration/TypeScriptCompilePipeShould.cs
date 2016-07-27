@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -9,15 +7,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.AspNetCore.TestHost;
-using Moq;
 using NetPack.Pipes;
 using NetPack.Requirements;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
-using NetPack.Extensions;
 using NetPack.File;
 using NetPack.Pipeline;
-using Newtonsoft.Json;
+using NetPack.Utils;
 
 namespace NetPack.Tests.Integration
 {
@@ -91,14 +87,13 @@ namespace NetPack.Tests.Integration
             {
                 var nodeServices = context.RequestServices.GetService<INodeServices>();
                 var nodeJsRequirement = context.RequestServices.GetService<NodeJsRequirement>();
-
+                var embeddedResourceProvider = context.RequestServices.GetService<IEmbeddedResourceProvider>();
                 //if (context.Request.Query.ContainsKey())
                 //{
-                    
+
 
                 //}
-
-                var pipe = new TypeScriptCompilePipe(nodeServices, nodeJsRequirement);
+                var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider);
                 var pipelineContext = new PipelineContext();
                 pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
 
