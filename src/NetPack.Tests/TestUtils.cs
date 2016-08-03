@@ -4,9 +4,43 @@ using System.IO;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using NetPack.File;
 
 namespace NetPack.Tests
 {
+
+    public class MockFileProvider : IFileProvider
+    {
+        public IFileInfo GetFileInfo(string subpath)
+        {
+           
+            if (!Files.ContainsKey(subpath))
+            {
+                return new NotFoundFileInfo(subpath);
+            }
+
+            return Files[subpath];
+        }
+
+        public IDirectoryContents GetDirectoryContents(string subpath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IChangeToken Watch(string filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddFile(string subpath, string contents)
+        {
+            var path = SubPathInfo.Parse(subpath);
+            var file = new StringFileInfo(contents, path.FileName);
+            Files.Add(path.ToString(), file);
+        }
+
+        public Dictionary<string, IFileInfo> Files { get; set; }
+    }
 
     public class TestFileProvider : IFileProvider
     {
@@ -104,6 +138,7 @@ namespace NetPack.Tests
                     });
 
                 }
+                index = index + 1;
             }
 
             if (getChangeToken != null)

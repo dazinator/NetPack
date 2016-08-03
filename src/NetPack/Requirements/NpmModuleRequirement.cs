@@ -118,22 +118,24 @@ namespace NetPack.Requirements
         public virtual void Check()
         {
             var installedPackages = GetInstalledPackages();
+
             if (!installedPackages.ContainsKey(_packageName))
             {
                 if (_installIfNotFound)
                 {
                     // try and install the requird npm module.
-                    InstallNpmPackage(_packageName);
+                    InstallNpmPackage(_packageName, _version);
+                    return;
                 }
             }
 
-            // make sure we satisfy the specified version.
+            // package already installed with same name, but is it the required version? 
             if (_version != null)
             {
                 var installedPackageVersions = installedPackages[_packageName];
-                if (installedPackageVersions.Contains(_version))
+                if (!installedPackageVersions.Contains(_version))
                 {
-                    throw new NotSupportedException("Checking package version not yet supported.");
+                    InstallNpmPackage(_packageName, _version);
                 }
             }
 

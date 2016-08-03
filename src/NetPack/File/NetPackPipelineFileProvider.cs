@@ -30,7 +30,6 @@ namespace NetPack.File
                 }
             }
 
-
             return new NotFoundFileInfo(subpath);
         }
 
@@ -65,78 +64,5 @@ namespace NetPack.File
         }
     }
 
-    //public class NetPackPipelineManagerFileProvider : INetPackPipelineFileProvider
-    //{
-
-    //    private PipelineManager _pipelineManager;
-
-    //    public NetPackPipelineManagerFileProvider(PipelineManager pipelineManager)
-    //    {
-    //        _pipelineManager = pipelineManager;
-    //    }
-
-    //    public SourceFile GetSourceFile(string subpath)
-    //    {
-    //        foreach (var pipeline in _pipelineManager.PipeLines)
-    //        {
-    //            foreach (var file in pipeline.Output.Files)
-    //            {
-    //                if (file.GetPath() == subpath)
-    //                {
-    //                    return file;
-    //                }
-    //            }
-    //        }
-
-    //        return null;
-    //    }
-
-    //    public IFileInfo GetFileInfo(string subpath)
-    //    {
-    //        foreach (var pipeline in _pipelineManager.PipeLines)
-    //        {
-    //            foreach (var file in pipeline.Output.Files)
-    //            {
-    //                if (file.GetPath() == subpath)
-    //                {
-    //                    return file.FileInfo;
-    //                }
-    //            }
-    //        }
-
-    //        return new NotFoundFileInfo(subpath);
-    //    }
-
-    //    public IDirectoryContents GetDirectoryContents(string subpath)
-    //    {
-    //        var files = new List<IFileInfo>();
-    //        // ReSharper disable once LoopCanBeConvertedToQuery
-    //        foreach (var pipeline in _pipelineManager.PipeLines)
-    //        {
-    //            // ReSharper disable once LoopCanBeConvertedToQuery
-    //            foreach (var file in pipeline.Output.Files)
-    //            {
-    //                if (file.Directory == subpath)
-    //                {
-    //                    files.Add(file.FileInfo);
-    //                }
-    //            }
-    //        }
-
-    //        if (files.Any())
-    //        {
-    //            return new EnumerableDirectoryContents(files);
-    //        }
-
-    //        return new NotFoundDirectoryContents();
-
-    //    }
-
-    //    public IChangeToken Watch(string filter)
-    //    {
-    //        // watching output files for changes not yet supported. 
-    //        return NullChangeToken.Singleton;
-    //        //throw new NotImplementedException();
-    //    }
-    //}
+    
 }

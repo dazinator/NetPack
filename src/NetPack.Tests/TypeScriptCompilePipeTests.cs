@@ -22,15 +22,16 @@ namespace NetPack.Tests
 
             // arrange
             var mockNodeInstance = new Moq.Mock<INodeServices>();
-            mockNodeInstance.Setup(a => a.InvokeAsync<TypeScriptCompileResult>(It.IsAny<string>(), It.IsAny<TypeScriptCompilePipe.TypescriptCompileRequestDto>()))
-                            .ReturnsAsync(new TypeScriptCompileResult() { Code = "Compiled code" });
+            mockNodeInstance.Setup(a => a.InvokeAsync<TypeScriptCompilePipe.TypeScriptCompileResult>(It.IsAny<string>(), It.IsAny<TypeScriptCompilePipe.TypescriptCompileRequestDto>()))
+                                .ReturnsAsync(new TypeScriptCompilePipe.TypeScriptCompileResult() { Sources = new Dictionary<string, string>() { { "SomeFolder/somefile.js", "come code"} } });
+                               //.ReturnsAsync(new TypeScriptCompileResult() { });
 
             var mockJsRequirement = new Moq.Mock<NodeJsRequirement>();
             mockJsRequirement.Setup(a => a.Check());
 
             var testInputFiles = new SourceFile[]
             {
-                new SourceFile(new StringFileInfo(TestUtils.TsContentOne, "somefile.ts"), "/SomeFolder")
+                new SourceFile(new StringFileInfo(TestUtils.TsContentOne, "somefile.ts"), "SomeFolder")
             };
 
             var embeddedScript = new StringFileInfo("some embedded script", "netpack-typescript");
@@ -61,8 +62,8 @@ namespace NetPack.Tests
             // should name the output file .js not .ts.
             Assert.Equal(outputFile.FileInfo.Name, "somefile.js");
 
-            // should output the file with the same directory as the input.
-            Assert.Equal(outputFile.Directory, "/SomeFolder");
+            // The output should have a directory returned from node.
+            Assert.Equal(outputFile.Directory, "SomeFolder");
 
         }
 

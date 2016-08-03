@@ -48,7 +48,7 @@ namespace NetPack.Tests.Integration
 
 
         [Fact]
-        public async void Serve_Files_Output_From_Pipeline()
+        public async Task Serve_Files_Output_From_Pipeline()
         {
             // This test shows that when we request a .js file, we get one, even though
             // it doesn't physically exist on disk, it has been produced in memory
@@ -64,7 +64,7 @@ namespace NetPack.Tests.Integration
         }
 
         [Fact]
-        public async void Serve_Updated_Outputs_When_Inputs_Change()
+        public async Task Serve_Updated_Outputs_When_Inputs_Change()
         {
             // This test shows that:
 
@@ -85,7 +85,7 @@ namespace NetPack.Tests.Integration
 
             //3. The pipeline should re-process all its inputs to produce updated outputs.
             // Give it 5 seconds to complete this.
-            await Task.Delay(new TimeSpan(0, 0, 5));
+            await Task.Delay(new TimeSpan(0, 0, 10));
 
             //4. Now request the same javascript file again - it should have been autoamtically updated by the pipeline.
             var updatedFileContents = await GetResponseString("wwwroot/somefile.js");

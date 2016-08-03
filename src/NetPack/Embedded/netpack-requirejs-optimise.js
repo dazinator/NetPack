@@ -4,20 +4,28 @@ var requirejs = require('requirejs');
 
 module.exports = function (callback, requestDto) {
 
-    var options = requestDto.options;
-   
     // set up virtual file system to resolve files from memory when r.js requests them.
-    mock({
-        'wwwroot': {
-            'moduleA.js': 'file content here',
-            'moduleB.js': 'more file content here'
-        },
+    var dir = {};
+    var files = requestDto.Files;
+
+    callback(null, {
+        Result: contents
     });
-    
+
+    var arrayLength = files.length;
+    for (var i = 0; i < arrayLength; i++) {
+
+        var file = files[i];
+        dir[file.FilePath] = file.FileContents;
+        //Do something
+    }
+
+    mock(dir);
+
     var config = {
         baseUrl: 'wwwroot',
         name: 'moduleB',
-        out: '../build/main-built.js'
+        out: 'main-built.js'
     };
 
     requirejs.optimize(config, function (buildResponse) {
@@ -32,13 +40,18 @@ module.exports = function (callback, requestDto) {
         var contents = fs.readFileSync(config.out, 'utf8');
 
         callback(null, {
-            code: contents
+            Result: contents
         });
-       
+
     }, function (err) {
         //optimization err callback
+        var errorMessage = err.toString();
+        callback(null,
+        {
+            Error: errorMessage
+        });
     });
-   
+
 };
 
 

@@ -25,7 +25,7 @@ namespace NetPack
             var typescriptPackageRequriement = new NpmModuleRequirement("typescript", true);
             builder.IncludeRequirement(typescriptPackageRequriement);
 
-            var typescriptSimplePackageRequirement = new NpmModuleRequirement("typescript-simple", true);
+            var typescriptSimplePackageRequirement = new NpmModuleRequirement("netpack-typescript-compiler", true, "0.0.4");
             builder.IncludeRequirement(typescriptSimplePackageRequirement);
 
             //var nodeJsRequirement = (NodeJsRequirement)appServices.GetRequiredService(typeof(NodeJsRequirement));
