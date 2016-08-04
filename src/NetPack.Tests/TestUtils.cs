@@ -1,76 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using Moq;
-using NetPack.File;
 
 namespace NetPack.Tests
 {
-
-    public class MockFileProvider : IFileProvider
-    {
-        public IFileInfo GetFileInfo(string subpath)
-        {
-           
-            if (!Files.ContainsKey(subpath))
-            {
-                return new NotFoundFileInfo(subpath);
-            }
-
-            return Files[subpath];
-        }
-
-        public IDirectoryContents GetDirectoryContents(string subpath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IChangeToken Watch(string filter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddFile(string subpath, string contents)
-        {
-            var path = SubPathInfo.Parse(subpath);
-            var file = new StringFileInfo(contents, path.FileName);
-            Files.Add(path.ToString(), file);
-        }
-
-        public Dictionary<string, IFileInfo> Files { get; set; }
-    }
-
-    public class TestFileProvider : IFileProvider
-    {
-
-        private readonly IFileProvider _fileProvider;
-        public TestFileProvider(IFileProvider fileProvider)
-        {
-            _fileProvider = fileProvider;
-            Files = new Dictionary<string, IFileInfo>();
-        }
-
-        public Dictionary<string, IFileInfo> Files { get; set; }
-
-        public IFileInfo GetFileInfo(string subpath)
-        {
-            return Files.ContainsKey(subpath) ? Files[subpath] : _fileProvider.GetFileInfo(subpath);
-        }
-
-        public IDirectoryContents GetDirectoryContents(string subpath)
-        {
-            return _fileProvider.GetDirectoryContents(subpath);
-        }
-
-        public IChangeToken Watch(string filter)
-        {
-            return _fileProvider.Watch(filter);
-        }
-    }
-
-
     public static class TestUtils
     {
         /// <summary>

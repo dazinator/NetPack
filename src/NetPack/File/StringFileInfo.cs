@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
 
 namespace NetPack.File
 {
@@ -42,5 +44,58 @@ namespace NetPack.File
         public bool IsDirectory { get; }
 
 
+    }
+
+    public class InMemoryChangeToken : IChangeToken
+    {
+
+       // public StringFileInfo File { get; set; }
+
+        public InMemoryChangeToken()
+        {
+          //  File = file;
+        }
+
+        private readonly List<Tuple<Action<object>, object, IDisposable>> _callbacks = new List<Tuple<Action<object>, object, IDisposable>>();
+
+        public bool ActiveChangeCallbacks { get; set; }
+
+        public bool HasChanged { get; set; }
+
+        public List<Tuple<Action<object>, object, IDisposable>> Callbacks
+        {
+            get
+            {
+                return _callbacks;
+            }
+        }
+
+        public IDisposable RegisterChangeCallback(Action<object> callback, object state)
+        {
+            var disposable = EmptyDisposable.Instance;
+            _callbacks.Add(Tuple.Create(callback, state, (IDisposable)disposable));
+            return disposable;
+        }
+
+        public void RaiseCallback(object newItem)
+        {
+            foreach (var callback in _callbacks)
+            {
+                callback.Item1(newItem);
+            }
+        }
+    }
+
+    internal class EmptyDisposable : IDisposable
+    {
+        public static EmptyDisposable Instance { get; } = new EmptyDisposable();
+
+        private EmptyDisposable()
+        {
+        }
+
+        public void Dispose()
+        {
+        }
     }
 }

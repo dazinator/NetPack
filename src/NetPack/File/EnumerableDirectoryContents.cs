@@ -4,7 +4,7 @@ using Microsoft.Extensions.FileProviders;
 
 namespace NetPack.File
 {
-    internal class EnumerableDirectoryContents : IDirectoryContents
+    public class EnumerableDirectoryContents : IDirectoryContents
     {
         private readonly IEnumerable<IFileInfo> _entries;
 
