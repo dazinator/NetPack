@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.FileProviders;
@@ -11,7 +12,7 @@ namespace NetPack.Pipes
 {
     public class UglifyPipe : IPipe
     {
-        public async Task ProcessAsync(IPipelineContext context)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
             // Need to run uglify on any .js, .css, .html, or .htm files passed through the pipeline.
             foreach (var inputFile in context.Input)

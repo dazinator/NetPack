@@ -11,6 +11,7 @@ namespace NetPack.Pipeline
 {
     public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineInputOptionsBuilder, IPipelineBuilder
     {
+        
         public PipelineConfigurationBuilder(IApplicationBuilder appBuilder)
         {
             ApplicationBuilder = appBuilder;
@@ -19,6 +20,7 @@ namespace NetPack.Pipeline
         }
 
         public IApplicationBuilder ApplicationBuilder { get; set; }
+
 
         //public IFileProvider FileProvider { get; set; }
 
@@ -80,7 +82,7 @@ namespace NetPack.Pipeline
 
         public IPipeLine BuildPipeLine()
         {
-            var pipeLine = new Pipeline(Sources, Pipes, this.WachInput, Requirements);
+            var pipeLine = new Pipeline(Sources, Pipes, Requirements);
             return pipeLine;
 
         }

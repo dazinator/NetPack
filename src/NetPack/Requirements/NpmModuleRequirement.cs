@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace NetPack.Requirements
@@ -155,11 +157,36 @@ namespace NetPack.Requirements
                 p.WaitForExit();
 
                 // reads the error output
-                var errorMessage = p.StandardError.ReadToEnd();
+                var errors = new List<string>();
+                var warnings = new List<string>();
 
-                // if there were errors, throw an exception
-                if (!String.IsNullOrEmpty(errorMessage))
-                    throw new NpmPackageCouldNotBeInstalledException(errorMessage);
+                while (!p.StandardError.EndOfStream)
+                {
+                    var line = p.StandardError.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        if (line.Contains("WARN"))
+                        {
+                            warnings.Add(line);
+                            // WARNINGS ARE OK.
+                        }
+                        else
+                        {
+                            errors.Add(line);
+                        }
+                    }
+                }
+
+                if (errors.Any())
+                {
+                    var errorMessage = string.Join(Environment.NewLine, errors);
+                    // if there were errors, throw an exception
+                    if (!String.IsNullOrEmpty(errorMessage))
+                        throw new NpmPackageCouldNotBeInstalledException(errorMessage);
+                }
+
+
+            
 
                 var output = p.StandardOutput.ReadToEnd();
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.File;
@@ -28,7 +29,7 @@ namespace NetPack.Pipes
         }
 
 
-        public async Task ProcessAsync(IPipelineContext context)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
             Assembly assy = ReflectionUtils.GetAssemblyFromType(this.GetType());
             var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");

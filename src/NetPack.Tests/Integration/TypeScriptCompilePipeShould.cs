@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,7 @@ using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using NetPack.File;
 using NetPack.Pipeline;
+using NetPack.Pipes.Typescript;
 using NetPack.Utils;
 
 namespace NetPack.Tests.Integration
@@ -97,7 +99,7 @@ namespace NetPack.Tests.Integration
                 var pipelineContext = new PipelineContext();
                 pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
 
-                await pipe.ProcessAsync(pipelineContext);
+                await pipe.ProcessAsync(pipelineContext, CancellationToken.None);
                 
                 var builder = new StringBuilder();
 

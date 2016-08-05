@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NetPack;
+using NetPack.Pipes.Typescript;
 
 namespace NetPack.Web
 {
@@ -29,6 +31,7 @@ namespace NetPack.Web
         {
             // Add framework services.
             services.AddMvc();
+            services.AddNetPack();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,8 +56,30 @@ namespace NetPack.Web
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
             });
+
+            app.UseContentPipeLine(pipelineBuilder =>
+            {
+                return pipelineBuilder
+                    .WithInput((inputBuilder)
+                                 => inputBuilder
+                                    .Include("wwwroot/ts/Another.ts")
+                                    .Include("wwwroot/ts/Greeter.ts"))
+                                    .WatchInputForChanges()
+                    .DefinePipeline()
+                        .AddTypeScriptPipe(tsConfig =>
+                        {
+                            tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                            tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                            tsConfig.NoImplicitAny = true;
+                            tsConfig.RemoveComments = false; 
+                            tsConfig.SourceMap = true;
+                        })
+                    .BuildPipeLine();
+            })
+              .UsePipelineOutputAsStaticFiles();
+
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -94,7 +95,7 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
                 pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(AmdModuleAFileContent, "moduleA.js"), "wwwroot"));
                 pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(AmdModuleBFileContent, "moduleB.js"), "wwwroot"));
 
-                await sut.ProcessAsync(pipelineContext);
+                await sut.ProcessAsync(pipelineContext, CancellationToken.None);
 
                 // Write the content of any outputs to the response for inspection.
                 var builder = new StringBuilder();

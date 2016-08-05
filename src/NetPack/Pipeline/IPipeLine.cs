@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using NetPack.Pipes;
 
@@ -13,11 +14,11 @@ namespace NetPack.Pipeline
 
         List<IPipe> Pipes { get; }
 
-        Task<PipelineOutput> FlushAsync();
+        Task<PipelineOutput> FlushAsync(CancellationToken cancelationToken);
 
         //PipelineOutput Flush(TimeSpan? timeout = null);
 
-        bool IsWatching { get; }
+        //bool IsWatching { get; }
 
         int FlushCount { get; }
         bool HasFlushed { get; }

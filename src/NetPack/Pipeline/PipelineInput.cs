@@ -21,20 +21,14 @@ namespace NetPack.Pipeline
             Files.Add(sourceFile);
         }
         
-        public void WatchFiles(Action<SourceFile> action)
+        public void WatchFiles(Action<IFileInfo> action)
         {
             foreach (var file in Files)
             {
-                var path = file.GetPath();
-                var changeToken = FileProvider.Watch(path);
+               // var path = file.GetPath();
+                WatchFile(file, action);
 
-                changeToken.RegisterChangeCallback((a) =>
-                {
-                    var newFileInfo = (IFileInfo) a;
-                    file.Update(newFileInfo);
-                    action(file);
-                }, file);
-
+               
 
                 //changeToken.RegisterChangeCallback((obj =>
                 //{
@@ -43,8 +37,22 @@ namespace NetPack.Pipeline
             }
         }
 
+        private void WatchFile(SourceFile file, Action<IFileInfo> action)
+        {
+            var path = file.GetPath();
+            var changeToken = FileProvider.Watch(path);
+            changeToken.RegisterChangeCallback((a) =>
+            {
+                var newFileInfo = (IFileInfo)a;
+                file.Update(newFileInfo);
+                action(newFileInfo);
 
+                // must watch file again as old change token expired.
+                WatchFile(file, action);
 
+            }, file.FileInfo);
+
+        }
     }
 
 

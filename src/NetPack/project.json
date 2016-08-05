@@ -15,7 +15,8 @@
     "Microsoft.Extensions.FileProviders.Embedded": "1.0.0",
     "Microsoft.Extensions.Options": "1.0.0",
     "Microsoft.AspNetCore.StaticFiles": "1.0.0",
-    "NUglify": "1.5.2"
+    "NUglify": "1.5.2",
+    "Polly": "4.3.0"
   },
 
   "frameworks": {

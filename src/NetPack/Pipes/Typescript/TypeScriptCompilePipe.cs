@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Utils;
-using System.Reflection;
-using System.Linq;
 
-namespace NetPack.Pipes
+namespace NetPack.Pipes.Typescript
 {
     public class TypeScriptCompilePipe : IPipe
     {
@@ -29,7 +29,7 @@ namespace NetPack.Pipes
             _options = options;
         }
 
-        public async Task ProcessAsync(IPipelineContext context)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
             var requestDto = new TypescriptCompileRequestDto();
             requestDto.Options = _options;

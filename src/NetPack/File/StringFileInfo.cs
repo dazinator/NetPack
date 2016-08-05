@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -56,13 +57,13 @@ namespace NetPack.File
           //  File = file;
         }
 
-        private readonly List<Tuple<Action<object>, object, IDisposable>> _callbacks = new List<Tuple<Action<object>, object, IDisposable>>();
+        private readonly ConcurrentBag<Tuple<Action<object>, object, IDisposable>> _callbacks = new ConcurrentBag<Tuple<Action<object>, object, IDisposable>>();
 
         public bool ActiveChangeCallbacks { get; set; }
 
         public bool HasChanged { get; set; }
 
-        public List<Tuple<Action<object>, object, IDisposable>> Callbacks
+        public ConcurrentBag<Tuple<Action<object>, object, IDisposable>> Callbacks
         {
             get
             {

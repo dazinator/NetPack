@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
 using NetPack.Pipeline;
 using NetPack.Pipes;
+using NetPack.Pipes.Typescript;
 using NetPack.Requirements;
 using NetPack.Utils;
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.FileProviders;
+﻿using System;
+using Microsoft.Extensions.FileProviders;
+using NetPack.File;
 
 namespace NetPack.Pipeline
 {
@@ -16,6 +18,15 @@ namespace NetPack.Pipeline
 
         public PipelineInputBuilder Include(string filePath)
         {
+            //todo: handle globbs too, 
+            // however need to think about how we would handle detecting new files that appear matching the glob
+            // for example if you create a new file at runtime, we should pick it up.
+            // current implmentation listens to specific files only. 
+            var subPath = SubPathInfo.Parse(filePath);
+            if (!subPath.IsFile)
+            {
+                throw new ArgumentException("Only paths for specific files are currently supported. Globbs and directories cannot currently be used.");
+            }
             var file = _sourceFileProvider.EnsureFile(filePath);
             var dir = GetDirectoryPath(filePath);
             return AddFile(file, dir);
@@ -28,7 +39,7 @@ namespace NetPack.Pipeline
         }
 
         public PipelineInput Input { get; set; }
-   
+
         protected virtual string GetDirectoryPath(string subPath)
         {
             // does the subpath contain directory portion?
@@ -42,7 +53,7 @@ namespace NetPack.Pipeline
             return dir;
 
         }
-        
+
 
     }
 }

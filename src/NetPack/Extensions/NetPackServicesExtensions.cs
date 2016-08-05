@@ -24,6 +24,7 @@ namespace NetPack
             services.AddSingleton<PipelineManager>();
             services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
             services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
+            services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
 
             return services;
         }
@@ -45,11 +46,15 @@ namespace NetPack
                     "Could not find a required netpack service. Have you called services.AddNetPack() in your startup class?");
             }
 
-
+            var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
             var builder = new PipelineConfigurationBuilder(appBuilder);
             var pipeLine = createPipeline(builder);
             pipeLineManager.AddPipeLine(pipeLine);
-
+            if (builder.WachInput)
+            {
+                pipeLineWatcher.WatchPipeline(pipeLine);
+            }
+          
             //   var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
             //  var existingStaticFilesProvider = staticFilesOptions.Value.FileProvider ?? hostingEnv.WebRootFileProvider;
             //  appBuilder.

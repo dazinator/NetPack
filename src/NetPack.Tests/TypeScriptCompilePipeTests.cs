@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using Microsoft.AspNetCore.NodeServices;
 using Moq;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes;
+using NetPack.Pipes.Typescript;
 using NetPack.Requirements;
 using NetPack.Utils;
 using Xunit;
@@ -50,8 +52,9 @@ namespace NetPack.Tests
                 outputFiles.Add(a);
             });
 
+            
             // act
-            await sut.ProcessAsync(pipelineContext.Object);
+            await sut.ProcessAsync(pipelineContext.Object, CancellationToken.None);
 
             // assert
 

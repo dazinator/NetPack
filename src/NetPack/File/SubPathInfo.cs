@@ -20,6 +20,11 @@ namespace NetPack.File
 
         public bool IsPattern { get; set; }
 
+        public bool IsFile
+        {
+            get { return !IsPattern && !string.IsNullOrWhiteSpace(FileName); }
+        }
+
         public void CheckPattern()
         {
             bool patternValidationEnabled = true;

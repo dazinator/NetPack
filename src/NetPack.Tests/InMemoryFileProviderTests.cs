@@ -1,5 +1,6 @@
 using System.IO;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
 using NetPack.File;
 using NetPack.Pipeline;
 using Xunit;
@@ -94,7 +95,7 @@ namespace NetPack.Tests
             fileProvider.AddFile(path3, "not interested in this one");
 
             // watch all txt files.
-            var token = fileProvider.Watch("/myfolder/some*.txt") as InMemoryChangeToken;
+            var token = fileProvider.Watch("/myfolder/some*.txt") as IChangeToken;
             int changeFiredCount = 0;
 
             token.RegisterChangeCallback((a) =>

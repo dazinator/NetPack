@@ -1,4 +1,4 @@
-﻿namespace NetPack.Pipes
+﻿namespace NetPack.Pipes.Typescript
 {
     public class TypeScriptPipeOptions
     {

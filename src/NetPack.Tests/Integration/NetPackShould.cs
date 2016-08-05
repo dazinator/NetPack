@@ -14,6 +14,7 @@ using Moq;
 using NetPack.Pipes;
 using Xunit;
 using NetPack.File;
+using NetPack.Pipes.Typescript;
 
 namespace NetPack.Tests.Integration
 {
@@ -85,7 +86,7 @@ namespace NetPack.Tests.Integration
 
             //3. The pipeline should re-process all its inputs to produce updated outputs.
             // Give it 5 seconds to complete this.
-            await Task.Delay(new TimeSpan(0, 0, 10));
+            await Task.Delay(new TimeSpan(0, 0, 5));
 
             //4. Now request the same javascript file again - it should have been autoamtically updated by the pipeline.
             var updatedFileContents = await GetResponseString("wwwroot/somefile.js");
@@ -107,34 +108,11 @@ namespace NetPack.Tests.Integration
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
             {
 
+                var mockFileProvider = new InMemoryFileProvider();
+                mockFileProvider.AddFile("wwwroot/somefile.ts", TestUtils.TsContentOne);
+                mockFileProvider.AddFile("wwwroot/someOtherfile.ts", TestUtils.TsContentTwo);
 
-                var mockDisposable = new Moq.Mock<IDisposable>();
-                var callBacks = new Dictionary<string, List<Action<object>>>();
-                var changeTokens = new Dictionary<string, Moq.Mock<IChangeToken>>();
-
-                var mockFileProvider = TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" }, new[] { TestUtils.TsContentOne, TestUtils.TsContentTwo },
-                    filePath =>
-                    {
-                        var mockChangeToken = new Moq.Mock<IChangeToken>();
-                        mockChangeToken.SetupAllProperties();
-                        mockChangeToken.Setup(a => a.RegisterChangeCallback(It.IsAny<Action<Object>>(), It.IsAny<object>()))
-                   .Returns<Action<object>, object>((callback, b) =>
-                   {
-                       if (!callBacks.ContainsKey(filePath))
-                       {
-                           callBacks[filePath] = new List<Action<object>>();
-                       }
-                       callBacks[filePath].Add(callback);
-                       return mockDisposable.Object;
-                   });
-
-                        changeTokens.Add(filePath, mockChangeToken);
-                        return mockChangeToken.Object;
-                    });
-
-                // quick way to override some stuff when i need to..
-                var wrappedFileProvider = new TestFileProvider(mockFileProvider);
-                env.ContentRootFileProvider = wrappedFileProvider;
+                env.ContentRootFileProvider = mockFileProvider;
 
                 app.UseContentPipeLine(pipelineBuilder =>
                 {
@@ -151,7 +129,7 @@ namespace NetPack.Tests.Integration
                                          tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
                                          tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
                                          tsConfig.NoImplicitAny = true;
-                                         tsConfig.RemoveComments = true;
+                                         tsConfig.RemoveComments = false; // important: we are not removing comments because we test for a modification that involves a comment being added!
                                          tsConfig.SourceMap = true;
                                      })
                         .BuildPipeLine();
@@ -168,42 +146,15 @@ namespace NetPack.Tests.Integration
                         {
                             foreach (var value in values)
                             {
+                                var subPath = SubPathInfo.Parse(value);
 
-
-                                var changeToken = changeTokens[value];
-                                changeToken.SetupGet(x => x.HasChanged).Returns(true);
-
-                                string fileName = value;
-                                var lastIndex = value.LastIndexOf("/");
-                                if (lastIndex > -1)
-                                {
-                                    fileName = value.Substring(lastIndex + 1);
-                                }
-
-                                var existingFile = wrappedFileProvider.GetFileInfo(value);
-                                using (var reader = new StreamReader(existingFile.CreateReadStream()))
-                                {
-                                    var builder = new StringBuilder();
-                                    var existingFileContents = reader.ReadToEnd();
-                                    builder.Append(existingFileContents);
-                                    builder.AppendLine();
-                                    builder.AppendLine(" // modified on " + DateTime.UtcNow);
-                                    var modifiedContents = builder.ToString();
-
-                                    var changedFileInfo = new StringFileInfo(modifiedContents, fileName);
-                                    wrappedFileProvider.Files[value] = changedFileInfo;
-
-                                    var onChangedCallbacks = callBacks[value];
-                                    foreach (var callback in onChangedCallbacks)
-                                    {
-                                        // trigerring the change callbacks for the token, 
-                                        // all subscribers will be notified that this file has changed.
-                                        callback.Invoke(changedFileInfo);
-                                    }
-                                }
-
-
-
+                                var existingFile = mockFileProvider.GetFileInfo(value);
+                                var existingFileContents = existingFile.ReadAllContent();
+                                var modifiedFileContents = existingFileContents + Environment.NewLine +
+                                                           "// modified on " + DateTime.UtcNow;
+                                
+                                var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.FileName);
+                                mockFileProvider.UpdateFile(subPath, modifiedFile);
 
 
                             }

@@ -1,37 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.FileProviders;
 using NetPack.Pipes;
 using NetPack.Requirements;
+using Polly;
 
 namespace NetPack.Pipeline
 {
     public class Pipeline : IPipeLine
     {
+
+
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
 
-        public Pipeline(PipelineInput input, List<IPipe> pipes, bool watch, List<IRequirement> requirements)
+
+        public Pipeline(PipelineInput input, List<IPipe> pipes, List<IRequirement> requirements)
         {
             Input = input;
             Pipes = pipes;
             Requirements = requirements;
 
-            if (watch)
-            {
-                // when files change, re-flush the pipeline. (in other words, process all the input
-                // files of the pipeline again.
-                input.WatchFiles(async a =>
-                {
-                // leave some delay?
-                    if (HasFlushed) // only bother doing when initialised, cos we do a flush on initialise.
-                    {
-                        await this.FlushAsync();
-                    }
-                   
-                });
-            }
+            //if (watch)
+            //{
+            //    // when files change, re-flush the pipeline. (in other words, process all the input
+            //    // files of the pipeline again.
+            //    input.WatchFiles(a =>
+            //    {
+            //        _changedFiles.Enqueue(a);
+            //        //// leave some delay?
+            //        //if (HasFlushed) // only bother doing when initialised, cos we do a flush on initialise.
+            //        //{
+            //        //    await this.FlushAsync();
+            //        //}
 
-            IsWatching = watch;
+            //    });
+            //}
+
+            //  IsWatching = watch;
             HasFlushed = false;
         }
 
@@ -52,7 +61,7 @@ namespace NetPack.Pipeline
             // before all assets have been processed..
             if (!HasFlushed)
             {
-                FlushAsync().Wait(DefaultFlushTimeout);
+                FlushAsync(CancellationToken.None).Wait(DefaultFlushTimeout);
                 // await pipeline.FlushAsync();
             }
         }
@@ -69,65 +78,50 @@ namespace NetPack.Pipeline
         /// Processes the current input through the pipes in the pipeline, and returns the output of the pipeline.
         /// </summary>
         /// <returns></returns>
-        public async Task<PipelineOutput> FlushAsync()
+        public async Task<PipelineOutput> FlushAsync(CancellationToken cancelationToken)
         {
 
             var context = new PipelineContext(Input.Files);
-
-            foreach (var pipe in Pipes)
+            try
             {
-                await pipe.ProcessAsync(context);
-                context.PrepareNextInputs();
+
+                var policy = Policy.Handle<IOException>()
+                      .WaitAndRetryAsync(new[]
+    {
+    TimeSpan.FromSeconds(1),
+    TimeSpan.FromSeconds(2),
+    TimeSpan.FromSeconds(3)
+    }, (exception, timeSpan) =>
+    {
+        // TODO: Log exception    
+    });
+
+                foreach (var pipe in Pipes)
+                {
+                    await policy.ExecuteAsync(ct => pipe.ProcessAsync(context, ct), cancelationToken);
+                    //  await pipe.ProcessAsync(context);
+                    context.PrepareNextInputs();
+                }
+
+                // whatever is currently the inputs for the "next" pipe (even though we dont have any more pipe)
+                // is actually the output we want to return from the pipe.
+                var output = new PipelineOutput(context.InputFiles);
+                Output = output;
+
+                FlushCount = FlushCount + 1;
+                HasFlushed = true;
+
+                return output;
             }
-
-            // whatever is currently the inputs for the "next" pipe (even though we dont have any more pipe)
-            // is actually the output we want to return from the pipe.
-            var output = new PipelineOutput(context.InputFiles);
-            Output = output;
-
-            FlushCount = FlushCount + 1;
-            HasFlushed = true;
-
-            return output;
+            catch (Exception e)
+            {
+                // retry?
+                throw;
+            }
 
         }
 
-        ///// <summary>
-        ///// Processes the current input through the pipes in the pipeline, and returns the output of the pipeline.
-        ///// </summary>
-        ///// <returns></returns>
-        //public PipelineOutput Flush(TimeSpan? timeout = null)
-        //{
-        //    var result = Task.Run(FlushAsync);
-        //    result.Wait(timeout ?? DefaultFlushTimeout);
-
-        //    if (result.IsFaulted)
-        //    {
-        //        throw result.Exception;
-        //    }
-
-        //    //var context = new PipelineContext(Input.Files);
-
-        //    //foreach (var pipe in Pipes)
-        //    //{
-        //    //    var flushTimeout = timeout ?? DefaultFlushTimeout;
-        //    //    pipe.ProcessAsync(context).Wait(flushTimeout);
-        //    //    context.PrepareNextInputs();
-        //    //}
-
-        //    //// whatever is currently the inputs for the "next" pipe (even though we dont have any more pipe)
-        //    //// is actually the output we want to return from the pipe.
-        //    //var output = new PipelineOutput(context.InputFiles);
-
-        //    //FlushCount = FlushCount + 1;
-        //    //HasFlushed = true;
-
-        //    //return output;
-
-
-        //}
-
-        public bool IsWatching { get; set; }
+        //public bool IsWatching { get; set; }
 
         public int FlushCount { get; set; }
 
