@@ -27,8 +27,8 @@ namespace NetPack.Pipeline
          
             input.WatchFiles(a =>
             {
-                var coll = (System.Collections.Concurrent.IProducerConsumerCollection<IPipeLine>)_pipelineFlushRequest;
-                coll.TryAdd(pipeline);
+                // var coll = (System.Collections.Concurrent.IProducerConsumerCollection<IPipeLine>)_pipelineFlushRequest;
+                _pipelineFlushRequest.Add(pipeline);
             });
 
             EnsureMonitorTaskRunning();
