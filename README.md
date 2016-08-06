@@ -14,7 +14,7 @@ When developing an ASP.NET Core application, you often have content files in you
 
 1. Define your pre-processing requirements using a C# fluent API.
 2. Pre-process any files that are visible to your ASP.NET Core application (via an IFileProvider), at runtime.
-2. Can `Watch` for changes to any of those files, and re-processes the pipeline when files change. This enables you to edit a source file (e.g Typescript) and then refresh your browser and see the updated javascript file from the pipeline.
+2. Can `Watch` for changes to any of those files, and re-processes the pipeline when files change. This enables you to edit a source file (e.g Typescript) whilst your application is running, and then refresh your browser and see the updated javascript file from the pipeline.
 3. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
    (can be embedded files etc)
 
