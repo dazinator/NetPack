@@ -18,7 +18,7 @@ When developing an ASP.NET Core application, you often have content files in you
 3. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
    (can be embedded files etc)
 
-`NetPack` performs all pre-processing in memory, and it then it allows the outputs (processed files) to be served up by your ASP.NET Core application by integrating with the `StaticFiles` middleware.
+`NetPack` performs all pre-processing in memory, and it then it allows the outputs (the processed files - also still in memory) to be served up by your ASP.NET Core application by integrating with the `StaticFiles` middleware.
 
 # NetPack is different from Gulp / WebPack / Grunt etc etc
 
