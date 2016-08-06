@@ -6,9 +6,9 @@ namespace NetPack.Pipeline
 {
     public interface IPipelineInputOptionsBuilder
     {
-        IPipelineInputOptionsBuilder WatchInputForChanges();
+        IPipelineInputOptionsBuilder Watch();
 
-        IPipelineBuilder DefinePipeline();
+        IPipelineBuilder BeginPipeline();
 
     }
 

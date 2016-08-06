@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.PatternContexts;
 using NetPack.File;
 
 namespace NetPack
 {
+
     public class FileProcessContext
     {
 

@@ -9,9 +9,9 @@ namespace NetPack.Pipeline
     {
         IApplicationBuilder ApplicationBuilder { get; set; }
 
-        IPipelineInputOptionsBuilder WithInput(PipelineInput sources);
+        IPipelineInputOptionsBuilder Take(PipelineInput sources);
 
-        IPipelineInputOptionsBuilder WithInput(Action<PipelineInputBuilder> sourcesBuilder, IFileProvider fileProvider = null);
+        IPipelineInputOptionsBuilder Take(Action<PipelineInputBuilder> sourcesBuilder, IFileProvider fileProvider = null);
 
 
     }

@@ -34,13 +34,13 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public IPipelineInputOptionsBuilder WithInput(PipelineInput sources)
+        public IPipelineInputOptionsBuilder Take(PipelineInput sources)
         {
             Sources = sources;
             return this;
         }
 
-        public IPipelineInputOptionsBuilder WithInput(Action<PipelineInputBuilder> sourcesBuilder, IFileProvider fileProvider = null)
+        public IPipelineInputOptionsBuilder Take(Action<PipelineInputBuilder> sourcesBuilder, IFileProvider fileProvider = null)
         {
             var sourcesFileProvider = fileProvider ?? GetDefaultFileProvider();
             var builder = new PipelineInputBuilder(sourcesFileProvider);
@@ -64,13 +64,13 @@ namespace NetPack.Pipeline
 
         public bool WachInput { get; protected set; }
 
-        public IPipelineInputOptionsBuilder WatchInputForChanges()
+        public IPipelineInputOptionsBuilder Watch()
         {
             this.WachInput = true;
             return this;
         }
 
-        public IPipelineBuilder DefinePipeline()
+        public IPipelineBuilder BeginPipeline()
         {
             return this;
         }

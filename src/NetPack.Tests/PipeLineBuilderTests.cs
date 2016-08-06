@@ -43,11 +43,11 @@ namespace NetPack.Tests
 
             var sut = (IPipelineConfigurationBuilder)new PipelineConfigurationBuilder(app);
 
-            var pipeLine = sut.WithInput((inputBuilder) =>
+            var pipeLine = sut.Take((inputBuilder) =>
                                              inputBuilder.Include("wwwroot/somefile.ts")
                                                          .Include("wwwroot/someOtherfile.ts"))
-                                                         .WatchInputForChanges()
-                                                         .DefinePipeline()
+                                                         .Watch()
+                                                         .BeginPipeline()
                                                             .AddPipe(mockPipe.Object)
                                                             .AddPipe(mockAnotherPipe.Object)
                                                          .BuildPipeLine();

@@ -59,26 +59,35 @@ namespace NetPack.Web
                     template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
             });
 
+
             app.UseContentPipeLine(pipelineBuilder =>
             {
                 return pipelineBuilder
-                    .WithInput((inputBuilder)
-                                 => inputBuilder
-                                    .Include("wwwroot/ts/Another.ts")
-                                    .Include("wwwroot/ts/Greeter.ts"))
-                                    .WatchInputForChanges()
-                    .DefinePipeline()
-                        .AddTypeScriptPipe(tsConfig =>
-                        {
-                            tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                            tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                            tsConfig.NoImplicitAny = true;
-                            tsConfig.RemoveComments = false; 
-                            tsConfig.SourceMap = true;
-                        })
+                   .Take(files => files
+                                   .Include("wwwroot/ts/Another.ts")
+                                   .Include("wwwroot/ts/Greeter.ts"))
+                                   .Watch()
+                   .BeginPipeline()
+                       .AddTypeScriptPipe(tsConfig =>
+                       {
+                           tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                           tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                           tsConfig.NoImplicitAny = true;
+                           tsConfig.RemoveComments = false;
+                           tsConfig.SourceMap = true;
+
+                       })
                     .BuildPipeLine();
             })
               .UsePipelineOutputAsStaticFiles();
+
+
+            if (!env.IsProduction())
+            {
+                // add another pipeline that takes outputs from previous pipeline and bundles them
+
+
+            }
 
         }
     }

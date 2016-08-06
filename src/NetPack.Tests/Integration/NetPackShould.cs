@@ -118,12 +118,12 @@ namespace NetPack.Tests.Integration
                 {
                     return pipelineBuilder
                         //.AddPipe(someOtherPipe)
-                        .WithInput((inputBuilder)
+                        .Take((inputBuilder)
                                      => inputBuilder
                                         .Include("wwwroot/somefile.ts")
                                         .Include("wwwroot/someOtherfile.ts"))
-                                        .WatchInputForChanges()
-                        .DefinePipeline()
+                                        .Watch()
+                        .BeginPipeline()
                             .AddTypeScriptPipe(tsConfig =>
                                      {
                                          tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
