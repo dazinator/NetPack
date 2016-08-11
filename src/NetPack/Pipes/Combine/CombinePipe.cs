@@ -1,17 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.FileProviders;
-using NetPack.File;
 using NetPack.Pipeline;
-using NetPack.Utils;
+using NetPack.Pipes.Combine;
 using Newtonsoft.Json.Linq;
-using NUglify.JavaScript.Syntax;
 
 namespace NetPack.Pipes
 {
@@ -44,12 +40,13 @@ namespace NetPack.Pipes
         private async Task<MemoryStream> GetCombinedStreamAsync(IFileProvider fileProvider, IEnumerable<string> filePaths)
         {
 
-            var scriptInfos = new List<ScriptInfo>();
+            var scriptInfos = new List<CombinedScriptInfo>();
 
             var ms = new MemoryStream();
             int totalLineCount = 0;
 
             var combiner = new ScriptCombiner();
+            bool hasSourceMappingDirectives = false;
 
             foreach (var filePath in filePaths)
             {
@@ -61,39 +58,66 @@ namespace NetPack.Pipes
                     {
                         // await fileStream.CopyToAsync(ms);
 
-                        ScriptInfo sourceScript;
+                        CombinedScriptInfo sourceScript;
                         using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
                         {
                             sourceScript = combiner.AddScript(sourceFileStream, writer);
+                            sourceScript.LineNumberOffset = totalLineCount;
                             scriptInfos.Add(sourceScript);
-
+                            hasSourceMappingDirectives = hasSourceMappingDirectives | sourceScript.SourceMapDeclaration != null;
                             totalLineCount = totalLineCount + sourceScript.LineCount;
-
-                            //if (sourceScript.SourceMapDeclaration != null)
-                            //{
-                            //    // remove the source mapping url declaration line from the bundle.
-                            //    writer.BaseStream.Position = sourceScript.SourceMapDeclaration.Position;
-                            //    writer.WriteLine();
-                            //    // we need to remove the declartion line from the concatenated output
-                            //    // and instead, output a new source map that represents where the sources
-                            //    // ar ein the bundle file.
-
-                            //}
                         }
-
-
                     }
                 }
             }
+
+            // Now if there are source mapping url directives present, need to produce a new source map file and directive.
+            if (!hasSourceMappingDirectives)
+            {
+                BuildSourceMap(ms, scriptInfos);
+            }
+
             //ensure it's reset
             ms.Position = 0;
             return ms;
+
         }
 
+        private void BuildSourceMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos)
+        {
+            // todo
+            throw new NotImplementedException();
+
+            // 1. Locate the existing source maps and read them into json object.
 
 
+            // 2. Create a new index map json object, and append sections for each of the existing source maps.
 
+            // 3. Output the sourcemap as a new in-memory file, from the pipeline, on the subpath /[BundileFilePath].map
 
+            // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
+
+            // An Index Map looks like this, as per the spec here: https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit?pref=2&pli=1
+
+            //            {
+            //                  version: 3,
+            //                  file: “app.js”,
+            //                  sections: 
+            //                    [
+            //                      { offset: { line: 0, column: 0}, url: “url_for_part1.map” }
+            //                      { offset: { line: 100, column: 10}, map:
+            //                          {
+            //                              version: 3,
+            //                              file: “section.js”,
+            //                              sources: ["foo.js", "bar.js"],
+            //                              names: ["src", "maps", "are", "fun"],
+            //                              mappings: "AAAA,E;;ABCDE;"
+            //                          }
+            //                      }
+            //                    ],
+            //             }
+
+        }
     }
 
     // StreamUtil.cs:

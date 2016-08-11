@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using NetPack.Extensions;
+using NetPack.Pipes;
 
-namespace NetPack.Pipes
+namespace NetPack.Utils
 {
     /// <summary>
     /// Takes an encoding (defaulting to UTF-8) and a function which produces a seekable stream
@@ -155,7 +157,7 @@ namespace NetPack.Pipes
 
                     position -= bytesToRead;
                     stream.Position = position;
-                    StreamUtil.ReadExactly(stream, buffer, bytesToRead);
+                    stream.ReadExactly(buffer, bytesToRead);
                     // If we haven't read a full buffer, but we had bytes left
                     // over from before, copy them to the end of the buffer
                     if (leftOverData > 0 && bytesToRead != _bufferSize)
@@ -209,12 +211,14 @@ namespace NetPack.Pipes
                             swallowCarriageReturn = true;
                         }
                         int start = i + 1;
-                        string bufferContents = new string(charBuffer, start, endExclusive - start);
+                        int length = endExclusive - start;
                         endExclusive = i;
+                        string bufferContents = new string(charBuffer, start, length);
+                   
                         string stringToYield = previousEnd == null ? bufferContents : bufferContents + previousEnd;
                         if (!firstYield || stringToYield.Length != 0)
                         {
-                            CurrentLinePosition = stream.Position - buffer.Length + start;
+                            Position = stream.Position - length;
                             yield return stringToYield;
                         }
                         firstYield = false;
@@ -254,7 +258,7 @@ namespace NetPack.Pipes
             return GetEnumerator();
         }
 
-        public long CurrentLinePosition { get; set; }
+        public long Position { get; set; }
 
     }
 }

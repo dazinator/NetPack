@@ -31,6 +31,9 @@ namespace NetPack.Pipes
 
         public int LineNumber { get; set; }
 
-        public long Position { get; set; }
+
+
+
+        //public long Position { get; set; }
     }
 }

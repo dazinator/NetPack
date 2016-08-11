@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
+using NetPack.Extensions;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Utils;
@@ -60,7 +61,7 @@ namespace NetPack.Pipes.Typescript
             }
 
             // read script from embedded resource and use string as temp file:
-            Assembly assy = ReflectionUtils.GetAssemblyFromType(this.GetType());
+            Assembly assy = this.GetType().GetAssemblyFromType();
             var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
             var scriptContent = script.ReadAllContent();
 

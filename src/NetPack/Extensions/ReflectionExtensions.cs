@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Reflection;
 
-namespace NetPack.Utils
+namespace NetPack.Extensions
 {
-    public static class ReflectionUtils
+    public static class ReflectionExtensions
     {
-        public static Assembly GetAssemblyFromType(Type type)
+        public static Assembly GetAssemblyFromType(this Type type)
         {
 
 #if NETSTANDARD

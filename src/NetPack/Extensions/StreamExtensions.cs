@@ -1,11 +1,12 @@
 using System;
 using System.IO;
 
-namespace NetPack.Pipes
+// ReSharper disable once CheckNamespace
+namespace NetPack.Extensions
 {
-    public static class StreamUtil
+    public static class StreamExtensions
     {
-        public static void ReadExactly(Stream input, byte[] buffer, int bytesToRead)
+        public static void ReadExactly(this Stream input, byte[] buffer, int bytesToRead)
         {
             int index = 0;
             while (index < bytesToRead)

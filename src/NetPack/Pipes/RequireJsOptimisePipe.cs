@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
+using NetPack.Extensions;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Utils;
@@ -31,7 +32,7 @@ namespace NetPack.Pipes
 
         public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
-            Assembly assy = ReflectionUtils.GetAssemblyFromType(this.GetType());
+            Assembly assy = this.GetType().GetAssemblyFromType();
             var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
             var scriptContent = script.ReadAllContent();
 
