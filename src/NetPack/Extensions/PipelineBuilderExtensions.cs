@@ -11,7 +11,7 @@ using NetPack.Utils;
 // Extension method put in root namespace for discoverability purposes.
 namespace NetPack
 {
-    public static class PipelineBuilderExtensions
+    public static class PipelineBuilderTypescriptExtensions
     {
 
         public static IPipelineBuilder AddTypeScriptPipe(this IPipelineBuilder builder, Action<TypeScriptPipeOptions> configureOptions)
@@ -39,6 +39,20 @@ namespace NetPack
             configureOptions(tsOptions);
             var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider, tsOptions);
 
+            builder.AddPipe(pipe);
+            return builder;
+        }
+
+    }
+
+    public static class PipelineBuilderCombineExtensions
+    {
+
+        public static IPipelineBuilder AddCombinePipe(this IPipelineBuilder builder, Action<CombinePipeOptions> configureOptions)
+        {
+            var options = new CombinePipeOptions();
+            configureOptions(options);
+            var pipe = new CombinePipe(options);
             builder.AddPipe(pipe);
             return builder;
         }

@@ -5,11 +5,9 @@ using System.Text;
 using Microsoft.Extensions.FileProviders;
 using NetPack.File;
 using NetPack.Pipes;
-using Newtonsoft.Json;
+using NetPack.Pipes.Combine;
 using Xunit;
 using Xunit.Abstractions;
-using NetPack;
-using NetPack.Pipes.Combine;
 
 namespace NetPack.Tests
 {
@@ -47,7 +45,7 @@ namespace NetPack.Tests
         private IFileInfo GivenFileThatHasSourceMappingUrl(string path, int length)
         {
             var subPath = SubPathInfo.Parse(path);
-            var content = GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + subPath.ToString();
+            var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + subPath.ToString();
             _fileProvider.AddFile(subPath, content);
             var fileInfo = _fileProvider.GetFileInfo(subPath);
             return fileInfo;
@@ -109,19 +107,6 @@ namespace NetPack.Tests
             }
           
         }
-
-        private static string GenerateString(int length)
-        {
-            var builder = new StringBuilder(length);
-            for (int i = 0; i < length; i++)
-            {
-                builder.Append("A");
-            }
-
-            return builder.ToString();
-        }
-
-
 
 
     }

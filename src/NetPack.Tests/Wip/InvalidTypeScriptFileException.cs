@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Primitives;
 
-namespace NetPack.Tests
+namespace NetPack.Tests.Wip
 {
     public class InvalidTypeScriptFileException : Exception
     {

@@ -21,7 +21,6 @@ namespace NetPack.Tests.Integration
     public class NetPackShould
     {
 
-
         private readonly TestServer _server;
         private readonly HttpClient _client;
 
@@ -100,6 +99,35 @@ namespace NetPack.Tests.Integration
         public class Startup
         {
 
+            public const string TsContentOne = @"
+
+        class Greeter
+        {
+    constructor(public greeting: string) { }
+    greet()
+            {
+                return ""<h1>"" + this.greeting + ""</h1>"";
+            }
+        };
+
+        var greeter = new Greeter(""Hello, world!"");
+
+        document.body.innerHTML = greeter.greet();";
+
+            public const string TsContentTwo = @"
+
+        class Another
+        {
+    constructor(public another: string) { }
+    doSomething()
+            {
+               // return ""<h1>"" + this.greeting + ""</h1>"";
+            }
+        };
+
+        var another = new Another(""Hello, world!"");
+        another.doSomething();";
+
             public void ConfigureServices(IServiceCollection services)
             {
                 services.AddNetPack();
@@ -109,8 +137,8 @@ namespace NetPack.Tests.Integration
             {
 
                 var mockFileProvider = new InMemoryFileProvider();
-                mockFileProvider.AddFile("wwwroot/somefile.ts", TestUtils.TsContentOne);
-                mockFileProvider.AddFile("wwwroot/someOtherfile.ts", TestUtils.TsContentTwo);
+                mockFileProvider.AddFile("wwwroot/somefile.ts", TsContentOne);
+                mockFileProvider.AddFile("wwwroot/someOtherfile.ts", TsContentTwo);
 
                 env.ContentRootFileProvider = mockFileProvider;
 
@@ -152,8 +180,8 @@ namespace NetPack.Tests.Integration
                                 var existingFileContents = existingFile.ReadAllContent();
                                 var modifiedFileContents = existingFileContents + Environment.NewLine +
                                                            "// modified on " + DateTime.UtcNow;
-                                
-                                var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.FileName);
+
+                                var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
                                 mockFileProvider.UpdateFile(subPath, modifiedFile);
 
 

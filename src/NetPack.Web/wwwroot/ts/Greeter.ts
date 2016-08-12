@@ -5,5 +5,5 @@
     }
 };
 
-var greeter = new Greeter("Hi!!!!");
+var greeter = new Greeter("Hi there!!!!");
 document.body.querySelector(".message").innerHTML = greeter.greet(); 

@@ -1,21 +1,23 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
 
 namespace NetPack.File
 {
-    public class StringFileInfo : IFileInfo
+    public class MemoryStreamFileInfo : IFileInfo
     {
-        private readonly string _contents;
+        private readonly MemoryStream _stream;
         private Lazy<long> _lazyLength;
 
-        private static Encoding _Encoding = Encoding.UTF8;
+        private Object _lock = new object();
 
-        public StringFileInfo(string contents, string name)
+        private Encoding _encoding;
+
+        public MemoryStreamFileInfo(MemoryStream contents, Encoding encoding, string name)
         {
-            _contents = contents;
+            _stream = contents;
+            _encoding = encoding;
             LastModified = DateTimeOffset.UtcNow;
             IsDirectory = false;
             Name = name;
@@ -24,15 +26,21 @@ namespace NetPack.File
 
             _lazyLength = new Lazy<long>(() =>
             {
-                return _Encoding.GetByteCount(_contents);
+                return _stream.Length;
             });
-
-
         }
 
         public Stream CreateReadStream()
         {
-            return new MemoryStream(_Encoding.GetBytes(_contents ?? ""));
+            var stream = new MemoryStream((int)_stream.Length);
+            lock (_lock) // in case concurrent threads try to read the same file, we want to lock.
+            {
+                _stream.Position = 0;
+                _stream.CopyTo(stream);
+                stream.Position = 0;
+                _stream.Position = 0;
+            }
+            return stream;
         }
 
         public bool Exists { get; }

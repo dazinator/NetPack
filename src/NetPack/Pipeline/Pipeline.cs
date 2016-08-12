@@ -42,6 +42,8 @@ namespace NetPack.Pipeline
 
             //  IsWatching = watch;
             HasFlushed = false;
+           // FileProvider = fileProvider;
+
         }
 
         public PipelineInput Input { get; set; }
@@ -127,6 +129,7 @@ namespace NetPack.Pipeline
 
         public bool HasFlushed { get; set; }
 
+        public IFileProvider FileProvider { get; set; }
 
 
     }

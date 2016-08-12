@@ -40,7 +40,7 @@ namespace NetPack.File
 
             foreach (var file in Files)
             {
-                if (file.Key.IsInDirectory(dir))
+                if (file.Key.IsInSameDirectory(dir))
                 {
                     files.Add(file.Value);
                 }
@@ -73,7 +73,7 @@ namespace NetPack.File
             // var filesToWatch = new List<StringFileInfo>();
 
             var fileTokens = new List<IChangeToken>();
-            bool isComposite = subPath.IsPattern || string.IsNullOrWhiteSpace(subPath.FileName);
+            bool isComposite = subPath.IsPattern || string.IsNullOrWhiteSpace(subPath.Name);
 
             foreach (var file in Files)
             {
@@ -137,14 +137,14 @@ namespace NetPack.File
 
         public void AddFile(SubPathInfo subpath, string contents)
         {
-            var file = new StringFileInfo(contents, subpath.FileName);
+            var file = new StringFileInfo(contents, subpath.Name);
             Files.Add(subpath, file);
         }
 
         public void AddFile(string subpath, string contents)
         {
             var path = SubPathInfo.Parse(subpath);
-            var file = new StringFileInfo(contents, path.FileName);
+            var file = new StringFileInfo(contents, path.Name);
             Files.Add(path, file);
         }
 

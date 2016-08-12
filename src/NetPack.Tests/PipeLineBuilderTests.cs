@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes;
 using Xunit;
@@ -19,14 +20,19 @@ namespace NetPack.Tests
             // arrange 
             var services = new ServiceCollection();
 
-            var mockHostingEnv = new Moq.Mock<IHostingEnvironment>();
+            var mockHostingEnv = new Mock<IHostingEnvironment>();
             mockHostingEnv.SetupAllProperties();
 
+            var fileProvider = new InMemoryFileProvider();
+            fileProvider.AddFile("wwwroot/somefile.ts", TsContentOne);
+            fileProvider.AddFile("wwwroot/someOtherfile.ts", TsContentTwo);
 
-            var mockFileProvider =
-                TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" },
-                    new[] { TestUtils.TsContentOne, TestUtils.TsContentTwo });
-            mockHostingEnv.Object.ContentRootFileProvider = mockFileProvider;
+            mockHostingEnv.Object.ContentRootFileProvider = fileProvider;
+
+            //var mockFileProvider =
+            //    TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" },
+            //        new[] { TestUtils.TsContentOne, TestUtils.TsContentTwo });
+            //mockHostingEnv.Object.ContentRootFileProvider = mockFileProvider;
 
             services.AddSingleton<IHostingEnvironment>(mockHostingEnv.Object);
 
@@ -65,6 +71,33 @@ namespace NetPack.Tests
 
         }
 
+        public const string TsContentOne = @"
 
+        class Greeter
+        {
+    constructor(public greeting: string) { }
+    greet()
+            {
+                return ""<h1>"" + this.greeting + ""</h1>"";
+            }
+        };
+
+        var greeter = new Greeter(""Hello, world!"");
+
+        document.body.innerHTML = greeter.greet();";
+
+        public const string TsContentTwo = @"
+
+        class Another
+        {
+    constructor(public another: string) { }
+    doSomething()
+            {
+               // return ""<h1>"" + this.greeting + ""</h1>"";
+            }
+        };
+
+        var another = new Another(""Hello, world!"");
+        another.doSomething();";
     }
 }

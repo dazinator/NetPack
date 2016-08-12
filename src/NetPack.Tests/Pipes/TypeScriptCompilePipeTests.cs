@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
 using Moq;
 using NetPack.File;
@@ -11,15 +12,13 @@ using NetPack.Requirements;
 using NetPack.Utils;
 using Xunit;
 
-namespace NetPack.Tests
+namespace NetPack.Tests.Pipes
 {
     public class TypeScriptCompilePipeTests
     {
 
-
-
         [Fact]
-        public async void Processes_TypescriptFiles_And_Outputs_Js_Files()
+        public async Task Processes_TypescriptFiles_And_Outputs_Js_Files()
         {
 
             // arrange
@@ -33,7 +32,7 @@ namespace NetPack.Tests
 
             var testInputFiles = new SourceFile[]
             {
-                new SourceFile(new StringFileInfo(TestUtils.TsContentOne, "somefile.ts"), "SomeFolder")
+                new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "SomeFolder")
             };
 
             var embeddedScript = new StringFileInfo("some embedded script", "netpack-typescript");
@@ -66,12 +65,25 @@ namespace NetPack.Tests
             Assert.Equal(outputFile.FileInfo.Name, "somefile.js");
 
             // The output should have a directory returned from node.
-            Assert.Equal(outputFile.Directory, "SomeFolder");
+            Assert.Equal(outputFile.Directory.ToString(), "SomeFolder");
 
         }
 
 
+        public const string TsContentOne = @"
 
+        class Greeter
+        {
+    constructor(public greeting: string) { }
+    greet()
+            {
+                return ""<h1>"" + this.greeting + ""</h1>"";
+            }
+        };
+
+        var greeter = new Greeter(""Hello, world!"");
+
+        document.body.innerHTML = greeter.greet();";
 
 
     }

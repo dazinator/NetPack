@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Requirements;
@@ -58,15 +59,15 @@ namespace NetPack
             //   var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
             //  var existingStaticFilesProvider = staticFilesOptions.Value.FileProvider ?? hostingEnv.WebRootFileProvider;
             //  appBuilder.
-
-            return new NetPackApplicationBuilder(appBuilder, pipeLine);
+            var pipelineFileProvider = new NetPackPipelineFileProvider(pipeLine);
+            return new NetPackApplicationBuilder(appBuilder, pipeLine, pipelineFileProvider);
         }
 
-        public static IApplicationBuilder UsePipelineOutputAsStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "")
+        public static INetPackApplicationBuilder UsePipelineOutputAsStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "")
         {
 
             // NetPackPipelineFileProvider
-            var fileProvider = new NetPackPipelineFileProvider(appBuilder.PipeLine);
+            var fileProvider = appBuilder.PipelineFileProvider;
             appBuilder.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = fileProvider,

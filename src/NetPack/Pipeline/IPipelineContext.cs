@@ -1,4 +1,5 @@
-﻿using NetPack.File;
+﻿using System;
+using NetPack.File;
 
 namespace NetPack.Pipeline
 {
@@ -10,6 +11,10 @@ namespace NetPack.Pipeline
         SourceFile[] Input { get; }
 
         void AddOutput(SourceFile info);
+
+        SourceFile[] ApplyFilter(Predicate<SourceFile> filter);
+
+      //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
 
     }
 }

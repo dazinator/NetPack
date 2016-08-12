@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.FileProviders;
 using NetPack.Pipeline;
 
 namespace NetPack
@@ -11,10 +12,11 @@ namespace NetPack
     {
 
         private readonly IApplicationBuilder _builder;
-        public NetPackApplicationBuilder(IApplicationBuilder appBuilder, IPipeLine pipeline)
+        public NetPackApplicationBuilder(IApplicationBuilder appBuilder, IPipeLine pipeline, IFileProvider pipelineFileProvider)
         {
             _builder = appBuilder;
-            PipeLine = pipeline;
+            Pipeline = pipeline;
+            PipelineFileProvider = pipelineFileProvider;
         }
 
         public IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware)
@@ -42,6 +44,8 @@ namespace NetPack
         }
         public IFeatureCollection ServerFeatures => _builder.ServerFeatures;
         public IDictionary<string, object> Properties => _builder.Properties;
-        public IPipeLine PipeLine { get; }
+        public IPipeLine Pipeline { get; }
+
+        public IFileProvider PipelineFileProvider { get; }
     }
 }

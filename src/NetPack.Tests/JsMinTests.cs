@@ -8,7 +8,7 @@ namespace NetPack.Tests
     {
 
         public const string JsContentOne = "define(\"IContentOne\", [\"require\", \"exports\"], function (require, exports) { \"use strict\"; });";
-        public const string JsContentTwo = "define(\"IContentTwo\", [\"require\", \"exports\"], function (require, exports) { \"use strict\"; });";
+        //public const string JsContentTwo = "define(\"IContentTwo\", [\"require\", \"exports\"], function (require, exports) { \"use strict\"; });";
 
         private ITestOutputHelper _output;
         public JsMinTests(ITestOutputHelper output)
@@ -19,9 +19,7 @@ namespace NetPack.Tests
         [Fact]
         public async void Can_Minify_Source_Files()
         {
-            var fileProvider = TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.js" }, new[] { JsContentOne });
-            var fileInfo = fileProvider.GetFileInfo("wwwroot/somefile.js");
-
+            var fileInfo = new StringFileInfo("somefile.js", JsContentOne);
             var sut = new JsMinifier();
             var context = new FileProcessContext(new SourceFile(fileInfo, "wwwroot"));
 
@@ -29,11 +27,11 @@ namespace NetPack.Tests
 
             _output.WriteLine(result);
             Assert.True(result.Length < JsContentOne.Length);
-            _output.WriteLine($"Minification reduced length by: {JsContentOne.Length - result.Length} characters." );
+            _output.WriteLine($"Minification reduced length by: {JsContentOne.Length - result.Length} characters.");
 
         }
 
-      
+
 
     }
 }

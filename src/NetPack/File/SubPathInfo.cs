@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -7,23 +8,42 @@ namespace NetPack.File
 {
     public class SubPathInfo
     {
+        private string _directory;
+        private string[] _directorySegements;
 
-        protected SubPathInfo(string directory, string filename)
+        // private string _directory;
+        protected SubPathInfo(string directory, string name)
         {
             Directory = directory;
-            FileName = filename;
+            Name = name;
+            // Extension = extensionWithoutDotPrefix;
             CheckPattern();
+            CoerceNameToDirectoryIfNecessary();
+            IsEmpty = string.IsNullOrWhiteSpace(Directory) && string.IsNullOrWhiteSpace(Name);
         }
 
-        public string FileName { get; }
-        public string Directory { get; }
+        public string Extension { get; }
+
+        public string Name { get; private set; }
+
+        public string Directory
+        {
+            get
+            {
+                return _directory;
+            }
+            private set
+            {
+                _directory = value;
+                _directorySegements = value == null ? null : value.Split('/');
+            }
+        }
 
         public bool IsPattern { get; set; }
 
-        public bool IsFile
-        {
-            get { return !IsPattern && !string.IsNullOrWhiteSpace(FileName); }
-        }
+        public bool IsFile { get; set; }
+
+        public bool IsEmpty { get; private set; }
 
         public void CheckPattern()
         {
@@ -31,7 +51,7 @@ namespace NetPack.File
             bool isWithinRangeBlock = false;
             var allChars = this.ToString();
 
-            for (int i = 0; i <= allChars.Length -1; i++)
+            for (int i = 0; i <= allChars.Length - 1; i++)
             {
                 var currentChar = allChars[i];
                 if (patternValidationEnabled)
@@ -66,11 +86,52 @@ namespace NetPack.File
             }
         }
 
+        public void CoerceNameToDirectoryIfNecessary()
+        {
+
+            // This is tricky and not perfect, because paths like the following could all be either
+            // files or directories.
+            // somefolder/.git
+            // somefolder/folder.old
+            // somefolder/somefile.old
+
+            // Therefore we use a simplistic heuristic
+            // For a path to be considered a file:
+            //  1. It can't be pattern like (i.e it can;t contain * or ? etc.
+            //  2. It can't end in a "/" (this is the same as the Name being null or empty)
+            //  3. It must have a "." in the Name, but not at the end.
+            // return !IsPattern && !string.IsNullOrWhiteSpace(Name) && Name.Contains('.') && !Name.EndsWith(".");
+
+            bool isEmptyName = string.IsNullOrWhiteSpace(Name);
+            IsFile = !IsPattern && !isEmptyName && Name.Contains('.') && !Name.EndsWith(".");
+            // If we detected that the name should be treated as a directory, then appened it to the directory, and blank the name.
+            if (!IsFile)
+            {
+                if (!isEmptyName)
+                {
+                    if (!string.IsNullOrWhiteSpace(Directory))
+                    {
+                        Directory = Directory + "/" + Name;
+                    }
+                    else
+                    {
+                        Directory = Name;
+                    }
+
+                    Name = string.Empty;
+                }
+            }
+
+
+
+        }
+
         public static SubPathInfo Parse(string subpath)
         {
             if (string.IsNullOrWhiteSpace(subpath))
             {
-                throw new ArgumentException("subpath");
+                return new SubPathInfo(string.Empty, string.Empty);
+                // throw new ArgumentException("subpath");
             }
 
             var builder = new StringBuilder(subpath.Length);
@@ -97,7 +158,7 @@ namespace NetPack.File
             var directory = builder.ToString();
             builder.Clear();
 
-            // now append filename portion
+            // now append Name portion
             if (subpath.Length > indexOfLastSeperator + 1)
             {
                 for (int c = indexOfLastSeperator + 1; c < subpath.Length; c++)
@@ -107,8 +168,8 @@ namespace NetPack.File
                 }
             }
 
-            var fileName = builder.ToString();
-            var subPath = new SubPathInfo(directory, fileName);
+            var name = builder.ToString();
+            var subPath = new SubPathInfo(directory, name);
             return subPath;
         }
 
@@ -144,7 +205,7 @@ namespace NetPack.File
 
         public override string ToString()
         {
-            return $"{Directory}/{FileName}";
+            return $"{Directory}/{Name}";
         }
 
         public bool IsMatch(SubPathInfo subPath)
@@ -153,14 +214,14 @@ namespace NetPack.File
             {
                 return this.Like(subPath.ToString());
             }
-            if (string.IsNullOrEmpty(subPath.FileName) && IsInDirectory(subPath))
+            if (string.IsNullOrEmpty(subPath.Name) && IsInSameDirectory(subPath))
             {
                 return true;
             }
             return this.Equals(subPath);
         }
 
-        public bool IsInDirectory(SubPathInfo directory)
+        public bool IsInSameDirectory(SubPathInfo directory)
         {
             var match = directory.Directory == Directory;
             return match;
@@ -189,19 +250,98 @@ namespace NetPack.File
             SubPathInfo p = obj as SubPathInfo;
             if (p == null)
             {
-                return false;
+                string pathString = obj as string;
+                if (pathString == null)
+                {
+                    return false;
+                }
+                try
+                {
+                    p = SubPathInfo.Parse(pathString);
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
             }
 
             // Return true if the fields match:
-            return (Directory == p.Directory) && (FileName == p.FileName);
+            return (Directory == p.Directory) && (Name == p.Name);
         }
+
+        public int GetDirectoryLevel()
+        {
+            return GetDirectoryLevel(Directory);
+        }
+
+        public static int GetDirectoryLevel(string path)
+        {
+            return path.Count(a => a == '/');
+        }
+
+        /// <summary>
+        /// Returns whether this subpath is the parent of the child directory.
+        /// </summary>
+        /// <param name="childFolder"></param>
+        /// <returns></returns>
+        public bool IsChildDirectory(SubPathInfo childFolder)
+        {
+            if (childFolder.IsFile || this.IsFile)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(this.Directory))
+            {
+                if (childFolder.GetDirectoryLevel() == 0)
+                {
+                    return true;
+                }
+            }
+
+            // Check if the child path is a directory within this directory.
+            if (Directory.StartsWith(childFolder.Directory, StringComparison.OrdinalIgnoreCase))
+            {
+                var childDirLevel = childFolder.GetDirectoryLevel();
+                var parentdirLevel = GetDirectoryLevel();
+                if (childDirLevel == parentdirLevel + 1)
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+
+        }
+
 
         public override int GetHashCode()
         {
-            int hashCode = Directory.GetHashCode() + FileName.GetHashCode();
+            int hashCode = Directory.GetHashCode() + Name.GetHashCode();
             return hashCode;
         }
 
+        public string GetDescendentFolderNameFrom(SubPathInfo parentDirectory)
+        {
+            if (this.IsFile || string.IsNullOrWhiteSpace(Directory))
+            {
+                return null;
+            }
+
+            // Check if the child path is a directory within this directory.
+            if (Directory.StartsWith(parentDirectory.Directory, StringComparison.OrdinalIgnoreCase) || parentDirectory.IsEmpty)
+            {
+                int nextlevel = parentDirectory.IsEmpty ? 0 : parentDirectory.GetDirectoryLevel() + 1;
+
+                if (_directorySegements?.Length > nextlevel)
+                {
+                    return _directorySegements[nextlevel];
+                }
+            }
+            return null;
+
+        }
     }
 
 }

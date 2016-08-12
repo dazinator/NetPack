@@ -1,14 +1,47 @@
-using System.IO;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using NetPack.File;
-using NetPack.Pipeline;
 using Xunit;
 
-namespace NetPack.Tests
+namespace NetPack.Tests.FileProvider
 {
     public class InMemoryFileProviderTests
     {
+
+        [Fact]
+        public void Can_Get_All_Files_Using_Empty_Directory()
+        {
+
+            var fileProvider = new InMemoryFileProvider();
+            var content = "hi there";
+
+            // act
+            fileProvider.AddFile("/myfolder/somefile.txt", "hi there");
+            fileProvider.AddFile("/someotherfile.txt", "me too");
+
+            // get the file back, testing two paths with and wothout a slash prefix.
+            var files = fileProvider.GetDirectoryContents("");
+            bool subDirectoryFound = false;
+            bool fileFound = false;
+
+            foreach (var file in files)
+            {
+                if (file.IsDirectory == true)
+                {
+                    subDirectoryFound = true;
+                    Assert.Equal(file.Name, "myfolder");
+                    continue;
+                }
+
+                fileFound = true;
+                Assert.Equal(file.Name, "someotherfile.txt");
+
+            }
+
+            Assert.True(subDirectoryFound);
+            Assert.False(fileFound);
+
+        }
+
         [Fact]
         public void Can_Add_Files_And_Then_Get_Them()
         {
@@ -73,7 +106,7 @@ namespace NetPack.Tests
 
             // Update the file. Should trigger the change callback.
             fileProvider.UpdateFile(path, new StringFileInfo("new contents", "somefile.txt"));
-            
+
             Assert.True(changeFired);
 
         }
@@ -104,13 +137,13 @@ namespace NetPack.Tests
             }, null);
 
             // Update the file. Should trigger the change callback.
-            fileProvider.UpdateFile(path1, new StringFileInfo("changed 1", path1.FileName));
+            fileProvider.UpdateFile(path1, new StringFileInfo("changed 1", path1.Name));
             Assert.Equal(changeFiredCount, 1);
 
-            fileProvider.UpdateFile(path2, new StringFileInfo("changed 2", path2.FileName));
+            fileProvider.UpdateFile(path2, new StringFileInfo("changed 2", path2.Name));
             Assert.Equal(changeFiredCount, 2);
 
-            fileProvider.UpdateFile(path3, new StringFileInfo("changed 3", path3.FileName));
+            fileProvider.UpdateFile(path3, new StringFileInfo("changed 3", path3.Name));
             Assert.Equal(changeFiredCount, 2);
         }
 

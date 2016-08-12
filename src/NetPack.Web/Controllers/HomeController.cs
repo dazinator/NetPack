@@ -26,6 +26,12 @@ namespace NetPack.Web.Controllers
             return View();
         }
 
+        public IActionResult MultipleTypescriptFilesCombinedToSingleJsFile()
+        {
+
+            return View();
+        }
+
         public IActionResult Error()
         {
             return View();

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using NetPack.File;
 using NetPack.Pipes;
 using NetPack.Requirements;
 
@@ -83,6 +84,8 @@ namespace NetPack.Pipeline
         public IPipeLine BuildPipeLine()
         {
             var pipeLine = new Pipeline(Sources, Pipes, Requirements);
+            var fileProvider = new NetPackPipelineFileProvider(pipeLine);
+            //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
 
         }

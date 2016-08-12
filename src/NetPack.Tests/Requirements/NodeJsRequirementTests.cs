@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NetPack.Requirements;
 using Xunit;
 
-namespace NetPack.Tests
+namespace NetPack.Tests.Requirements
 {
     public class NodeJsRequirementTests
     {

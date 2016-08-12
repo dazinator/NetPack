@@ -5,9 +5,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
+using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes.Combine;
 using Newtonsoft.Json.Linq;
+using System.Linq;
+using NetPack.Utils;
 
 namespace NetPack.Pipes
 {
@@ -16,6 +19,10 @@ namespace NetPack.Pipes
 
         private JObject _sourceMap;
         private CombinePipeOptions _options;
+
+        private List<SourceFile> _jsFiles = new List<SourceFile>();
+        private List<SourceFile> _cssFiles = new List<SourceFile>();
+
 
         public CombinePipe() : this(new CombinePipeOptions())
         {
@@ -29,39 +36,82 @@ namespace NetPack.Pipes
 
         public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
+            Predicate<SourceFile> filter = (a) => false;
+
+            if (_options.EnableJavascriptBundle)
+            {
+                filter = IsJsFile; 
+            }
+            if (_options.EnableCssBundle)
+            {
+                filter = PredicateHelper.Or<SourceFile>(filter, IsCssFile);
+            }
+
+            // ApplyFilter causes filters to evaluate the input files to this pipe,
+            // and all the input files that don't match the filters, 
+            // will be added to the output files of the pipe (pipelinecontext) untouched.
+            // Those that do match are returned.
+            // We only want js and / or css files based on whether we are configured to do js / css
+            // combining.
+            var candidateFiles = context.ApplyFilter(filter);
+            if (_options.EnableJavascriptBundle)
+            {
+                CombineJs(context, _jsFiles, cancelationToken);
+            }
+            if (_options.EnableCssBundle)
+            {
+                CombineJs(context, _cssFiles, cancelationToken);
+            }
 
         }
 
-        /// <summary>
-        /// Combines files into a single stream
-        /// </summary>
-        /// <param name="filePaths"></param>
-        /// <returns></returns>
-        private async Task<MemoryStream> GetCombinedStreamAsync(IFileProvider fileProvider, IEnumerable<string> filePaths)
+        private bool IsCssFile(SourceFile sourceFile)
         {
+            if (sourceFile.FileInfo != null && System.IO.Path.GetExtension(sourceFile.FileInfo.Name)
+                .Equals(".css", StringComparison.OrdinalIgnoreCase))
+            {
+                _cssFiles.Add(sourceFile); // add the css file to our collection for later.
+                return true;
+            }
+            return false;
+        }
 
+        private bool IsJsFile(SourceFile sourceFile)
+        {
+            if (sourceFile.FileInfo != null && System.IO.Path.GetExtension(sourceFile.FileInfo.Name)
+              .Equals(".js", StringComparison.OrdinalIgnoreCase))
+            {
+                _jsFiles.Add(sourceFile); // add the js file to our collection for later.
+                return true;
+            }
+            return false;
+        }
+
+        private void CombineCss(IEnumerable<SourceFile> cssFiles)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void CombineJs(IPipelineContext context, IEnumerable<SourceFile> jsFiles, CancellationToken cancelationToken)
+        {
+            bool hasSourceMappingDirectives = false;
+            var combiner = new ScriptCombiner();
             var scriptInfos = new List<CombinedScriptInfo>();
-
             var ms = new MemoryStream();
             int totalLineCount = 0;
+            var encoding = Encoding.UTF8;
 
-            var combiner = new ScriptCombiner();
-            bool hasSourceMappingDirectives = false;
-
-            foreach (var filePath in filePaths)
+            foreach (var sourceFile in jsFiles)
             {
-                var fileInfo = fileProvider.GetFileInfo(filePath);
-
+                var fileInfo = sourceFile.FileInfo;
                 if (fileInfo.Exists && !fileInfo.IsDirectory)
                 {
                     using (var sourceFileStream = fileInfo.CreateReadStream())
                     {
                         // await fileStream.CopyToAsync(ms);
-
-                        CombinedScriptInfo sourceScript;
-                        using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
+                        using (var writer = new StreamWriter(ms, encoding, 1024, true))
                         {
-                            sourceScript = combiner.AddScript(sourceFileStream, writer);
+                            var sourceScript = combiner.AddScript(sourceFileStream, writer);
                             sourceScript.LineNumberOffset = totalLineCount;
                             scriptInfos.Add(sourceScript);
                             hasSourceMappingDirectives = hasSourceMappingDirectives | sourceScript.SourceMapDeclaration != null;
@@ -71,31 +121,70 @@ namespace NetPack.Pipes
                 }
             }
 
+
             // Now if there are source mapping url directives present, need to produce a new source map file and directive.
-            if (!hasSourceMappingDirectives)
+            var outputFilePath = SubPathInfo.Parse(_options.CombinedJsFileName);
+            if (hasSourceMappingDirectives && _options.EnableIndexSourceMap)
             {
-                BuildSourceMap(ms, scriptInfos);
+                var mapFilePath = SubPathInfo.Parse(outputFilePath.ToString() + ".map");
+                var indexMapFile = BuildIndexMap(ms, scriptInfos, mapFilePath, outputFilePath);
+
+                // Output the new map file in the pipeline.
+                context.AddOutput(new SourceFile(indexMapFile, mapFilePath.Directory));
+
+                // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
+                using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
+                {
+                    writer.WriteLine();
+                    writer.WriteLine($"//# sourceMappingURL=/{mapFilePath.ToString()}");
+                }
             }
 
             //ensure it's reset
             ms.Position = 0;
-            return ms;
+            var bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
+            // Output the new map file in the pipeline.
+            context.AddOutput(new SourceFile(bundleJsFile, outputFilePath.Directory));
 
         }
 
-        private void BuildSourceMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos)
+        private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, SubPathInfo mapFilePath, SubPathInfo combinedFilePath)
         {
             // todo
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
 
-            // 1. Locate the existing source maps and read them into json object.
+            // 1. Create a new index map json object, and append sections for each of the existing source map declarations.
+            JObject indexMap = new JObject();
+            indexMap["version"] = 3;
+            indexMap["file"] = combinedFilePath.Name;
 
+            JArray sections = new JArray();
 
-            // 2. Create a new index map json object, and append sections for each of the existing source maps.
+            foreach (var script in scriptInfos)
+            {
+                var declaration = script.SourceMapDeclaration;
+                if (declaration != null)
+                {
+                    JObject sectionObject = new JObject();
+                    sectionObject["offset"] = new JObject();
+                    sectionObject["offset"]["line"] = script.LineNumberOffset;
+                    sectionObject["offset"]["column"] = 0;
 
-            // 3. Output the sourcemap as a new in-memory file, from the pipeline, on the subpath /[BundileFilePath].map
+                    var originalMapPath = declaration.SourceMappingUrl;
 
-            // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
+                    // TODO: could add support for inlining of the source maps,
+                    // so rather than appending a url here, could actually append the contents
+                    // of the map file using map: { }
+                    // var sourceMapFile = fileProvider.GetFileInfo(originalMapPath);
+                    sectionObject["url"] = originalMapPath;
+                    sections.Add(sectionObject);
+                }
+            }
+
+            indexMap["sections"] = sections;
+            var file = new StringFileInfo(indexMap.ToString(), mapFilePath.Name);
+            return file;
+
 
             // An Index Map looks like this, as per the spec here: https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit?pref=2&pli=1
 
@@ -120,5 +209,4 @@ namespace NetPack.Pipes
         }
     }
 
-    // StreamUtil.cs:
 }

@@ -44,7 +44,7 @@ namespace NetPack.Pipes.Typescript
                 {
                     // var inputFileInfo = inputFile.FileInfo;
                     var contents = inputFileInfo.ReadAllContent();
-                    requestDto.Files.Add(inputFile.GetPath(), contents);
+                    requestDto.Files.Add(inputFile.FullPath.ToString(), contents);
 
                     // tsFiles.Add(inputFile);
                 }
@@ -81,7 +81,7 @@ namespace NetPack.Pipes.Typescript
                 foreach (var output in result.Sources)
                 {
                     var subPathInfo = SubPathInfo.Parse(output.Key);
-                    var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.FileName);
+                    var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
                     context.AddOutput(new SourceFile(outputFileInfo, subPathInfo.Directory));
                 }
 

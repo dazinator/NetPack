@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
+using NetPack.File;
 using NetPack.Pipeline;
 
 namespace NetPack.Pipes

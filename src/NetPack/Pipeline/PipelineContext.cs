@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NetPack.File;
+using System.Linq;
 
 namespace NetPack.Pipeline
 {
@@ -22,6 +24,35 @@ namespace NetPack.Pipeline
         public void AddOutput(SourceFile info)
         {
             OutputFiles.Add(info);
+        }
+
+        /// <summary>
+        /// Causes all files dont match the filter to added as outputs, and those match, to be returned.
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public SourceFile[] ApplyFilter(Predicate<SourceFile> filter)
+        {
+            var matches = new List<SourceFile>();
+            foreach (var file in Input)
+            {
+                if (!filter(file))
+                {
+                    AddOutput(file);
+                    continue;
+                }
+                matches.Add(file);
+            }
+
+            return matches.ToArray();
+        }
+
+        public SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix)
+        {
+            var files =
+                    Input.Where(
+                        a => a.FileInfo != null && a.FileInfo.Name.EndsWith(fileExtensionIncludingDotPrefix, StringComparison.OrdinalIgnoreCase)).ToArray();
+            return files;
         }
 
         public List<SourceFile> OutputFiles { get; set; }
