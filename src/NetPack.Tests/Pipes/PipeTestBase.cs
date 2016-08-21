@@ -36,13 +36,13 @@ namespace NetPack.Tests.Pipes
 
             Sut = pipeFactory();
             await Sut.ProcessAsync(PipelineContext, CancellationToken.None);
-
+            PipelineContext.PrepareNextInputs();
         }
 
         protected SourceFile ThenTheOutputFileFromPipe(string filePath, Action<SourceFile> assertions)
         {
             var outputFile =
-                PipelineContext.OutputFiles.FirstOrDefault(
+                PipelineContext.InputFiles.FirstOrDefault(
                     a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(outputFile);
             return outputFile;

@@ -16,13 +16,14 @@ namespace NetPack.Pipeline
 
 
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
+        private string _webRootDir;
 
-
-        public Pipeline(PipelineInput input, List<IPipe> pipes, List<IRequirement> requirements)
+        public Pipeline(PipelineInput input, List<IPipe> pipes, List<IRequirement> requirements, string webRootPath = "wwwroot")
         {
             Input = input;
             Pipes = pipes;
             Requirements = requirements;
+            _webRootDir = webRootPath;
 
             //if (watch)
             //{
@@ -42,9 +43,11 @@ namespace NetPack.Pipeline
 
             //  IsWatching = watch;
             HasFlushed = false;
-           // FileProvider = fileProvider;
+            // FileProvider = fileProvider;
 
         }
+
+        public string WebRootPath { get; set; }
 
         public PipelineInput Input { get; set; }
 
@@ -108,6 +111,7 @@ namespace NetPack.Pipeline
                 // whatever is currently the inputs for the "next" pipe (even though we dont have any more pipe)
                 // is actually the output we want to return from the pipe.
                 var output = new PipelineOutput(context.InputFiles);
+                output.NormalisePaths(_webRootDir);
                 Output = output;
 
                 FlushCount = FlushCount + 1;

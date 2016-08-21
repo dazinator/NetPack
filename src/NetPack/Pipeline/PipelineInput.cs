@@ -39,7 +39,7 @@ namespace NetPack.Pipeline
 
         private void WatchFile(SourceFile file, Action<IFileInfo> action)
         {
-            var path = file.FullPath.ToString();
+            var path = file.ContentPathInfo.ToString();
             var changeToken = FileProvider.Watch(path);
             changeToken.RegisterChangeCallback((a) =>
             {

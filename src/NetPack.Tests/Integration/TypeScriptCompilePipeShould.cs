@@ -101,7 +101,7 @@ namespace NetPack.Tests.Integration
                 {
                     using (var reader = new StreamReader(output.FileInfo.CreateReadStream()))
                     {
-                        builder.AppendLine("File Name: " + output.FileInfo.Name + " Directory: " + output.Directory);
+                        builder.AppendLine("File Name: " + output.FileInfo.Name + " Path: " + output.ContentPathInfo.ToString());
                         builder.Append(reader.ReadToEnd());
                     }
                 }

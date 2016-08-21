@@ -8,6 +8,14 @@ namespace NetPack.Pipeline
     {
         IPipelineInputOptionsBuilder Watch();
 
+        /// <summary>
+        /// The path to the WebRoot folder within the Content directory.
+        /// </summary>
+        /// <param name="webrootPath"></param>
+        /// <returns></returns>
+        IPipelineInputOptionsBuilder FromWebRoot(string webrootPath);
+
+
         IPipelineBuilder BeginPipeline();
 
     }

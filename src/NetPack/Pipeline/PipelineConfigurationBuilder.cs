@@ -12,7 +12,7 @@ namespace NetPack.Pipeline
 {
     public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineInputOptionsBuilder, IPipelineBuilder
     {
-        
+
         public PipelineConfigurationBuilder(IApplicationBuilder appBuilder)
         {
             ApplicationBuilder = appBuilder;
@@ -65,9 +65,17 @@ namespace NetPack.Pipeline
 
         public bool WachInput { get; protected set; }
 
+        public string WebRootPath { get; set; }
+
         public IPipelineInputOptionsBuilder Watch()
         {
             this.WachInput = true;
+            return this;
+        }
+
+        public IPipelineInputOptionsBuilder FromWebRoot(string webrootPath)
+        {
+            WebRootPath = webrootPath;
             return this;
         }
 

@@ -44,9 +44,15 @@ namespace NetPack.Pipes.Typescript
                 {
                     // var inputFileInfo = inputFile.FileInfo;
                     var contents = inputFileInfo.ReadAllContent();
-                    requestDto.Files.Add(inputFile.FullPath.ToString(), contents);
+                    requestDto.Files.Add(inputFile.ContentPathInfo.ToString(), contents);
 
                     // tsFiles.Add(inputFile);
+                    // allow ts files to flow through pipeline if sourcemaps enabled, as this means we want the original
+                    // typescript files to be able to be served up.
+                    if(_options.SourceMap || _options.InlineSourceMap)
+                    {
+                        context.AddOutput(inputFile);
+                    }
                 }
                 else
                 {
@@ -81,6 +87,8 @@ namespace NetPack.Pipes.Typescript
                 foreach (var output in result.Sources)
                 {
                     var subPathInfo = SubPathInfo.Parse(output.Key);
+                    //var compiledTs = output.Value;
+                    // fix source mapping url declaration
                     var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
                     context.AddOutput(new SourceFile(outputFileInfo, subPathInfo.Directory));
                 }

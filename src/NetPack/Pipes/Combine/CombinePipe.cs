@@ -40,7 +40,7 @@ namespace NetPack.Pipes
 
             if (_options.EnableJavascriptBundle)
             {
-                filter = IsJsFile; 
+                filter = IsJsFile;
             }
             if (_options.EnableCssBundle)
             {
@@ -113,6 +113,7 @@ namespace NetPack.Pipes
                         {
                             var sourceScript = combiner.AddScript(sourceFileStream, writer);
                             sourceScript.LineNumberOffset = totalLineCount;
+                            sourceScript.Path = sourceFile.ContentPathInfo;
                             scriptInfos.Add(sourceScript);
                             hasSourceMappingDirectives = hasSourceMappingDirectives | sourceScript.SourceMapDeclaration != null;
                             totalLineCount = totalLineCount + sourceScript.LineCount;
@@ -130,7 +131,8 @@ namespace NetPack.Pipes
                 var indexMapFile = BuildIndexMap(ms, scriptInfos, mapFilePath, outputFilePath);
 
                 // Output the new map file in the pipeline.
-                context.AddOutput(new SourceFile(indexMapFile, mapFilePath.Directory));
+                //TODO: Add this line back..
+               // context.AddOutput(new SourceFile(indexMapFile, mapFilePath.Directory));
 
                 // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
                 using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
@@ -170,13 +172,22 @@ namespace NetPack.Pipes
                     sectionObject["offset"]["line"] = script.LineNumberOffset;
                     sectionObject["offset"]["column"] = 0;
 
-                    var originalMapPath = declaration.SourceMappingUrl;
+
+                    //TODO: if the source mapping url is absolute should leave it as is.
+
+                    // if its relative, then treat it as relative to the original script location.
+                    var mappingUrl = SubPathInfo.Parse(declaration.SourceMappingUrl);
+                    var relativePathFromCombinedFileToScriptFile = combinedFilePath.GetRelativePathTo(script.Path);
+                    var sourceMapSubPath = SubPathInfo.Parse(script.Path.Directory + "/" + mappingUrl.Name);
+                    //SubPathInfo.Parse(relativePathFromCombinedFileToScriptFile.Directory + "/" + declaration.SourceMappingUrl);
+                    // var relativePathToMappingUrl = relativePathFromCombinedFileToScriptFile.GetRelativePathTo(mappingUrl);
+                    var url = "/" + sourceMapSubPath;
 
                     // TODO: could add support for inlining of the source maps,
                     // so rather than appending a url here, could actually append the contents
                     // of the map file using map: { }
                     // var sourceMapFile = fileProvider.GetFileInfo(originalMapPath);
-                    sectionObject["url"] = originalMapPath;
+                    sectionObject["url"] = url.ToString();
                     sections.Add(sectionObject);
                 }
             }

@@ -9,13 +9,15 @@ namespace NetPack.File
         {
             // Directory = directory;
             FileInfo = fileInfo;
-            FullPath = SubPathInfo.Parse($"{directory}/{FileInfo.Name}");
-            Directory = SubPathInfo.Parse(directory);
+            ContentPathInfo = SubPathInfo.Parse($"{directory}/{FileInfo.Name}");
+           // Directory = SubPathInfo.Parse(directory);
         }
 
-        public SubPathInfo FullPath { get; set; }
+        public SubPathInfo ContentPathInfo { get; set; }
 
-        public SubPathInfo Directory { get; set; }
+        public SubPathInfo WebRootPathInfo { get; set; }
+
+        //public SubPathInfo Directory { get; set; }
 
         public IFileInfo FileInfo { get; protected set; }
 
@@ -23,7 +25,7 @@ namespace NetPack.File
 
         public override string ToString()
         {
-            return FullPath.ToString();
+            return ContentPathInfo.ToString();
         }
 
         public void Update(IFileInfo fileInfo)

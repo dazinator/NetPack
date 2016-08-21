@@ -104,7 +104,7 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
                 {
                     using (var reader = new StreamReader(output.FileInfo.CreateReadStream()))
                     {
-                        builder.AppendLine("File Name: " + output.FileInfo.Name + " Directory: " + output.Directory);
+                        builder.AppendLine("File Name: " + output.FileInfo.Name + " Content Path: " + output.ContentPathInfo);
                         builder.Append(reader.ReadToEnd());
                     }
                 }

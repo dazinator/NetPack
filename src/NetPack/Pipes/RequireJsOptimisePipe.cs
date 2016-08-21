@@ -50,7 +50,7 @@ namespace NetPack.Pipes
                     optimiseRequest.Files.Add(new NodeInMemoryFile()
                     {
                         FileContents = fileContent,
-                        FilePath = file.FullPath.ToString()
+                        FilePath = file.ContentPathInfo.ToString()
                     });
 
                 }

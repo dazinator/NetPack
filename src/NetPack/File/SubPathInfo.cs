@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,6 +11,7 @@ namespace NetPack.File
     {
         private string _directory;
         private string[] _directorySegements;
+        private static char[] _directorySeperator = new char[] { '/' };
 
         // private string _directory;
         protected SubPathInfo(string directory, string name)
@@ -35,7 +37,7 @@ namespace NetPack.File
             private set
             {
                 _directory = value;
-                _directorySegements = value == null ? null : value.Split('/');
+                _directorySegements = value == null ? null : value.Split(_directorySeperator, StringSplitOptions.RemoveEmptyEntries);
             }
         }
 
@@ -205,7 +207,23 @@ namespace NetPack.File
 
         public override string ToString()
         {
+            if (string.IsNullOrWhiteSpace(Directory))
+            {
+                return Name;
+            }
+
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                return Directory;
+            }
+
+            if (Directory.EndsWith("/"))
+            {
+                return $"{Directory}{Name}";
+            }
+
             return $"{Directory}/{Name}";
+
         }
 
         public bool IsMatch(SubPathInfo subPath)
@@ -279,41 +297,41 @@ namespace NetPack.File
             return path.Count(a => a == '/');
         }
 
-        /// <summary>
-        /// Returns whether this subpath is the parent of the child directory.
-        /// </summary>
-        /// <param name="childFolder"></param>
-        /// <returns></returns>
-        public bool IsChildDirectory(SubPathInfo childFolder)
-        {
-            if (childFolder.IsFile || this.IsFile)
-            {
-                return false;
-            }
+        ///// <summary>
+        ///// Returns whether this subpath is the parent of the child directory.
+        ///// </summary>
+        ///// <param name="parentFolder"></param>
+        ///// <returns></returns>
+        //public bool IsChildDirectory(SubPathInfo parentFolder)
+        //{
+        //    if (parentFolder.IsFile || this.IsFile)
+        //    {
+        //        return false;
+        //    }
 
-            if (string.IsNullOrWhiteSpace(this.Directory))
-            {
-                if (childFolder.GetDirectoryLevel() == 0)
-                {
-                    return true;
-                }
-            }
+        //    if (string.IsNullOrWhiteSpace(this.Directory))
+        //    {
+        //        if (parentFolder.GetDirectoryLevel() == 0)
+        //        {
+        //            return true;
+        //        }
+        //    }
 
-            // Check if the child path is a directory within this directory.
-            if (Directory.StartsWith(childFolder.Directory, StringComparison.OrdinalIgnoreCase))
-            {
-                var childDirLevel = childFolder.GetDirectoryLevel();
-                var parentdirLevel = GetDirectoryLevel();
-                if (childDirLevel == parentdirLevel + 1)
-                {
-                    return true;
-                }
+        //    // Check if the child path is a directory within this directory.
+        //    if (Directory.StartsWith(parentFolder.Directory, StringComparison.OrdinalIgnoreCase))
+        //    {
+        //        var childDirLevel = parentFolder.GetDirectoryLevel();
+        //        var parentdirLevel = GetDirectoryLevel();
+        //        if (childDirLevel == parentdirLevel + 1)
+        //        {
+        //            return true;
+        //        }
 
-            }
+        //    }
 
-            return false;
+        //    return false;
 
-        }
+        //}
 
 
         public override int GetHashCode()
@@ -324,10 +342,10 @@ namespace NetPack.File
 
         public string GetDescendentFolderNameFrom(SubPathInfo parentDirectory)
         {
-            if (this.IsFile || string.IsNullOrWhiteSpace(Directory))
-            {
-                return null;
-            }
+            //if (this.IsFile || string.IsNullOrWhiteSpace(Directory))
+            //{
+            //    return null;
+            //}
 
             // Check if the child path is a directory within this directory.
             if (Directory.StartsWith(parentDirectory.Directory, StringComparison.OrdinalIgnoreCase) || parentDirectory.IsEmpty)
@@ -341,6 +359,29 @@ namespace NetPack.File
             }
             return null;
 
+        }
+
+        public string[] DirectorySegements => _directorySegements;
+
+        public SubPathInfo GetRelativePathTo(SubPathInfo someFile)
+        {
+
+            // we make the 2 relative paths absolute by appending a ficticious root to them
+            // so 
+            // SomeDir/somefolder/ ---> Z:\\SomeDir/somefolder\\
+
+            // this then allows us to use System.Uri.MakeRelativeUri() to get the relative path between them.
+
+            var path1 = "Z:\\" + (string.IsNullOrWhiteSpace(Directory) ? "" : Directory + "\\");
+            var path2 = "Z:\\" + (string.IsNullOrWhiteSpace(someFile.Directory) ? "" : someFile.Directory + "\\") + someFile.Name; //.Replace('/', '\\');
+
+            var path1Uri = new Uri(path1);
+            var path2Uri = new Uri(path2);
+
+            Uri diff = path1Uri.MakeRelativeUri(path2Uri);
+            string relPath = diff.OriginalString;
+            var relSubPathInfo = SubPathInfo.Parse(relPath);
+            return relSubPathInfo;
         }
     }
 

@@ -38,7 +38,7 @@ namespace NetPack.Tests.FileProvider
             }
 
             Assert.True(subDirectoryFound);
-            Assert.False(fileFound);
+            Assert.True(fileFound);
 
         }
 

@@ -34,17 +34,78 @@ namespace NetPack.File
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-
             var files = new List<IFileInfo>();
-            var dir = SubPathInfo.Parse(subpath);
+            var parentDirectory = SubPathInfo.Parse(subpath);
 
-            foreach (var file in Files)
+            foreach (var folder in Files.Select(a => a.Key.GetDescendentFolderNameFrom(parentDirectory)).Distinct())
             {
-                if (file.Key.IsInSameDirectory(dir))
+                if (folder != null)
                 {
-                    files.Add(file.Value);
+                    files.Add(new NetPackDirectoryInfo(folder));
                 }
             }
+            //var childFolders = _pipeline.Output.Files.Where(a => subPathInfo.IsChildDirectory(a.Directory)).Select(a => a.Directory.ToString()).Distinct();
+            var childFiles = Files.Where(a => a.Key.IsInSameDirectory(parentDirectory));
+
+            //foreach (var folder in childFolders)
+            //{
+            //    files.Add(new NetPackDirectoryInfo(folder));
+            //}
+
+            foreach (var file in childFiles)
+            {
+                files.Add(file.Value);
+            }
+
+            //var files = _pipeline.Output.Files.Where(a=>a.FullPath.IsChildFileOrDirectory(subPathInfo))
+
+            //// var normalisedSubPath = subpath.TrimStart(trimStartChars);
+            //if (!subPathInfo.IsEmpty)
+            //{
+
+            //   // var childFiles = 
+            //    int directoryLevel = subPathInfo.GetDirectoryLevel();
+
+            //    foreach (var file in _pipeline.Output.Files)
+            //    {
+
+            //        if (subPathInfo.IsChildFileOrDirectory(file.GetPath()))
+            //        {
+
+            //        }
+            //        if (file.Directory == subPathInfo.Directory)
+            //        {
+            //            files.Add(file.FileInfo);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    // return all files and directories in root directory
+            //    //  var directories = new Dictionary<SubPathInfo, IFileInfo>
+            //    var filesInRoot = _pipeline.Output.Files.Where(a => string.IsNullOrEmpty(a.Directory));
+
+            //    var dirsInRoot =
+            //        _pipeline.Output.Files.Select(a => a.Directory.Split('/').FirstOrDefault()).Distinct();
+            //    //'(d => d == ' /' || d == '\\') == 0)
+            //    //  .Select(a => a.Directory)
+            //    // .Distinct();
+
+
+            //    //  || (a => a.Directory).Where(b=>b. ..Distinct()
+            //    foreach (var dir in dirsInRoot)
+            //    {
+            //        files.Add(new NetPackDirectoryInfo(dir));
+            //    }
+            //    foreach (var file in filesInRoot)
+            //    {
+            //        files.Add(file.FileInfo);
+            //    }
+
+            //}
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
+
 
             if (files.Any())
             {
@@ -52,6 +113,26 @@ namespace NetPack.File
             }
 
             return new NotFoundDirectoryContents();
+
+
+
+            //var files = new List<IFileInfo>();
+            //var dir = SubPathInfo.Parse(subpath);
+
+            //foreach (var file in Files)
+            //{
+            //    if (file.Key.IsInSameDirectory(dir))
+            //    {
+            //        files.Add(file.Value);
+            //    }
+            //}
+
+            //if (files.Any())
+            //{
+            //    return new EnumerableDirectoryContents(files);
+            //}
+
+            //return new NotFoundDirectoryContents();
 
         }
 

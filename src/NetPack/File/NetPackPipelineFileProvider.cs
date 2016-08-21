@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Primitives;
 using NetPack.Pipeline;
 
@@ -12,11 +11,14 @@ namespace NetPack.File
 
         private static char[] trimStartChars = new[] { '/' };
 
+        // private string _webRootFolder;
+
         private IPipeLine _pipeline;
 
         public NetPackPipelineFileProvider(IPipeLine pipeline)
         {
             _pipeline = pipeline;
+            // _webRootFolder = webrootFolder;
         }
 
         public IFileInfo GetFileInfo(string subpath)
@@ -25,7 +27,7 @@ namespace NetPack.File
 
             foreach (var file in _pipeline.Output.Files)
             {
-                if (file.FullPath.IsMatch(normalisedSubPath))
+                if (file.ContentPathInfo.IsMatch(normalisedSubPath))
                 {
                     return file.FileInfo;
                 }
@@ -41,7 +43,7 @@ namespace NetPack.File
             var parentDirectory = SubPathInfo.Parse(subpath);
 
 
-            foreach (var folder in _pipeline.Output.Files.Select(a => a.Directory.GetDescendentFolderNameFrom(parentDirectory)).Distinct())
+            foreach (var folder in _pipeline.Output.Files.Select(a => a.WebRootPathInfo.GetDescendentFolderNameFrom(parentDirectory)).Distinct())
             {
                 if (folder != null)
                 {
@@ -49,7 +51,7 @@ namespace NetPack.File
                 }
             }
             //var childFolders = _pipeline.Output.Files.Where(a => subPathInfo.IsChildDirectory(a.Directory)).Select(a => a.Directory.ToString()).Distinct();
-            var childFiles = _pipeline.Output.Files.Where(a => a.Directory.IsInSameDirectory(parentDirectory));
+            var childFiles = _pipeline.Output.Files.Where(a => a.WebRootPathInfo.Directory == parentDirectory.Directory);
 
             //foreach (var folder in childFolders)
             //{

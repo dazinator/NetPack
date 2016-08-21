@@ -68,12 +68,13 @@ namespace NetPack
 
             // NetPackPipelineFileProvider
             var fileProvider = appBuilder.PipelineFileProvider;
-            appBuilder.UseStaticFiles(new StaticFileOptions()
+            var staticFileOptions = new StaticFileOptions()
             {
                 FileProvider = fileProvider,
                 RequestPath = string.IsNullOrWhiteSpace(servePath) ? null : new PathString(servePath)
-            });
+            };
 
+            appBuilder.UseStaticFiles(staticFileOptions);
             return appBuilder;
         }
 

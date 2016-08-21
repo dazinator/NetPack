@@ -57,15 +57,15 @@ namespace NetPack.Tests.Pipes
 
             // assert
 
-            // should output the compiled typescript file.
-            Assert.Equal(outputFiles.Count, 1);
-            var outputFile = outputFiles[0];
+            // should output the compiled typescript file and the source ts file cos source maps enabled
+            Assert.Equal(outputFiles.Count, 2);
+            var outputFile = outputFiles[1];
 
             // should name the output file .js not .ts.
             Assert.Equal(outputFile.FileInfo.Name, "somefile.js");
 
             // The output should have a directory returned from node.
-            Assert.Equal(outputFile.Directory.ToString(), "SomeFolder");
+            Assert.Equal(outputFile.ContentPathInfo.Directory.ToString(), "SomeFolder");
 
         }
 
