@@ -10,7 +10,8 @@ namespace NetPack.File
             // Directory = directory;
             FileInfo = fileInfo;
             ContentPathInfo = SubPathInfo.Parse($"{directory}/{FileInfo.Name}");
-           // Directory = SubPathInfo.Parse(directory);
+            WebPathInfo = ContentPathInfo;
+            // Directory = SubPathInfo.Parse(directory);
         }
 
         public SubPathInfo ContentPathInfo { get; set; }

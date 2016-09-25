@@ -93,6 +93,7 @@ namespace NetPack.Pipeline
         {
 
             var context = new PipelineContext(Input.Files, this.RequestPath);
+           
             try
             {
 
@@ -116,8 +117,7 @@ namespace NetPack.Pipeline
 
                 // whatever is currently the inputs for the "next" pipe (even though we dont have any more pipe)
                 // is actually the output we want to return from the pipe.
-                var output = new PipelineOutput(context.InputFiles);
-                output.SetRequestPaths(RequestPath);
+                var output = new PipelineOutput(context.InputFiles, this.RequestPath);
                 Output = output;
 
                 FlushCount = FlushCount + 1;

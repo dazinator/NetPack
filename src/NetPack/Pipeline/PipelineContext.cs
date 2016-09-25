@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using NetPack.File;
 using System.Linq;
+using Microsoft.Extensions.FileProviders;
 
 namespace NetPack.Pipeline
 {
     public class PipelineContext : IPipelineContext
     {
 
+
         public PipelineContext() : this(new List<SourceFile>())
         {
-           
+
         }
 
         public PipelineContext(List<SourceFile> inputFiles, string baseRequestPath = null)
@@ -20,9 +22,11 @@ namespace NetPack.Pipeline
             BaseRequestPath = baseRequestPath;
         }
 
-        public string BaseRequestPath { get;  }
 
-       
+
+        public string BaseRequestPath { get; }
+
+
 
         public SourceFile[] Input => InputFiles.ToArray();
 
@@ -64,7 +68,6 @@ namespace NetPack.Pipeline
 
         public List<SourceFile> InputFiles { get; set; }
 
-
         public void PrepareNextInputs()
         {
             // Sets the inputs ready for the next pipe,
@@ -72,5 +75,30 @@ namespace NetPack.Pipeline
             InputFiles = OutputFiles;
             OutputFiles = new List<SourceFile>();
         }
+
+        public SourceFile FindFile(SubPathInfo subPath)
+        {
+            
+            foreach (var file in InputFiles)
+            {
+                if (file.WebPathInfo.IsMatch(subPath))
+                {
+                    return file;
+                }
+            }
+
+            foreach (var file in OutputFiles)
+            {
+                if (file.WebPathInfo.IsMatch(subPath))
+                {
+                    return file;
+                }
+            }
+
+            return null;
+            
+        }
+
+
     }
 }

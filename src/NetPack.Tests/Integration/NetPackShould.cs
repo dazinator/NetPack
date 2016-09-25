@@ -56,7 +56,7 @@ namespace NetPack.Tests.Integration
             // in our application, configured in the applications startup.cs
 
             // Act
-            var responseString = await GetResponseString("wwwroot/somefile.js");
+            var responseString = await GetResponseString("netpack/ts/wwwroot/somefile.js");
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(responseString));
@@ -77,7 +77,7 @@ namespace NetPack.Tests.Integration
             //   and these are then being served to the browser when requested.
 
             //1.
-            var originalFileContents = await GetResponseString("wwwroot/somefile.js");
+            var originalFileContents = await GetResponseString("netpack/ts/wwwroot/somefile.js");
 
             //2. This causes the `IChangeToken for the file `wwwroot/somefile.ts` on the server to activate,
             // and as the pipeline is watching its inputs, it should detect this and re-process.
@@ -88,7 +88,7 @@ namespace NetPack.Tests.Integration
             await Task.Delay(new TimeSpan(0, 0, 5));
 
             //4. Now request the same javascript file again - it should have been autoamtically updated by the pipeline.
-            var updatedFileContents = await GetResponseString("wwwroot/somefile.js");
+            var updatedFileContents = await GetResponseString("netpack/ts/wwwroot/somefile.js");
 
             Assert.NotEqual(originalFileContents, updatedFileContents);
             Assert.True(updatedFileContents.Contains("// modified on"));
@@ -141,15 +141,19 @@ namespace NetPack.Tests.Integration
                 mockFileProvider.AddFile("wwwroot/someOtherfile.ts", TsContentTwo);
 
                 env.ContentRootFileProvider = mockFileProvider;
+             //   env.WebRootFileProvider = 
 
                 app.UseContentPipeLine(pipelineBuilder =>
                 {
                     return pipelineBuilder
                         //.AddPipe(someOtherPipe)
                         .Take((inputBuilder)
-                                     => inputBuilder
-                                        .Include("wwwroot/somefile.ts")
-                                        .Include("wwwroot/someOtherfile.ts"))
+                                     =>
+                        {
+                            inputBuilder
+                                .Include("wwwroot/somefile.ts")
+                                .Include("wwwroot/someOtherfile.ts");
+                        }, mockFileProvider)
                                         .Watch()
                         .BeginPipeline()
                             .AddTypeScriptPipe(tsConfig =>
@@ -162,7 +166,7 @@ namespace NetPack.Tests.Integration
                                      })
                         .BuildPipeLine();
                 })
-                .UsePipelineOutputAsStaticFiles();
+                .UsePipelineOutputAsStaticFiles("netpack/ts");
 
                 app.Run(async (a) =>
                 {

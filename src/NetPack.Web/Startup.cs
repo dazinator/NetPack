@@ -56,12 +56,7 @@ namespace NetPack.Web
 
             app.UseStaticFiles();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
-            });
+           
 
             var tsFileProvider = new PhysicalFileProvider(env.ContentRootPath + "\\wwwroot\\ts\\");
 
@@ -69,8 +64,10 @@ namespace NetPack.Web
             CompileIndividualTypescriptFilesThenCombineThem(app, tsFileProvider);
 
 
-            _fileProviders.Add(env.WebRootFileProvider);
-            env.WebRootFileProvider = new CompositeFileProvider(_fileProviders);
+            //_fileProviders.Add(env.WebRootFileProvider);
+
+            // See issue: https://github.com/aspnet/StaticFiles/issues/158
+           // env.WebRootFileProvider = new CompositeFileProvider(_fileProviders);
 
             if (!env.IsProduction())
             {
@@ -78,6 +75,13 @@ namespace NetPack.Web
 
 
             }
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
+            });
 
         }
 

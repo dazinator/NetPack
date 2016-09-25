@@ -1,10 +1,15 @@
 ﻿using System;
+using Microsoft.Extensions.FileProviders;
 using NetPack.File;
 
 namespace NetPack.Pipeline
 {
     public interface IPipelineContext
     {
+
+        SourceFile FindFile(SubPathInfo subPath);
+
+
         /// <summary>
         /// The files provided to this pipe as input, for processing.
         /// </summary>

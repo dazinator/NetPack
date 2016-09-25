@@ -33,7 +33,7 @@ namespace NetPack.Tests.Pipes
         {
             var sourceFilesList = new List<SourceFile>(sourceFiles);
             PipelineContext = new PipelineContext(sourceFilesList);
-
+          
             Sut = pipeFactory();
             await Sut.ProcessAsync(PipelineContext, CancellationToken.None);
             PipelineContext.PrepareNextInputs();
