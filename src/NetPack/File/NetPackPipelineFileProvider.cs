@@ -27,7 +27,7 @@ namespace NetPack.File
 
             foreach (var file in _pipeline.Output.Files)
             {
-                if (file.ContentPathInfo.IsMatch(normalisedSubPath))
+                if (file.WebPathInfo.IsMatch(normalisedSubPath))
                 {
                     return file.FileInfo;
                 }
@@ -43,7 +43,7 @@ namespace NetPack.File
             var parentDirectory = SubPathInfo.Parse(subpath);
 
 
-            foreach (var folder in _pipeline.Output.Files.Select(a => a.WebRootPathInfo.GetDescendentFolderNameFrom(parentDirectory)).Distinct())
+            foreach (var folder in _pipeline.Output.Files.Select(a => a.WebPathInfo.GetDescendentFolderNameFrom(parentDirectory)).Distinct())
             {
                 if (folder != null)
                 {
@@ -51,7 +51,7 @@ namespace NetPack.File
                 }
             }
             //var childFolders = _pipeline.Output.Files.Where(a => subPathInfo.IsChildDirectory(a.Directory)).Select(a => a.Directory.ToString()).Distinct();
-            var childFiles = _pipeline.Output.Files.Where(a => a.WebRootPathInfo.Directory == parentDirectory.Directory);
+            var childFiles = _pipeline.Output.Files.Where(a => a.WebPathInfo.Directory == parentDirectory.Directory);
 
             //foreach (var folder in childFolders)
             //{

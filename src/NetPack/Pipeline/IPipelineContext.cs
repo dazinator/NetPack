@@ -14,7 +14,9 @@ namespace NetPack.Pipeline
 
         SourceFile[] ApplyFilter(Predicate<SourceFile> filter);
 
-      //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
+        string BaseRequestPath { get; }
+
+        //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
 
     }
 }

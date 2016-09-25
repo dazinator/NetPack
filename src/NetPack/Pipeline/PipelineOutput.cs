@@ -14,30 +14,30 @@ namespace NetPack.Pipeline
         public List<SourceFile> Files { get; }
 
         /// <summary>
-        /// Any file path that starts with the specified directory, will have its path modified, to remove that directory from its path.
-        /// For example, if a file path is "somefolder/a/somefile.js" and the directory argument is "somefolder" then the files path will be chaned
-        /// to "a/somefile.js".
-        /// This is necessary because we can work with files based on their "content" path (ContentRootFileProvider), but when
-        /// those files are resolved, we want them to be resolved relative to some other folder within the content directory, like the 
-        /// wwwroot folder for example. Therefore this fixes up the paths
-        /// </summary>
-        /// <param name="directory"></param>
-        public void NormalisePaths(string directory)
+        /// Will set all of the output files in the pipeline to have a "RequestPath" that is equal to their current content path, but prefixed with the specified
+        /// base path. So if a file's content path is '/content/myfile.js' then calling this method with a baseRequestPath arg of '/netpack' will
+        /// result in the file having a request path of '/netpack/content/myfile.js'.
+        /// 
+        /// The request path is the path that you can resolve the file on via a http request.
+        ///  </summary>
+        /// <param name="baseRequestPath"></param>
+        public void SetRequestPaths(string baseRequestPath)
         {
             // webroot
-            var parentDir = SubPathInfo.Parse(directory);
+            var basePath = SubPathInfo.Parse(baseRequestPath);
 
             foreach (var file in Files)
             {
+                file.WebPathInfo = SubPathInfo.Parse(basePath.ToString() + "/" + file.ContentPathInfo.ToString());
                 // change the directory of files, so that we remove the webroot folder they are being served, from.
                 // this is because the files are sourced from the content file provider,
                 // but are resolved relative to the webroot file provider.
-                if (file.ContentPathInfo.Directory.ToString().StartsWith(parentDir.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    var normalisedDir = file.ContentPathInfo.ToString().Substring(directory.Length);
-                    normalisedDir = normalisedDir.TrimStart('/');
-                    file.WebRootPathInfo = SubPathInfo.Parse(normalisedDir);
-                }
+                //if (file.ContentPathInfo.Directory.ToString().StartsWith(parentDir.ToString(), StringComparison.OrdinalIgnoreCase))
+                //{
+                //    var normalisedDir = file.ContentPathInfo.ToString().Substring(basePath.Length);
+                //    normalisedDir = normalisedDir.TrimStart('/');
+                //    file.WebPathInfo = SubPathInfo.Parse(normalisedDir);
+                //}
             }
         }
 

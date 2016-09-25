@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "file": "bundleA.js",
+  "sections": [
+    {
+      "offset": {
+        "line": 0,
+        "column": 0
+      },
+      "map": {
+        "version": 3,
+        "file": "another.js",
+        "sourceRoot": "",
+        "sources": [ "another.ts" ],
+        "names": [],
+        "mappings": "AAAA;IACI,iBAAmB,OAAe;QAAf,YAAO,GAAP,OAAO,CAAQ;IAAI,CAAC;IACvC,6BAAW,GAAX;QACI,+CAA+C;IACnD,CAAC;IACL,cAAC;AAAD,CAAC,AALD,IAKC;AAAA,CAAC;AAEF,IAAI,OAAO,GAAG,IAAI,OAAO,CAAC,QAAQ,CAAC,CAAC;AACpC,OAAO,CAAC,WAAW,EAAE,CAAC"
+      }     
+    },
+    {
+      "offset": {
+        "line": 13,
+        "column": 0
+      },
+      "map": {
+        "version": 3,
+        "file": "greeter.js",
+        "sourceRoot": "",
+        "sources": [ "greeter.ts" ],
+        "names": [],
+        "mappings": "AAAA;IACI,iBAAmB,QAAgB;QAAhB,aAAQ,GAAR,QAAQ,CAAQ;IAAI,CAAC;IACxC,uBAAK,GAAL;QACI,MAAM,CAAC,UAAU,GAAG,IAAI,CAAC,QAAQ,GAAG,SAAS,CAAC;IAClD,CAAC;IACL,cAAC;AAAD,CAAC,AALD,IAKC;AAAA,CAAC;AAEF,IAAI,OAAO,GAAG,IAAI,OAAO,CAAC,cAAc,CAAC,CAAC;AAC1C,QAAQ,CAAC,IAAI,CAAC,aAAa,CAAC,UAAU,CAAC,CAAC,SAAS,GAAG,OAAO,CAAC,KAAK,EAAE,CAAC"
+      }
+    }
+  ]
+}

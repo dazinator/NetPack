@@ -127,7 +127,9 @@ namespace NetPack.Pipes
             var outputFilePath = SubPathInfo.Parse(_options.CombinedJsFileName);
             if (hasSourceMappingDirectives && _options.EnableIndexSourceMap)
             {
-                var mapFilePath = SubPathInfo.Parse(outputFilePath.ToString() + ".map");
+
+                
+                var mapFilePath = SubPathInfo.Parse(context.BaseRequestPath + "/" + outputFilePath.ToString() + ".map");
                 var indexMapFile = BuildIndexMap(ms, scriptInfos, mapFilePath, outputFilePath);
 
                 // Output the new map file in the pipeline.
@@ -183,7 +185,7 @@ namespace NetPack.Pipes
                     // var relativePathToMappingUrl = relativePathFromCombinedFileToScriptFile.GetRelativePathTo(mappingUrl);
                     var url = "/" + sourceMapSubPath;
 
-                    // TODO: could add support for inlining of the source maps,
+                    // TODO: Inline the source maps rather than using url,
                     // so rather than appending a url here, could actually append the contents
                     // of the map file using map: { }
                     // var sourceMapFile = fileProvider.GetFileInfo(originalMapPath);

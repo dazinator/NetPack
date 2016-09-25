@@ -44,8 +44,15 @@ namespace NetPack.Pipeline
 
         public void AddPipeLine(IPipeLine pipeline)
         {
-            pipeline.Initialise();
             PipeLines.Add(pipeline);
+        }
+
+        public void InitialisePipes()
+        {
+            foreach (var pipeline in PipeLines)
+            {
+                pipeline.Initialise();
+            }
         }
 
         

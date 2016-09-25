@@ -10,14 +10,19 @@ namespace NetPack.Pipeline
 
         public PipelineContext() : this(new List<SourceFile>())
         {
+           
         }
 
-
-        public PipelineContext(List<SourceFile> inputFiles)
+        public PipelineContext(List<SourceFile> inputFiles, string baseRequestPath = null)
         {
             OutputFiles = new List<SourceFile>();
             InputFiles = inputFiles;
+            BaseRequestPath = baseRequestPath;
         }
+
+        public string BaseRequestPath { get;  }
+
+       
 
         public SourceFile[] Input => InputFiles.ToArray();
 

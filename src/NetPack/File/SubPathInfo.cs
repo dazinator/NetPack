@@ -284,7 +284,11 @@ namespace NetPack.File
             }
 
             // Return true if the fields match:
-            return (Directory == p.Directory) && (Name == p.Name);
+            //todo: make case sensitivity depend on platform?
+            // ie windows file system is not case sensitive..
+
+            return (Directory.Equals(p.Directory, StringComparison.OrdinalIgnoreCase))
+                && (Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase));
         }
 
         public int GetDirectoryLevel()

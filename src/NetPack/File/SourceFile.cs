@@ -15,7 +15,7 @@ namespace NetPack.File
 
         public SubPathInfo ContentPathInfo { get; set; }
 
-        public SubPathInfo WebRootPathInfo { get; set; }
+        public SubPathInfo WebPathInfo { get; set; }
 
         //public SubPathInfo Directory { get; set; }
 

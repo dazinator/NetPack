@@ -54,7 +54,7 @@ namespace NetPack.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseStaticFiles("");
+            app.UseStaticFiles();
 
             app.UseMvc(routes =>
             {
@@ -63,8 +63,10 @@ namespace NetPack.Web
                     template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
             });
 
-            CompileIndividualTypescriptFiles(app);
-            CompileIndividualTypescriptFilesThenCombineThem(app);
+            var tsFileProvider = new PhysicalFileProvider(env.ContentRootPath + "\\wwwroot\\ts\\");
+
+            CompileIndividualTypescriptFiles(app, tsFileProvider);
+            CompileIndividualTypescriptFilesThenCombineThem(app, tsFileProvider);
 
 
             _fileProviders.Add(env.WebRootFileProvider);
@@ -79,14 +81,19 @@ namespace NetPack.Web
 
         }
 
-        private void CompileIndividualTypescriptFiles(IApplicationBuilder app)
+        private void CompileIndividualTypescriptFiles(IApplicationBuilder app, IFileProvider typescriptFileProvider)
         {
+
+
             var contentPipeline = app.UseContentPipeLine(pipelineBuilder =>
              {
                  return pipelineBuilder
-                    .Take(files => files
-                                    .Include("wwwroot/ts/Another.ts")
-                                    .Include("wwwroot/ts/Greeter.ts"))
+                    .Take(files =>
+                    {
+                        files
+                            .Include("Another.ts")
+                            .Include("Greeter.ts");
+                    }, typescriptFileProvider)
                                     .Watch()
                     .BeginPipeline()
                         .AddTypeScriptPipe(tsConfig =>
@@ -99,7 +106,7 @@ namespace NetPack.Web
                         })
                      .BuildPipeLine();
              })
-             .UsePipelineOutputAsStaticFiles();
+             .UsePipelineOutputAsStaticFiles("netpack/ts");
 
             // Can access useful properties of the pipeline here like the FileProvider used to serve outputs from the pipeline.
             //  var pipelineOutputsFileProvider = contentPipeline.PipelineFileProvider;
@@ -111,14 +118,18 @@ namespace NetPack.Web
         }
 
 
-        private void CompileIndividualTypescriptFilesThenCombineThem(IApplicationBuilder app)
+        private void CompileIndividualTypescriptFilesThenCombineThem(IApplicationBuilder app, IFileProvider typescriptFileProvider)
         {
+            
             var contentPipeline = app.UseContentPipeLine(pipelineBuilder =>
             {
                 return pipelineBuilder
-                   .Take(files => files
-                                   .Include("wwwroot/ts/Another.ts")
-                                   .Include("wwwroot/ts/Greeter.ts"))
+                   .Take(files =>
+                   {
+                       files
+                           .Include("Another.ts")
+                           .Include("Greeter.ts");
+                   }, typescriptFileProvider)
                                    .Watch()
                    .BeginPipeline()
                        .AddTypeScriptPipe(tsConfig =>
@@ -132,11 +143,11 @@ namespace NetPack.Web
                        })
                        .AddCombinePipe(combineConfig =>
                        {
-                           combineConfig.CombinedJsFileName = "wwwroot/js/bundleA.js";
+                           combineConfig.CombinedJsFileName = "bundleA.js";
                        })
                     .BuildPipeLine();
             })
-              .UsePipelineOutputAsStaticFiles();
+              .UsePipelineOutputAsStaticFiles("netpack/tsbundle");
 
             _fileProviders.Add(contentPipeline.PipelineFileProvider);
         }

@@ -22,8 +22,9 @@ namespace NetPack.Pipeline
 
         int FlushCount { get; }
         bool HasFlushed { get; }
+        string RequestPath { get; set; }
 
-       // bool IsFlushing { get; }
+        // bool IsFlushing { get; }
         void Initialise();
     }
 }
