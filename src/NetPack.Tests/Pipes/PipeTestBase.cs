@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Tests.Pipes
 {

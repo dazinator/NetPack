@@ -16,6 +16,7 @@ using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes.Typescript;
 using NetPack.Utils;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Tests.Integration
 {

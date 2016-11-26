@@ -1,3 +1,4 @@
+using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Hosting;
@@ -24,8 +25,8 @@ namespace NetPack.Tests
             mockHostingEnv.SetupAllProperties();
 
             var fileProvider = new InMemoryFileProvider();
-            fileProvider.AddFile("wwwroot/somefile.ts", TsContentOne);
-            fileProvider.AddFile("wwwroot/someOtherfile.ts", TsContentTwo);
+            fileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
+            fileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
 
             mockHostingEnv.Object.ContentRootFileProvider = fileProvider;
 
