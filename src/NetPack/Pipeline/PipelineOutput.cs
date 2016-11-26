@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NetPack.File;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Pipeline
 {

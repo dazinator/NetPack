@@ -8,6 +8,7 @@ using NetPack.Pipes;
 using NetPack.Pipes.Combine;
 using Xunit;
 using Xunit.Abstractions;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Tests
 {
@@ -17,7 +18,7 @@ namespace NetPack.Tests
         private InMemoryFileProvider _fileProvider;
         private List<Tuple<int, CombinedScriptInfo>> _scriptInfoForAssert;
         private MemoryStream _combinedFileOutputStream;
-      
+
         public ScriptCombinerTests(ITestOutputHelper output)
         {
             _output = output;
@@ -44,11 +45,16 @@ namespace NetPack.Tests
 
         private IFileInfo GivenFileThatHasSourceMappingUrl(string path, int length)
         {
-            var subPath = SubPathInfo.Parse(path);
-            var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + subPath.ToString();
-            _fileProvider.AddFile(subPath, content);
-            var fileInfo = _fileProvider.GetFileInfo(subPath);
-            return fileInfo;
+            var subPathInfo = SubPathInfo.Parse(path);
+            var subPath = subPathInfo.ToString();
+            var fileName = subPathInfo.Name;
+            var mapFileName = subPathInfo + ".map";
+
+
+            var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + mapFileName;
+            var addedFileInfo = _fileProvider.Directory.AddFile(subPath, new StringFileInfo(content, fileName)).FileInfo;
+            //var fileInfo = _fileProvider.GetFileInfo(subPath);
+            return addedFileInfo;
         }
 
         private void ThenCombinedOutputShouldntContainSourceMappingUrls()
@@ -105,7 +111,7 @@ namespace NetPack.Tests
 
                 }
             }
-          
+
         }
 
 

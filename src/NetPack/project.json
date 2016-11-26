@@ -17,7 +17,8 @@
     "Microsoft.AspNetCore.StaticFiles": "1.0.0",
     "NUglify": "1.5.2",
     "Polly": "4.3.0",
-    "ReflectionBridge":  "0.0.11"
+    "ReflectionBridge": "0.0.11",
+    "Dazinator.AspNet.Extensions.FileProviders":  "1.0.1"
   },
 
   "frameworks": {

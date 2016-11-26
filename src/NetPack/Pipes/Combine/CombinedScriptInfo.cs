@@ -1,3 +1,4 @@
+using Dazinator.AspNet.Extensions.FileProviders;
 using NetPack.File;
 
 namespace NetPack.Pipes

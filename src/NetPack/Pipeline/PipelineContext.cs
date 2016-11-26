@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NetPack.File;
 using System.Linq;
 using Microsoft.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Pipeline
 {
@@ -22,11 +23,7 @@ namespace NetPack.Pipeline
             BaseRequestPath = baseRequestPath;
         }
 
-
-
         public string BaseRequestPath { get; }
-
-
 
         public SourceFile[] Input => InputFiles.ToArray();
 

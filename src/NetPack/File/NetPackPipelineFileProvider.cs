@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using NetPack.Pipeline;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.File
 {

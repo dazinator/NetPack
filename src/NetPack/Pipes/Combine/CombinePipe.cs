@@ -11,6 +11,7 @@ using NetPack.Pipes.Combine;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using NetPack.Utils;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Pipes
 {

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Microsoft.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.File
 {

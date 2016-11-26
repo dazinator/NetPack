@@ -9,6 +9,7 @@ using NetPack.Extensions;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Utils;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Pipes.Typescript
 {

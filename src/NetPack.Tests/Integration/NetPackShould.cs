@@ -15,6 +15,7 @@ using NetPack.Pipes;
 using Xunit;
 using NetPack.File;
 using NetPack.Pipes.Typescript;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Tests.Integration
 {
@@ -137,11 +138,11 @@ namespace NetPack.Tests.Integration
             {
 
                 var mockFileProvider = new InMemoryFileProvider();
-                mockFileProvider.AddFile("wwwroot/somefile.ts", TsContentOne);
-                mockFileProvider.AddFile("wwwroot/someOtherfile.ts", TsContentTwo);
+                mockFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
+                mockFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
 
                 env.ContentRootFileProvider = mockFileProvider;
-             //   env.WebRootFileProvider = 
+                //   env.WebRootFileProvider = 
 
                 app.UseContentPipeLine(pipelineBuilder =>
                 {
@@ -186,8 +187,8 @@ namespace NetPack.Tests.Integration
                                                            "// modified on " + DateTime.UtcNow;
 
                                 var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
-                                mockFileProvider.UpdateFile(subPath, modifiedFile);
-
+                                var fileToBeUpdated = mockFileProvider.Directory.GetFile(subPath.ToString());
+                                fileToBeUpdated.Update(modifiedFile);
 
                             }
                         }
