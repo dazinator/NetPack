@@ -105,7 +105,7 @@ namespace NetPack.Tests
                 {
                     using (var writer = new StreamWriter(_combinedFileOutputStream, Encoding.UTF8, 1024, true))
                     {
-                        var scriptInfo = Sut.AddScript(fileStream, writer);
+                        var scriptInfo = Sut.AddScript(fileStream, writer).Result;
                         _scriptInfoForAssert.Add(new Tuple<int, CombinedScriptInfo>(lineCount, scriptInfo));
                     }
 

@@ -10,6 +10,7 @@ using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders;
 
 namespace NetPack.Pipes.Typescript
 {
@@ -31,35 +32,35 @@ namespace NetPack.Pipes.Typescript
             _options = options;
         }
 
-        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        public Task ProcessAsync(IPipelineContext context, IFileInfo[] input, CancellationToken cancelationToken)
         {
             var requestDto = new TypescriptCompileRequestDto();
             requestDto.Options = _options;
 
-            foreach (var inputFile in context.Input)
+            foreach (var inputFileInfo in input)
             {
-                var inputFileInfo = inputFile.FileInfo;
+                //var inputFileInfo = inputFile.FileInfo;
 
                 var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
-                if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
-                {
-                    // var inputFileInfo = inputFile.FileInfo;
-                    var contents = inputFileInfo.ReadAllContent();
-                    requestDto.Files.Add(inputFile.ContentPathInfo.ToString(), contents);
+                //if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
+                //{
+                // var inputFileInfo = inputFile.FileInfo;
+                var contents = inputFileInfo.ReadAllContent();
+                requestDto.Files.Add(inputFile.ContentPathInfo.ToString(), contents);
 
-                    // tsFiles.Add(inputFile);
-                    // allow ts files to flow through pipeline if sourcemaps enabled, as this means we want the original
-                    // typescript files to be able to be served up.
-                    if(_options.SourceMap || _options.InlineSourceMap)
-                    {
-                        context.AddOutput(inputFile);
-                    }
-                }
-                else
-                {
-                    // allow file to flow through pipeline untouched as we aren't interested in doing anything to non.ts files.
-                    context.AddOutput(inputFile);
-                }
+                //// tsFiles.Add(inputFile);
+                //// allow ts files to flow through pipeline if sourcemaps enabled, as this means we want the original
+                //// typescript files to be able to be served up.
+                //if (_options.SourceMap || _options.InlineSourceMap)
+                //{
+                //    context.AddOutput(inputFile);
+                //}
+                //}
+                //else
+                //{
+                //    // allow file to flow through pipeline untouched as we aren't interested in doing anything to non.ts files.
+                //    context.AddOutput(inputFile);
+                //}
             }
 
             if (!requestDto.Files.Any())

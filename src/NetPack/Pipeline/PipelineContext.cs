@@ -21,9 +21,10 @@ namespace NetPack.Pipeline
 
         public string BaseRequestPath { get; }
 
-        public void AddOutput(string directory, IFileInfo info)
+        public void AddOutput(string directory, IFileInfo file)
         {
-            Output.AddFile(directory, info);
+            Output.AddOrUpdateFile(directory, file);
+          //  Output.AddFile(directory, info);
         }
 
         public IDirectory Output { get; set; }

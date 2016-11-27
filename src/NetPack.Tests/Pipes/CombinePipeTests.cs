@@ -14,16 +14,15 @@ namespace NetPack.Tests.Pipes
         {
 
             // Given some files with source mapping url declarations.
-            var jsFile1 = GivenASourceFile("js/red.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/red.js.map");
-            var jsFile2 = GivenASourceFile("js/green.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/green.js.map");
-            var jsFile3 = GivenASourceFile("js/blue.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/blue.js.map");
+            var jsFile1 = GivenAFileInfo("js/red.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/red.js.map");
+            var jsFile2 = GivenAFileInfo("js/green.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/green.js.map");
+            var jsFile3 = GivenAFileInfo("js/blue.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/blue.js.map");
 
             // When they are processed by the following combine pipe
             await WhenFilesProcessedByPipe(() =>
             {
-                var options = new CombinePipeOptions()
+                var options = new JsCombinePipeOptions()
                 {
-                    EnableJavascriptBundle = true,
                     CombinedJsFileName = "mybundle.js",
                     EnableIndexSourceMap = true
                 };
@@ -42,7 +41,7 @@ namespace NetPack.Tests.Pipes
             // The combined file should not have any of the source mapping urls present in the input files.
             ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
             {
-                var content = combinedFile.FileInfo.ReadAllContent();
+                var content = combinedFile.ReadAllContent();
                 Assert.DoesNotContain("//# sourceMappingURL=/" + "js/red.js.map", content);
                 Assert.DoesNotContain("//# sourceMappingURL=/" + "js/green.js.map", content);
                 Assert.DoesNotContain("//# sourceMappingURL=/" + "js/blue.js.map", content);
@@ -51,7 +50,7 @@ namespace NetPack.Tests.Pipes
             // The combined file should have a single source mapping url, which is the index map.
             ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
             {
-                var content = combinedFile.FileInfo.ReadAllContent();
+                var content = combinedFile.ReadAllContent();
                 Assert.Contains("//# sourceMappingURL=/" + "mybundle.js.map", content);
             });
 
@@ -65,16 +64,16 @@ namespace NetPack.Tests.Pipes
         {
 
             // Given a mixture of js files and other file types.
-            var jsFile1 = GivenASourceFile("js/red.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/red.js.map");
-            var nonJsFile1 = GivenASourceFile("other/green.other", () => TestUtils.GenerateString(1000));
-            var nonJsFile2 = GivenASourceFile("blue.other", () => TestUtils.GenerateString(1000) + Environment.NewLine);
+            var jsFile1 = GivenAFileInfo("js/red.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/red.js.map");
+            var nonJsFile1 = GivenAFileInfo("other/green.other", () => TestUtils.GenerateString(1000));
+            var nonJsFile2 = GivenAFileInfo("blue.other", () => TestUtils.GenerateString(1000) + Environment.NewLine);
 
             // When they are processed to combine JS files
             await WhenFilesProcessedByPipe(() =>
             {
-                var options = new CombinePipeOptions()
+                var options = new JsCombinePipeOptions()
                 {
-                    EnableJavascriptBundle = true,
+                  //  EnableJavascriptBundle = true,
                     CombinedJsFileName = "mybundle.js",
                     EnableIndexSourceMap = true
                 };

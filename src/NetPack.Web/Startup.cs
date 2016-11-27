@@ -91,7 +91,7 @@ namespace NetPack.Web
 
             var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
              {
-                 return pipelineBuilder
+                 pipelineBuilder
                     .Take(files =>
                     {
                         files
@@ -127,7 +127,7 @@ namespace NetPack.Web
             
             var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
             {
-                return pipelineBuilder
+                pipelineBuilder
                    .Take(files =>
                    {
                        files
@@ -145,7 +145,7 @@ namespace NetPack.Web
                            tsConfig.SourceMap = true;
 
                        })
-                       .AddCombinePipe(combineConfig =>
+                       .AddJsCombinePipe(combineConfig =>
                        {
                            combineConfig.CombinedJsFileName = "bundleA.js";
                        })

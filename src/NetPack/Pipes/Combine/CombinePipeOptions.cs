@@ -3,7 +3,7 @@ namespace NetPack.Pipes
     public class JsCombinePipeOptions
     {
 
-        public CombinePipeOptions()
+        public JsCombinePipeOptions()
         {
             //EnableJavascriptBundle = true;
            // EnableCssBundle = false;

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using NetPack.Extensions;
 using NetPack.Utils;
 
@@ -7,7 +8,7 @@ namespace NetPack.Pipes.Combine
 {
     public class ScriptCombiner
     {
-        public CombinedScriptInfo AddScript(Stream sourceStream, StreamWriter writer)
+        public async Task<CombinedScriptInfo> AddScript(Stream sourceStream, StreamWriter writer)
         {
             var scriptInfo = new CombinedScriptInfo();
 
@@ -41,22 +42,20 @@ namespace NetPack.Pipes.Combine
             int linesWritten;
             if (scriptInfo.SourceMapDeclaration == null)
             {
-                CombineWithoutSourceMap(sourceStream, writer, out linesWritten);
+                linesWritten = await CombineWithoutSourceMap(sourceStream, writer);
                 scriptInfo.LineCount = linesWritten;
                 return scriptInfo;
             }
 
-
             // A source map is present, copy the script to the bundle but omit the sourcemappingurl.
-            int lineNumberOfSourceMapUrl;
-            CombineWithSourceMap(sourceMappingUrlPosition, sourceStream, writer, out linesWritten, out lineNumberOfSourceMapUrl);
+            var lineInfo = await CombineWithSourceMap(sourceMappingUrlPosition, sourceStream, writer);
 
-            scriptInfo.LineCount = linesWritten;
-            scriptInfo.SourceMapDeclaration.LineNumber = lineNumberOfSourceMapUrl;
+            scriptInfo.LineCount = lineInfo.Item1;
+            scriptInfo.SourceMapDeclaration.LineNumber = lineInfo.Item2;
             return scriptInfo;
         }
 
-        private void CombineWithoutSourceMap(Stream sourceStream, StreamWriter writer, out int linesWritten)
+        private async Task<int> CombineWithoutSourceMap(Stream sourceStream, StreamWriter writer)
         {
             int lineCount = 0;
             sourceStream.Position = 0;
@@ -66,16 +65,17 @@ namespace NetPack.Pipes.Combine
                 // reader.DiscardBufferedData();
                 while (!reader.EndOfStream)
                 {
-                    var line = reader.ReadLine();
+                    var line = await reader.ReadLineAsync();
                     lineCount = lineCount + 1;
-                    writer.WriteLine(line);
+                    await writer.WriteLineAsync(line);
                 }
-                linesWritten = lineCount;
+                return lineCount;
+                //  linesWritten = lineCount;
             }
 
         }
 
-        private void CombineWithSourceMap(long sourceMappingUrlPosition, Stream sourceStream, StreamWriter writer, out int linesWritten, out int sourceMappingUrlLineNumber)
+        private async Task<Tuple<int, int>> CombineWithSourceMap(long sourceMappingUrlPosition, Stream sourceStream, StreamWriter writer)
         {
             int lineCount = 0;
             int lineNumberOfSourceMap = 0;
@@ -99,7 +99,7 @@ namespace NetPack.Pipes.Combine
                             // location we are currently at which is.. disappointing..
                             // the following extension method calculates the actual position.
                             var actualPosition = reader.GetActualPosition();
-                            lineText = reader.ReadLine();
+                            lineText = await reader.ReadLineAsync();
                             lineCount = lineCount + 1;
 
                             // Check if we are now at the position of the source map url line,
@@ -108,23 +108,25 @@ namespace NetPack.Pipes.Combine
                                 // we want to omit it from being written to the bundle - 
                                 // write an empty line instead.
                                 lineNumberOfSourceMap = lineCount;
-                                writer.WriteLine();
+                                await writer.WriteLineAsync();
                                 detectSourceMapLineNumber = false;
                                 continue;
                             }
 
-                            writer.WriteLine(lineText);
+                            await writer.WriteLineAsync(lineText);
                             continue;
                         }
                     }
 
-                    lineText = reader.ReadLine();
+                    lineText = await reader.ReadLineAsync();
                     lineCount = lineCount + 1;
-                    writer.WriteLine(lineText);
+                    await writer.WriteLineAsync(lineText);
                 }
 
-                sourceMappingUrlLineNumber = lineNumberOfSourceMap;
-                linesWritten = lineCount;
+                // sourceMappingUrlLineNumber = lineNumberOfSourceMap;
+                // linesWritten = lineCount;
+
+                return new Tuple<int, int>(lineCount, lineNumberOfSourceMap);
             }
         }
     }

@@ -6,29 +6,29 @@ using NetPack.File;
 namespace NetPack
 {
 
-    public class FileProcessContext
-    {
+    //public class FileProcessContext
+    //{
 
-        private Lazy<string> _contents;
+    //    private Lazy<string> _contents;
 
 
-        public FileProcessContext(SourceFile sourceFile)
-        {
-            SourceFile = sourceFile;
-            _contents = new Lazy<string>(ReadContents);
-        }
+    //    public FileProcessContext(SourceFile sourceFile)
+    //    {
+    //        SourceFile = sourceFile;
+    //        _contents = new Lazy<string>(ReadContents);
+    //    }
 
-        public SourceFile SourceFile { get; set; }
+    //    public SourceFile SourceFile { get; set; }
 
-        public string FileContents => _contents.Value;
+    //    public string FileContents => _contents.Value;
 
-        public string ReadContents()
-        {
-            using (var stream = new StreamReader(SourceFile.FileInfo.CreateReadStream()))
-            {
-                return stream.ReadToEnd();
-            }
-        }
+    //    public string ReadContents()
+    //    {
+    //        using (var stream = new StreamReader(SourceFile.FileInfo.CreateReadStream()))
+    //        {
+    //            return stream.ReadToEnd();
+    //        }
+    //    }
 
-    }
+    //}
 }

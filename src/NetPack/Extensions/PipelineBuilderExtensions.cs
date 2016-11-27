@@ -48,9 +48,9 @@ namespace NetPack
     public static class PipelineBuilderCombineExtensions
     {
 
-        public static IPipelineBuilder AddCombinePipe(this IPipelineBuilder builder, Action<CombinePipeOptions> configureOptions)
+        public static IPipelineBuilder AddJsCombinePipe(this IPipelineBuilder builder, Action<JsCombinePipeOptions> configureOptions)
         {
-            var options = new CombinePipeOptions();
+            var options = new JsCombinePipeOptions();
             configureOptions(options);
             var pipe = new JsCombinePipe(options);
             builder.AddPipe(pipe);
