@@ -21,6 +21,6 @@ namespace NetPack.Pipes
         /// <summary>
         /// The path to the script.
         /// </summary>
-        public SubPathInfo Path { get; set; }
+      //  public SubPathInfo Path { get; set; }
     }
 }

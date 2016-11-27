@@ -10,25 +10,24 @@ namespace NetPack.Pipeline
         public PipelineInput(IFileProvider fileProvider)
         {
             FileProvider = fileProvider;
-            Files = new List<SourceFile>();
+            Files = new List<string>();
         }
 
         public IFileProvider FileProvider { get; set; }
-        public List<SourceFile> Files { get; }
-        public void AddFile(IFileInfo file, string directory)
+        public List<string> IncludeList { get; }
+        public void AddInclude(string pattern)
         {
-            var sourceFile = new SourceFile(file, directory);
-            Files.Add(sourceFile);
+            IncludeList.Add(pattern);
         }
-        
-        public void WatchFiles(Action<IFileInfo> action)
+
+        public void WatchFiles(Action<string> action)
         {
-            foreach (var file in Files)
+            foreach (var file in IncludeList)
             {
-               // var path = file.GetPath();
+                // var path = file.GetPath();
                 WatchFile(file, action);
 
-               
+
 
                 //changeToken.RegisterChangeCallback((obj =>
                 //{
@@ -37,20 +36,19 @@ namespace NetPack.Pipeline
             }
         }
 
-        private void WatchFile(SourceFile file, Action<IFileInfo> action)
+        private void WatchFile(string pattern, Action<string> action)
         {
-            var path = file.ContentPathInfo.ToString();
-            var changeToken = FileProvider.Watch(path);
+            // var path = file.ContentPathInfo.ToString();
+            var changeToken = FileProvider.Watch(pattern);
             changeToken.RegisterChangeCallback((a) =>
             {
-                var newFileInfo = (IFileInfo)a;
-                file.Update(newFileInfo);
-                action(newFileInfo);
-
+                // var newFileInfo = (IFileInfo)a;
+                //  file.Update(newFileInfo);
+                action(pattern);
                 // must watch file again as old change token expired.
-                WatchFile(file, action);
+                WatchFile(pattern, action);
 
-            }, file.FileInfo);
+            }, pattern);
 
         }
     }

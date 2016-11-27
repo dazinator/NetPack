@@ -52,7 +52,7 @@ namespace NetPack
         {
             var options = new CombinePipeOptions();
             configureOptions(options);
-            var pipe = new CombinePipe(options);
+            var pipe = new JsCombinePipe(options);
             builder.AddPipe(pipe);
             return builder;
         }

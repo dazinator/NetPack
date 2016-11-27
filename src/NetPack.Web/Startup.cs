@@ -89,7 +89,7 @@ namespace NetPack.Web
         {
 
 
-            var contentPipeline = app.UseContentPipeLine(pipelineBuilder =>
+            var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
              {
                  return pipelineBuilder
                     .Take(files =>
@@ -110,7 +110,7 @@ namespace NetPack.Web
                         })
                      .BuildPipeLine();
              })
-             .UsePipelineOutputAsStaticFiles("netpack/ts");
+             .UseOutputAsStaticFiles("netpack/ts");
 
             // Can access useful properties of the pipeline here like the FileProvider used to serve outputs from the pipeline.
             //  var pipelineOutputsFileProvider = contentPipeline.PipelineFileProvider;
@@ -125,7 +125,7 @@ namespace NetPack.Web
         private void CompileIndividualTypescriptFilesThenCombineThem(IApplicationBuilder app, IFileProvider typescriptFileProvider)
         {
             
-            var contentPipeline = app.UseContentPipeLine(pipelineBuilder =>
+            var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
             {
                 return pipelineBuilder
                    .Take(files =>
@@ -151,7 +151,7 @@ namespace NetPack.Web
                        })
                     .BuildPipeLine();
             })
-              .UsePipelineOutputAsStaticFiles("netpack/tsbundle");
+              .UseOutputAsStaticFiles("netpack/tsbundle");
 
             _fileProviders.Add(contentPipeline.PipelineFileProvider);
         }

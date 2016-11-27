@@ -1,12 +1,12 @@
 namespace NetPack.Pipes
 {
-    public class CombinePipeOptions
+    public class JsCombinePipeOptions
     {
 
         public CombinePipeOptions()
         {
-            EnableJavascriptBundle = true;
-            EnableCssBundle = false;
+            //EnableJavascriptBundle = true;
+           // EnableCssBundle = false;
             EnableIndexSourceMap = true;
         }
 
@@ -23,14 +23,14 @@ namespace NetPack.Pipes
         /// </summary>
         public string CombinedJsFileName { get; set; }
 
-        /// <summary>
-        /// The filename for the combined css file.
-        /// </summary>
-        public string CombinedCssFileName { get; set; }
+        ///// <summary>
+        ///// The filename for the combined css file.
+        ///// </summary>
+        //public string CombinedCssFileName { get; set; }
 
-        public bool EnableJavascriptBundle { get; set; }
+        //public bool EnableJavascriptBundle { get; set; }
 
-        public bool EnableCssBundle { get; set; }
+        //public bool EnableCssBundle { get; set; }
 
 
 

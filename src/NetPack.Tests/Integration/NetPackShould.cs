@@ -144,9 +144,9 @@ namespace NetPack.Tests.Integration
                 env.ContentRootFileProvider = mockFileProvider;
                 //   env.WebRootFileProvider = 
 
-                app.UseContentPipeLine(pipelineBuilder =>
+                app.UseFileProcessing(pipelineBuilder =>
                 {
-                    return pipelineBuilder
+                    pipelineBuilder
                         //.AddPipe(someOtherPipe)
                         .Take((inputBuilder)
                                      =>
@@ -167,7 +167,7 @@ namespace NetPack.Tests.Integration
                                      })
                         .BuildPipeLine();
                 })
-                .UsePipelineOutputAsStaticFiles("netpack/ts");
+                .UseOutputAsStaticFiles("netpack/ts");
 
                 app.Run(async (a) =>
                 {

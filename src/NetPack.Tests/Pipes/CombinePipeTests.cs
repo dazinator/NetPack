@@ -27,7 +27,7 @@ namespace NetPack.Tests.Pipes
                     CombinedJsFileName = "mybundle.js",
                     EnableIndexSourceMap = true
                 };
-                return new CombinePipe(options);
+                return new JsCombinePipe(options);
             }, jsFile1, jsFile2, jsFile3);
 
 
@@ -78,7 +78,7 @@ namespace NetPack.Tests.Pipes
                     CombinedJsFileName = "mybundle.js",
                     EnableIndexSourceMap = true
                 };
-                return new CombinePipe(options);
+                return new JsCombinePipe(options);
             }, jsFile1, nonJsFile1, nonJsFile2);
 
 

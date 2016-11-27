@@ -2,25 +2,20 @@
 using Microsoft.Extensions.FileProviders;
 using NetPack.File;
 using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 
 namespace NetPack.Pipeline
 {
     public interface IPipelineContext
     {
 
-        SourceFile FindFile(SubPathInfo subPath);
-
-
-        /// <summary>
-        /// The files provided to this pipe as input, for processing.
-        /// </summary>
-        SourceFile[] Input { get; }
-
-        void AddOutput(SourceFile info);
-
-        SourceFile[] ApplyFilter(Predicate<SourceFile> filter);
-
         string BaseRequestPath { get; }
+
+        void AddOutput(string directory, IFileInfo info);
+
+        IDirectory Output { get; set; }
+
+        IFileProvider FileProvider { get; set; }
 
         //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
 

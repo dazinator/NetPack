@@ -10,43 +10,40 @@ using NetPack.Requirements;
 
 namespace NetPack.Pipeline
 {
+
+    public class PipeConfiguration
+    {
+        public IPipe Pipe { get; set; }
+        public PipelineInput Input { get; set; }
+
+    }
+
     public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineInputOptionsBuilder, IPipelineBuilder
     {
 
-        public PipelineConfigurationBuilder(IApplicationBuilder appBuilder)
+        public PipelineConfigurationBuilder(IApplicationBuilder appBuilder, IFileProvider fileProvider = null)
         {
             ApplicationBuilder = appBuilder;
-            Pipes = new List<IPipe>();
+            Pipes = new List<PipeConfiguration>();
             Requirements = new List<IRequirement>();
+            FileProvider = fileProvider ?? GetDefaultFileProvider();
         }
 
-        public IApplicationBuilder ApplicationBuilder { get; set; }
+        public IFileProvider FileProvider { get; set; }
 
+        public IApplicationBuilder ApplicationBuilder { get; set; }
 
         //public IFileProvider FileProvider { get; set; }
 
         public List<IRequirement> Requirements { get; set; }
 
-        public List<IPipe> Pipes { get; set; }
+        public List<PipeConfiguration> Pipes { get; set; }
 
-        public IPipelineBuilder AddPipe(IPipe pipe)
+        public IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe)
         {
-            Pipes.Add(pipe);
-            return this;
-        }
-
-        public IPipelineInputOptionsBuilder Take(PipelineInput sources)
-        {
-            Sources = sources;
-            return this;
-        }
-
-        public IPipelineInputOptionsBuilder Take(Action<PipelineInputBuilder> sourcesBuilder, IFileProvider fileProvider = null)
-        {
-            var sourcesFileProvider = fileProvider ?? GetDefaultFileProvider();
-            var builder = new PipelineInputBuilder(sourcesFileProvider);
-            sourcesBuilder(builder);
-            Sources = builder.Input;
+            var builder = new PipelineInputBuilder(FileProvider);
+            inputBuilder(builder);
+            Pipes.Add(new PipeConfiguration() { Input = builder.Input });
             return this;
         }
 
@@ -60,8 +57,6 @@ namespace NetPack.Pipeline
             }
             return fileProvider;
         }
-
-        public PipelineInput Sources { get; protected set; }
 
         public bool WachInput { get; protected set; }
 
@@ -79,19 +74,9 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public IPipelineBuilder BeginPipeline()
-        {
-            return this;
-        }
-
-        IPipelineBuilder IPipelineBuilder.AddPipe(IPipe pipe)
-        {
-            return AddPipe(pipe);
-        }
-
         public IPipeLine BuildPipeLine()
         {
-            var pipeLine = new Pipeline(Sources, Pipes, Requirements);
+            var pipeLine = new Pipeline(Pipes, Requirements);
             var fileProvider = new NetPackPipelineFileProvider(pipeLine);
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;

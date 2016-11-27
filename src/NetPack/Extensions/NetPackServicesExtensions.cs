@@ -1,5 +1,7 @@
 using System;
+using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,15 +25,15 @@ namespace NetPack
             services.AddSingleton(new NodeJsRequirement());
             services.AddSingleton<IRequirement>(new NodeJsRequirement());
             services.AddSingleton<PipelineManager>();
-            services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
+            // services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
             services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
             services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
 
             return services;
         }
 
-        public static INetPackApplicationBuilder UseContentPipeLine(this IApplicationBuilder appBuilder,
-            Func<IPipelineConfigurationBuilder, IPipeLine> createPipeline)
+        public static INetPackApplicationBuilder UseFileProcessing(this IApplicationBuilder appBuilder,
+            Action<IPipelineConfigurationBuilder> processorBuilder)
         {
             //var staticFilesOptions = appBuilder.ApplicationServices.GetService<IOptions<StaticFileOptions>>();
             //if (staticFilesOptions == null)
@@ -47,49 +49,65 @@ namespace NetPack
                     "Could not find a required netpack service. Have you called services.AddNetPack() in your startup class?");
             }
 
-           
+
             var builder = new PipelineConfigurationBuilder(appBuilder);
-            var pipeLine = createPipeline(builder);
-           
-            pipeLineManager.AddPipeLine(pipeLine);
+            processorBuilder(builder);
+
+            var pipeline = builder.BuildPipeLine();
+            pipeLineManager.AddPipeLine(pipeline);
 
             var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
             if (builder.WachInput)
             {
-                pipeLineWatcher.WatchPipeline(pipeLine);
+                pipeLineWatcher.WatchPipeline(pipeline);
             }
 
             //   var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
             //  var existingStaticFilesProvider = staticFilesOptions.Value.FileProvider ?? hostingEnv.WebRootFileProvider;
             //  appBuilder.
-            var pipelineFileProvider = new NetPackPipelineFileProvider(pipeLine);
-            return new NetPackApplicationBuilder(appBuilder, pipeLine, pipelineFileProvider);
+            //  var pipelineFileProvider = new NetPackPipelineFileProvider(pipeLine);
+            return new NetPackApplicationBuilder(appBuilder, pipeline, pipelineFileProvider);
         }
 
-        public static INetPackApplicationBuilder UsePipelineOutputAsStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "/netpack")
+        public static INetPackApplicationBuilder UseOutputAsStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "/netpack")
         {
 
             // NetPackPipelineFileProvider
             var fileProvider = appBuilder.PipelineFileProvider;
-            if(!string.IsNullOrWhiteSpace(servePath))
+            if (!string.IsNullOrWhiteSpace(servePath))
             {
                 if (!servePath.StartsWith("/"))
                 {
                     servePath = "/" + servePath;
                 }
+
+                fileProvider = new RequestPathFileProvider(servePath, fileProvider);
+
             }
 
-            PathString requestPath = string.IsNullOrWhiteSpace(servePath) ? null : new PathString(servePath);
-
-            var staticFileOptions = new StaticFileOptions()
+            var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
+            if (hostingEnv.WebRootFileProvider == null)
             {
-                FileProvider = fileProvider,
-                RequestPath = requestPath
-            };
+                hostingEnv.WebRootFileProvider = fileProvider;
+            }
+            else
+            {
+                var composite = new CompositeFileProvider(hostingEnv.WebRootFileProvider, fileProvider);
+                hostingEnv.WebRootFileProvider = composite;
+            }
+
+
+            //PathString requestPath = string.IsNullOrWhiteSpace(servePath) ? null : new PathString(servePath);
+
+            //var staticFileOptions = new StaticFileOptions()
+            //{
+            //    FileProvider = fileProvider,
+            //    RequestPath = requestPath
+            //};
 
             appBuilder.Pipeline.RequestPath = servePath;
 
-            appBuilder.UseStaticFiles(staticFileOptions);
+            // appBuilder.UseStaticFiles(staticFileOptions);
 
             appBuilder.Pipeline.Initialise();
 

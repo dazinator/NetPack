@@ -12,92 +12,44 @@ using Newtonsoft.Json.Linq;
 using System.Linq;
 using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
 
 namespace NetPack.Pipes
 {
-    public class CombinePipe : IPipe
+    public class JsCombinePipe : IPipe
     {
 
         private JObject _sourceMap;
-        private CombinePipeOptions _options;
+        private JsCombinePipeOptions _options;
 
-        private List<SourceFile> _jsFiles = new List<SourceFile>();
-        private List<SourceFile> _cssFiles = new List<SourceFile>();
-
-
-        public CombinePipe() : this(new CombinePipeOptions())
+        public JsCombinePipe() : this(new JsCombinePipeOptions())
         {
 
         }
 
-        public CombinePipe(CombinePipeOptions options)
+        public JsCombinePipe(JsCombinePipeOptions options)
         {
             _options = options;
         }
 
-        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(IPipelineContext context, IFileInfo[] input, CancellationToken cancelationToken)
         {
-            Predicate<SourceFile> filter = (a) => false;
-
-            if (_options.EnableJavascriptBundle)
-            {
-                filter = IsJsFile;
-            }
-            if (_options.EnableCssBundle)
-            {
-                filter = PredicateHelper.Or<SourceFile>(filter, IsCssFile);
-            }
-
-            // ApplyFilter causes filters to evaluate the input files to this pipe,
-            // and all the input files that don't match the filters, 
-            // will be added to the output files of the pipe (pipelinecontext) untouched.
-            // Those that do match are returned.
-            // We only want js and / or css files based on whether we are configured to do js / css
-            // combining.
-            var candidateFiles = context.ApplyFilter(filter);
-            if (_options.EnableJavascriptBundle)
-            {
-                CombineJs(context, _jsFiles, cancelationToken);
-            }
-            if (_options.EnableCssBundle)
-            {
-                CombineJs(context, _cssFiles, cancelationToken);
-            }
-
+            CombineJs(context, input, cancelationToken);
         }
 
-        private bool IsCssFile(SourceFile sourceFile)
+        //private bool IsCssFile(SourceFile sourceFile)
+        //{
+        //    if (sourceFile.FileInfo != null && System.IO.Path.GetExtension(sourceFile.FileInfo.Name)
+        //        .Equals(".css", StringComparison.OrdinalIgnoreCase))
+        //    {
+        //        _cssFiles.Add(sourceFile); // add the css file to our collection for later.
+        //        return true;
+        //    }
+        //    return false;
+        //}
+
+        private void CombineJs(IPipelineContext context, IEnumerable<IFileInfo> jsFiles, CancellationToken cancelationToken)
         {
-            if (sourceFile.FileInfo != null && System.IO.Path.GetExtension(sourceFile.FileInfo.Name)
-                .Equals(".css", StringComparison.OrdinalIgnoreCase))
-            {
-                _cssFiles.Add(sourceFile); // add the css file to our collection for later.
-                return true;
-            }
-            return false;
-        }
-
-        private bool IsJsFile(SourceFile sourceFile)
-        {
-            if (sourceFile.FileInfo != null && System.IO.Path.GetExtension(sourceFile.FileInfo.Name)
-              .Equals(".js", StringComparison.OrdinalIgnoreCase))
-            {
-                _jsFiles.Add(sourceFile); // add the js file to our collection for later.
-                return true;
-            }
-            return false;
-        }
-
-        private void CombineCss(IEnumerable<SourceFile> cssFiles)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void CombineJs(IPipelineContext context, IEnumerable<SourceFile> jsFiles, CancellationToken cancelationToken)
-        {
-
-
-
 
             bool hasSourceMappingDirectives = false;
             var combiner = new ScriptCombiner();
@@ -106,9 +58,8 @@ namespace NetPack.Pipes
             int totalLineCount = 0;
             var encoding = Encoding.UTF8;
 
-            foreach (var sourceFile in jsFiles)
+            foreach (var fileInfo in jsFiles)
             {
-                var fileInfo = sourceFile.FileInfo;
                 if (fileInfo.Exists && !fileInfo.IsDirectory)
                 {
                     using (var sourceFileStream = fileInfo.CreateReadStream())
@@ -118,7 +69,7 @@ namespace NetPack.Pipes
                         {
                             var sourceScript = combiner.AddScript(sourceFileStream, writer);
                             sourceScript.LineNumberOffset = totalLineCount;
-                            sourceScript.Path = sourceFile.ContentPathInfo;
+                            sourceScript.Path = fileInfo.Name;
                             scriptInfos.Add(sourceScript);
                             hasSourceMappingDirectives = hasSourceMappingDirectives | sourceScript.SourceMapDeclaration != null;
                             totalLineCount = totalLineCount + sourceScript.LineCount;
@@ -184,11 +135,11 @@ namespace NetPack.Pipes
 
                     // use the baserequest path + the souremapping url to get the full request path
                     var sourceMapFilePath = SubPathInfo.Parse(declaration.SourceMappingUrl);
-                    var sourceMapFile = context.FindFile(sourceMapFilePath);
+                    var sourceMapFile = context.FileProvider.GetFileInfo(sourceMapFilePath.ToString());
                     JObject sourceMapObject = null;
-                    if (sourceMapFile != null)
+                    if (sourceMapFile != null &&  !sourceMapFile.IsDirectory && sourceMapFile.Exists)
                     {
-                        var sourceMapFileContents = sourceMapFile.FileInfo.ReadAllContent();
+                        var sourceMapFileContents = sourceMapFile.ReadAllContent();
                         sourceMapObject = JObject.Parse(sourceMapFileContents);
                     }
 

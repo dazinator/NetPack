@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipes;
 using NetPack.Requirements;
@@ -17,32 +19,25 @@ namespace NetPack.Pipeline
 
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
 
-        public Pipeline(PipelineInput input, List<IPipe> pipes, List<IRequirement> requirements)
+        public Pipeline(IFileProvider fileProvider, IDirectory directory, List<PipeConfiguration> pipes, List<IRequirement> requirements)
         {
-            Input = input;
+            FileProvider = fileProvider;
             Pipes = pipes;
             Requirements = requirements;
-            //if (watch)
-            //{
-            //    // when files change, re-flush the pipeline. (in other words, process all the input
-            //    // files of the pipeline again.
-            //    input.WatchFiles(a =>
-            //    {
-            //        _changedFiles.Enqueue(a);
-            //        //// leave some delay?
-            //        //if (HasFlushed) // only bother doing when initialised, cos we do a flush on initialise.
-            //        //{
-            //        //    await this.FlushAsync();
-            //        //}
-
-            //    });
-            //}
-
             //  IsWatching = watch;
             HasFlushed = false;
+            Output = directory;
             // FileProvider = fileProvider;
 
         }
+
+        public IFileProvider FileProvider { get; set; }
+
+        public IDirectory Output { get; set; }
+
+        public List<PipeConfiguration> Pipes { get; set; }
+
+        public List<IRequirement> Requirements { get; set; }
 
         private string _requestPath;
         public string RequestPath
@@ -54,14 +49,6 @@ namespace NetPack.Pipeline
                 //Output.SetRequestPaths(_requestPath);
             }
         }
-
-        public PipelineInput Input { get; set; }
-
-        public PipelineOutput Output { get; set; }
-
-        public List<IPipe> Pipes { get; set; }
-
-        public List<IRequirement> Requirements { get; set; }
 
         public void Initialise()
         {
@@ -86,14 +73,14 @@ namespace NetPack.Pipeline
         }
 
         /// <summary>
-        /// Processes the current input through the pipes in the pipeline, and returns the output of the pipeline.
+        /// Processes all pipes.
         /// </summary>
         /// <returns></returns>
-        public async Task<PipelineOutput> FlushAsync(CancellationToken cancelationToken)
+        public async Task FlushAsync(CancellationToken cancelationToken)
         {
 
-            var context = new PipelineContext(Input.Files, this.RequestPath);
-           
+            var context = new PipelineContext(this.FileProvider, this.Output, this.RequestPath);
+
             try
             {
 
@@ -110,20 +97,14 @@ namespace NetPack.Pipeline
 
                 foreach (var pipe in Pipes)
                 {
-                    await policy.ExecuteAsync(ct => pipe.ProcessAsync(context, ct), cancelationToken);
+                    var inputs = pipe.Input;
+                    IFileInfo[] inputFiles = GetInputFiles(inputs, FileProvider);
+                    await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(context, inputFiles, ct), cancelationToken);
                     //  await pipe.ProcessAsync(context);
-                    context.PrepareNextInputs();
                 }
-
-                // whatever is currently the inputs for the "next" pipe (even though we dont have any more pipe)
-                // is actually the output we want to return from the pipe.
-                var output = new PipelineOutput(context.InputFiles, this.RequestPath);
-                Output = output;
 
                 FlushCount = FlushCount + 1;
                 HasFlushed = true;
-
-                return output;
             }
             catch (Exception e)
             {
@@ -133,13 +114,34 @@ namespace NetPack.Pipeline
 
         }
 
+        private IFileInfo[] GetInputFiles(PipelineInput inputs, IFileProvider fileProvider)
+        {
+            var results = new List<IFileInfo>();
+            foreach (var input in inputs.IncludeList)
+            {
+                var files = fileProvider.Search(input);
+                // check if file already present? Multiple input patterns can match the same files.
+                foreach (var file in files)
+                {
+                    if (!results.Contains(file))
+                    {
+                        results.Add(file);
+                    }
+                }
+                
+            }
+            return results.ToArray();
+        }
+
         //public bool IsWatching { get; set; }
 
         public int FlushCount { get; set; }
 
         public bool HasFlushed { get; set; }
 
-        public IFileProvider FileProvider { get; set; }
+
+
+
 
 
     }

@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using NetPack.Pipes;
 
 namespace NetPack.Pipeline
 {
     public interface IPipeLine
     {
-        PipelineInput Input { get; }
+        IDirectory Output { get; set; }
 
-        PipelineOutput Output { get; set; }
+        List<PipeConfiguration> Pipes { get; }
 
-        List<IPipe> Pipes { get; }
-
-        Task<PipelineOutput> FlushAsync(CancellationToken cancelationToken);
+        Task FlushAsync(CancellationToken cancelationToken);
 
         //PipelineOutput Flush(TimeSpan? timeout = null);
 
