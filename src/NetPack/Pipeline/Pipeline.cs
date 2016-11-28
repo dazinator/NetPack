@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -7,33 +8,35 @@ using System.Threading.Tasks;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
+using NetPack;
 using NetPack.Pipes;
 using NetPack.Requirements;
 using Polly;
+using NetPack.Pipeline;
 
 namespace NetPack.Pipeline
 {
+
     public class Pipeline : IPipeLine
     {
 
 
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
 
-        public Pipeline(IFileProvider fileProvider, IDirectory directory, List<PipeConfiguration> pipes, List<IRequirement> requirements)
+        public Pipeline(IFileProvider fileProvider, List<PipeConfiguration> pipes, List<IRequirement> requirements, IDirectory directory = null)
         {
             FileProvider = fileProvider;
             Pipes = pipes;
             Requirements = requirements;
             //  IsWatching = watch;
             HasFlushed = false;
-            Output = directory;
-            // FileProvider = fileProvider;
-
+            Directory = directory ?? new InMemoryDirectory();
         }
 
         public IFileProvider FileProvider { get; set; }
 
-        public IDirectory Output { get; set; }
+        public IDirectory Directory { get; set; }
 
         public List<PipeConfiguration> Pipes { get; set; }
 
@@ -59,7 +62,7 @@ namespace NetPack.Pipeline
             // before all assets have been processed..
             if (!HasFlushed)
             {
-                FlushAsync(CancellationToken.None).Wait(DefaultFlushTimeout);
+                ProcessAsync(CancellationToken.None).Wait(DefaultFlushTimeout);
                 // await pipeline.FlushAsync();
             }
         }
@@ -76,10 +79,10 @@ namespace NetPack.Pipeline
         /// Processes all pipes.
         /// </summary>
         /// <returns></returns>
-        public async Task FlushAsync(CancellationToken cancelationToken)
+        public async Task ProcessAsync(CancellationToken cancelationToken)
         {
 
-            var context = new PipelineContext(this.FileProvider, this.Output, this.RequestPath);
+            var context = new PipelineContext(this.FileProvider, this.Directory, this.RequestPath);
 
             try
             {
@@ -98,7 +101,7 @@ namespace NetPack.Pipeline
                 foreach (var pipe in Pipes)
                 {
                     var inputs = pipe.Input;
-                    IFileInfo[] inputFiles = GetInputFiles(inputs, FileProvider);
+                    var inputFiles = GetInputFiles(inputs, context.FileProvider);
                     await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(context, inputFiles, ct), cancelationToken);
                     //  await pipe.ProcessAsync(context);
                 }
@@ -114,23 +117,25 @@ namespace NetPack.Pipeline
 
         }
 
-        private IFileInfo[] GetInputFiles(PipelineInput inputs, IFileProvider fileProvider)
+        private FileWithDirectory[] GetInputFiles(PipelineInput inputs, IFileProvider fileProvider)
         {
-            var results = new List<IFileInfo>();
+            var results = new Dictionary<string, FileWithDirectory>();
             foreach (var input in inputs.IncludeList)
             {
                 var files = fileProvider.Search(input);
                 // check if file already present? Multiple input patterns can match the same files.
                 foreach (var file in files)
                 {
-                    if (!results.Contains(file))
+                    var path = $"{file.Item1}/{file.Item2.Name}";
+                    if (!results.ContainsKey(path))
                     {
-                        results.Add(file);
+                        var item = new FileWithDirectory() { Directory = file.Item1, FileInfo = file.Item2 };
+                        results.Add(path, item);
                     }
                 }
-                
+
             }
-            return results.ToArray();
+            return results.Values.ToArray();
         }
 
         //public bool IsWatching { get; set; }
@@ -140,9 +145,33 @@ namespace NetPack.Pipeline
         public bool HasFlushed { get; set; }
 
 
+        public IEnumerable<IChangeToken> WatchInputs()
+        {
+
+            var inputs = Pipes.Select(a => a.Input);
+            List<IChangeToken> _tokens;
+
+            foreach (var input in inputs)
+            {
+                input.IncludeList.ForEach((include) =>
+                {
+                    var token = FileProvider.Watch(include);
+                    yield return token;
+                });
 
 
+            }
+
+            //input.IncludeList.ForEach((include) =>
+            //{
+            //    var changeToken = pipeline.FileProvider.Watch(include);
+            //});
+        }
 
 
     }
+
+
 }
+
+

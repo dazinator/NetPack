@@ -108,7 +108,7 @@ namespace NetPack.Web
                             tsConfig.RemoveComments = false;
                             tsConfig.SourceMap = true;
                         })
-                     .BuildPipeLine();
+                     .ProcessPipeLine();
              })
              .UseOutputAsStaticFiles("netpack/ts");
 
@@ -149,7 +149,7 @@ namespace NetPack.Web
                        {
                            combineConfig.CombinedJsFileName = "bundleA.js";
                        })
-                    .BuildPipeLine();
+                    .ProcessPipeLine();
             })
               .UseOutputAsStaticFiles("netpack/tsbundle");
 

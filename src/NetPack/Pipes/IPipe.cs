@@ -9,7 +9,7 @@ namespace NetPack.Pipes
 {
     public interface IPipe
     {
-        Task ProcessAsync(IPipelineContext context, IFileInfo[] input, CancellationToken cancelationToken);
+        Task ProcessAsync(IPipelineContext context, FileWithDirectory[] input, CancellationToken cancelationToken);
     }
 
     //public interface IPipeOutput

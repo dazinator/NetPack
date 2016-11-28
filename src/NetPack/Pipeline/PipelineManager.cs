@@ -16,8 +16,7 @@ namespace NetPack.Pipeline
 
         private readonly IHostingEnvironment _hostingEnv;
       //  private readonly IOptions<StaticFileOptions>  _staticFilesOptions;
-
-
+      
         public PipelineManager(IHostingEnvironment env)
         {
             _hostingEnv = env;

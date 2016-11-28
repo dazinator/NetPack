@@ -32,9 +32,10 @@ namespace NetPack.Pipes
             _options = options;
         }
 
-        public async Task ProcessAsync(IPipelineContext context, IFileInfo[] input, CancellationToken cancelationToken)
+        public async Task ProcessAsync(IPipelineContext context, FileWithDirectory[] input, CancellationToken cancelationToken)
         {
-            await CombineJs(context, input, cancelationToken);
+            var fileInfos = input.Select(a => a.FileInfo);
+            await CombineJs(context, fileInfos, cancelationToken);
         }
 
         //private bool IsCssFile(SourceFile sourceFile)
@@ -132,12 +133,14 @@ namespace NetPack.Pipes
                     sectionObject["offset"]["line"] = script.LineNumberOffset;
                     sectionObject["offset"]["column"] = 0;
 
-
-                    //TODO: if the source mapping url is absolute should leave it as is.
-
-                    // use the baserequest path + the souremapping url to get the full request path
+                    
                     var sourceMapFilePath = SubPathInfo.Parse(declaration.SourceMappingUrl);
+
                     // now find the source map file.
+                    // TODO: could allow a callback to be supplied and use that to resolve the source map file.
+                    // this is because the source map url in the javascript file being combined, might not be a path that makese sense to the 
+                    // current file provider.
+                
                     var sourceMapFile = context.FileProvider.GetFileInfo(sourceMapFilePath.ToString());
 
                     // read the contents of the source map file, and inline it into the new source map file.

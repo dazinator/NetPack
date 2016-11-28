@@ -18,7 +18,7 @@ namespace NetPack.Pipeline
 
     }
 
-    public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineInputOptionsBuilder, IPipelineBuilder
+    public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineBuilder
     {
 
         public PipelineConfigurationBuilder(IApplicationBuilder appBuilder, IFileProvider fileProvider = null)
@@ -26,12 +26,40 @@ namespace NetPack.Pipeline
             ApplicationBuilder = appBuilder;
             Pipes = new List<PipeConfiguration>();
             Requirements = new List<IRequirement>();
-            FileProvider = fileProvider ?? GetDefaultFileProvider();
+            //FileProvider = fileProvider ?? GetHostingEnvironmentContentFileProvider();
         }
+
+        #region  IPipelineConfigurationBuilder
+
+        public IApplicationBuilder ApplicationBuilder { get; set; }
+
+        public IPipelineBuilder WithHostingEnvironmentWebrootProvider()
+        {
+            FileProvider = GetHostingEnvironmentWebRootFileProvider();
+            return this;
+        }
+
+        public IPipelineBuilder WithHostingEnvironmentContentProvider()
+        {
+            FileProvider = GetHostingEnvironmentContentFileProvider();
+            return this;
+        }
+
+        public IPipelineBuilder WithContentProvider(IFileProvider fileProvider)
+        {
+            if (fileProvider == null)
+            {
+                throw new ArgumentNullException(nameof(fileProvider));
+            }
+            FileProvider = fileProvider;
+            return this;
+        }
+
+        #endregion
 
         public IFileProvider FileProvider { get; set; }
 
-        public IApplicationBuilder ApplicationBuilder { get; set; }
+       // public IDirectory Directory { get; set; }
 
         //public IFileProvider FileProvider { get; set; }
 
@@ -47,7 +75,7 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public IFileProvider GetDefaultFileProvider()
+        public IFileProvider GetHostingEnvironmentContentFileProvider()
         {
             var hostingEnv = ApplicationBuilder.ApplicationServices.GetRequiredService<IHostingEnvironment>();
             var fileProvider = hostingEnv.ContentRootFileProvider;
@@ -58,26 +86,37 @@ namespace NetPack.Pipeline
             return fileProvider;
         }
 
+        public IFileProvider GetHostingEnvironmentWebRootFileProvider()
+        {
+            var hostingEnv = ApplicationBuilder.ApplicationServices.GetRequiredService<IHostingEnvironment>();
+            var fileProvider = hostingEnv.WebRootFileProvider;
+            if (fileProvider == null)
+            {
+                throw new InvalidOperationException("The IHostingEnvironment doesn't have a WebRootFileProvider initialised.");
+            }
+            return fileProvider;
+        }
+
         public bool WachInput { get; protected set; }
 
-        public string WebRootPath { get; set; }
+       // public string WebRootPath { get; set; }
 
-        public IPipelineInputOptionsBuilder Watch()
+        public IPipelineBuilder Watch()
         {
             this.WachInput = true;
             return this;
         }
 
-        public IPipelineInputOptionsBuilder FromWebRoot(string webrootPath)
-        {
-            WebRootPath = webrootPath;
-            return this;
-        }
+        //public IPipelineInputOptionsBuilder FromWebRoot(string webrootPath)
+        //{
+        //    WebRootPath = webrootPath;
+        //    return this;
+        //}
 
         public IPipeLine BuildPipeLine()
         {
-            var pipeLine = new Pipeline(Pipes, Requirements);
-            var fileProvider = new NetPackPipelineFileProvider(pipeLine);
+            var pipeLine = new Pipeline(FileProvider, Pipes, Requirements);
+           // var fileProvider = new NetPackPipelineFileProvider(pipeLine);
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
 

@@ -1,22 +1,23 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using NetPack.Pipes;
 using NetPack.Requirements;
+using System;
 
 namespace NetPack.Pipeline
 {
     public interface IPipelineInputOptionsBuilder
     {
-        IPipelineInputOptionsBuilder Watch();
+       // IPipelineInputOptionsBuilder Watch();
 
-        /// <summary>
-        /// The path to the WebRoot folder within the Content directory.
-        /// </summary>
-        /// <param name="webrootPath"></param>
-        /// <returns></returns>
-        IPipelineInputOptionsBuilder FromWebRoot(string webrootPath);
+        ///// <summary>
+        ///// The path to the WebRoot folder within the Content directory.
+        ///// </summary>
+        ///// <param name="webrootPath"></param>
+        ///// <returns></returns>
+        //IPipelineInputOptionsBuilder FromWebRoot(string webrootPath);
 
 
-        IPipelineBuilder BeginPipeline();
+       // IPipelineBuilder BeginPipeline();
 
     }
 
@@ -25,11 +26,13 @@ namespace NetPack.Pipeline
 
         IApplicationBuilder ApplicationBuilder { get; set; }
 
-        IPipelineBuilder AddPipe(IPipe pipe);
+        IPipelineBuilder Watch();
 
+        IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);
+       
         // flushes the input through the pipeline. The input will be processed according to the pipeline, and outputs
         // will be returned.  
-        IPipeLine BuildPipeLine();
+        IPipeLine ProcessPipeLine();
 
         /// <summary>
         /// Adds a requirement to this pipeline. When the pipeline is initialised, all requirements are checked.

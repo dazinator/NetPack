@@ -165,7 +165,7 @@ namespace NetPack.Tests.Integration
                                          tsConfig.RemoveComments = false; // important: we are not removing comments because we test for a modification that involves a comment being added!
                                          tsConfig.SourceMap = true;
                                      })
-                        .BuildPipeLine();
+                        .ProcessPipeLine();
                 })
                 .UseOutputAsStaticFiles("netpack/ts");
 

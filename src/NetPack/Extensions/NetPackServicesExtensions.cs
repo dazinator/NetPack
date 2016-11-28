@@ -53,7 +53,7 @@ namespace NetPack
             var builder = new PipelineConfigurationBuilder(appBuilder);
             processorBuilder(builder);
 
-            var pipeline = builder.BuildPipeLine();
+            var pipeline = builder.ProcessPipeLine();
             pipeLineManager.AddPipeLine(pipeline);
 
             var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
