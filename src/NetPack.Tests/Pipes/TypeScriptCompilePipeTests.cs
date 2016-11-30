@@ -13,60 +13,50 @@ using NetPack.Utils;
 using Xunit;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders;
+using System;
 
 namespace NetPack.Tests.Pipes
 {
-    public class TypeScriptCompilePipeTests
+    public class TypeScriptCompilePipeTests : PipeTestBase
     {
 
         [Fact]
-        public async Task Processes_TypescriptFiles_And_Outputs_Js_Files()
+        public async Task Compiles_TypescriptFiles_Into_Js_Files_With_SourceMaps()
         {
 
             // arrange
             var mockNodeInstance = new Moq.Mock<INodeServices>();
             mockNodeInstance.Setup(a => a.InvokeAsync<TypeScriptCompilePipe.TypeScriptCompileResult>(It.IsAny<string>(), It.IsAny<TypeScriptCompilePipe.TypescriptCompileRequestDto>()))
-                                .ReturnsAsync(new TypeScriptCompilePipe.TypeScriptCompileResult() { Sources = new Dictionary<string, string>() { { "SomeFolder/somefile.js", "come code" } } });
-            //.ReturnsAsync(new TypeScriptCompileResult() { });
+                                         .ReturnsAsync(new TypeScriptCompilePipe.TypeScriptCompileResult()
+                                         {
+                                             Sources = new Dictionary<string, string>()
+                                             {
+                                                 { "SomeFolder/somefile.js", "some code" },
+                                                 { "SomeFolder/somefile.js.map", "some map code" }
+                                             }
+                                         });
 
             var mockJsRequirement = new Moq.Mock<NodeJsRequirement>();
             mockJsRequirement.Setup(a => a.Check());
 
-            var testInputFiles = new FileWithDirectory[]
-            {
-                new FileWithDirectory() { Directory = "SomeFolder", FileInfo = new StringFileInfo(TsContentOne, "somefile.ts") }
-            };
-
             var embeddedScript = new StringFileInfo("some embedded script", "netpack-typescript");
-
             var mockEmbeddedResources = new Moq.Mock<IEmbeddedResourceProvider>();
             mockEmbeddedResources.Setup(a => a.GetResourceFile(It.IsAny<Assembly>(), It.IsAny<string>())).Returns(embeddedScript);
 
-            IPipe sut = new TypeScriptCompilePipe(mockNodeInstance.Object, mockEmbeddedResources.Object);
+            // Act
+            var typescriptFileOne = GivenAFileInfo("SomeFolder/somefile.ts", () => TsContentOne);
 
-            var pipelineContext = new Moq.Mock<IPipelineContext>();
-            //  pipelineContext.Setup(a => a.Input).Returns(testInputFiles);
-
-            var outputFiles = new List<FileWithDirectory>();
-            pipelineContext.Setup(a => a.AddOutput(It.IsAny<string>(), It.IsAny<IFileInfo>())).Callback<string, IFileInfo>((a, b) =>
+            // When file processed by the typescript compile pipe
+            await WhenFilesProcessedByPipe(() =>
             {
-                outputFiles.Add(new FileWithDirectory() { Directory = a, FileInfo = b });
-            });
+                var options = new TypeScriptPipeOptions();
+                return new TypeScriptCompilePipe(mockNodeInstance.Object, mockEmbeddedResources.Object, options);
+            }, typescriptFileOne);
 
-            // act
-            await sut.ProcessAsync(pipelineContext.Object, testInputFiles, CancellationToken.None);
 
-            // assert
-
-            // should output the compiled typescript file and the source ts file cos source maps enabled
-            Assert.Equal(outputFiles.Count, 2);
-            var outputFile = outputFiles[1];
-
-            // should name the output file .js not .ts.
-            Assert.Equal(outputFile.FileInfo.Name, "somefile.js");
-
-            // The output should have a directory returned from node.
-            Assert.Equal(outputFile.Directory, "SomeFolder");
+            // Assert
+            ThenTheOutputFileFromPipe("SomeFolder/somefile.js", Assert.NotNull);
+            ThenTheOutputFileFromPipe("SomeFolder/somefile.js.map", Assert.NotNull);
 
         }
 

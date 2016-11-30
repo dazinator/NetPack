@@ -82,37 +82,52 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            //var nodeServices = app.ApplicationServices.GetService<INodeServices>();
+            //var embeddedResourceProvider = app.ApplicationServices.GetService<IEmbeddedResourceProvider>();
+            //var sut = new RequireJsOptimisePipe(nodeServices, embeddedResourceProvider);
 
+            // Provide some AMD modules as input for the RequireJs Optimise Pipe
+            var inMemoryFileProvider = new InMemoryFileProvider();
+            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleA.js"));
+            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
+
+            var fileProcessingBuilder = app.UseFileProcessing(a =>
+             {
+                 a.WithFileProvider(inMemoryFileProvider)
+                     .AddRequireJsOptimisePipe(input =>
+                     {
+                         input.Include("wwwroot/*.js");
+                     }, options =>
+                     {
+                         //
+                     });
+             });
+
+            var pipeline = fileProcessingBuilder.Pipeline;
+            pipeline.Initialise();
 
             app.Run(async (context) =>
             {
-                var nodeServices = context.RequestServices.GetService<INodeServices>();
-                var embeddedResourceProvider = context.RequestServices.GetService<IEmbeddedResourceProvider>();
 
-                var sut = new RequireJsOptimisePipe(nodeServices, embeddedResourceProvider);
 
-                // Provide some AMD modules as input for the RequireJs Optimise Pipe
-                var inMemoryFileProvider = new InMemoryFileProvider();
-                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleA.js"));
-                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
 
-                var pipelineContext = new PipelineContext(inMemoryFileProvider);
+                // var pipelineContext = new PipelineContext(inMemoryFileProvider);
                 // pipelineContext.InputFiles.Add(new SourceFile(, "wwwroot"));
                 // pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(AmdModuleBFileContent, "moduleB.js"), "wwwroot"));
-                var input = new PipelineInput();
-                input.IncludeList.Add("wwwroot/*.js");
-                var files = input.GetFiles(inMemoryFileProvider);
+                //  var input = new PipelineInput();
+                // input.IncludeList.Add("wwwroot/*.js");
+                // var files = input.GetFiles(inMemoryFileProvider);
 
-                await sut.ProcessAsync(pipelineContext, files, CancellationToken.None);
+                // await sut.ProcessAsync(pipelineContext, files, CancellationToken.None);
 
                 // Write the content of any outputs to the response for inspection.
                 var builder = new StringBuilder();
-               
-                foreach (var outputFile in pipelineContext.Output.GetFolder("wwwroot"))
+                var outputFolder = "wwwroot";
+                foreach (var outputFile in pipeline.OutputFileProvider.GetDirectoryContents(outputFolder))
                 {
-                    using (var reader = new StreamReader(outputFile.FileInfo.CreateReadStream()))
+                    using (var reader = new StreamReader(outputFile.CreateReadStream()))
                     {
-                        builder.AppendLine("File: " + outputFile.Path);
+                        builder.AppendLine("File: " + outputFolder + "/" + outputFile.Name);
                         builder.Append(reader.ReadToEnd());
                     }
                 }

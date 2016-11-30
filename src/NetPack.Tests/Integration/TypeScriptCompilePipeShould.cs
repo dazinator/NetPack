@@ -98,7 +98,7 @@ namespace NetPack.Tests.Integration
 
                 var pipelineContext = new PipelineContext(inMemoryFileProvider);
                 var input = new PipelineInput();
-                input.IncludeList.Add("wwwroot/*.js");
+                input.IncludeList.Add("wwwroot/*.ts");
                 var files = input.GetFiles(inMemoryFileProvider);
                 //  var pipelineContext = new PipelineContext();
                 //  pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));

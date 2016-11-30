@@ -30,6 +30,11 @@ namespace NetPack.Pipeline
             var results = new Dictionary<string, FileWithDirectory>();
             foreach (var input in IncludeList)
             {
+                //string searchPattern = input;
+                //if (!input.StartsWith("/"))
+                //{
+                //    searchPattern = "/" + input;
+                //}
                 var files = fileProvider.Search(input);
                 // check if file already present? Multiple input patterns can match the same files.
                 foreach (var file in files)

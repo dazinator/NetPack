@@ -59,5 +59,33 @@ namespace NetPack
 
     }
 
+    public static class PipelineBuilderRequireJsOptimiseExtensions
+    {
+
+        public static IPipelineBuilder AddRequireJsOptimisePipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<RequireJsOptimisationPipeOptions> configureOptions)
+        {
+
+            var appServices = builder.ApplicationBuilder.ApplicationServices;
+            var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
+
+            // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.
+            var nodeJsRequirement = new NodeJsRequirement();
+            builder.IncludeRequirement(nodeJsRequirement);
+
+            var memfilesNpmPackageRequirement = new NpmModuleRequirement("requirejs-memfiles", true, "2.1.15-3");
+            builder.IncludeRequirement(memfilesNpmPackageRequirement);
+
+            var options = new RequireJsOptimisationPipeOptions();
+            configureOptions(options);
+
+            var embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));
+
+            var pipe = new RequireJsOptimisePipe(nodeServices, embeddedResourceProvider, options);
+            builder.AddPipe(input, pipe);
+            return builder;
+        }
+
+    }
+
 
 }

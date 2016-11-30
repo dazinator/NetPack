@@ -9,6 +9,7 @@ using NetPack.Pipes.Combine;
 using Xunit;
 using Xunit.Abstractions;
 using Dazinator.AspNet.Extensions.FileProviders;
+using System.Threading.Tasks;
 
 namespace NetPack.Tests
 {
@@ -26,7 +27,7 @@ namespace NetPack.Tests
         }
 
         [Fact]
-        public async void When_Files_Are_Combined_Source_Mapping_Urls_Are_Removed()
+        public void When_Files_Are_Combined_Source_Mapping_Urls_Are_Removed()
         {
             // set up a couple of in memory files, for fileA and fileB
             // that both have source mapping url comments.

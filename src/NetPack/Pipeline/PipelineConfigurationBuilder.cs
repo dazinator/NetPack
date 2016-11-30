@@ -84,7 +84,7 @@ namespace NetPack.Pipeline
         {
             var builder = new PipelineInputBuilder();
             inputBuilder(builder);
-            Pipes.Add(new PipeConfiguration() { Input = builder.Input });
+            Pipes.Add(new PipeConfiguration() { Input = builder.Input, Pipe = pipe });
             return this;
         }
 

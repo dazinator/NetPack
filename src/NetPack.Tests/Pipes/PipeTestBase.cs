@@ -42,18 +42,18 @@ namespace NetPack.Tests.Pipes
         {
             //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
-            PipelineContext = new PipelineContext(provider, _directory, "");
+            PipelineContext = new PipelineContext(provider);
             Sut = pipeFactory();
             await Sut.ProcessAsync(PipelineContext, files, CancellationToken.None);
         }
 
         protected IFileInfo ThenTheOutputFileFromPipe(string filePath, Action<IFileInfo> assertions)
         {
-            var outputFile = _directory.GetFile(filePath);
+            var outputFile = PipelineContext.Output.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
-            assertions(outputFile.FileInfo);
-            return outputFile.FileInfo;
+            assertions(outputFile?.FileInfo);
+            return outputFile?.FileInfo;
         }
 
         public IPipe Sut { get; set; }

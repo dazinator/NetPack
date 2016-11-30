@@ -62,6 +62,8 @@ namespace NetPack
                 pipeLineWatcher.WatchPipeline(pipeline);
             }
 
+            pipeline.Initialise();
+
             //   var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
             //  var existingStaticFilesProvider = staticFilesOptions.Value.FileProvider ?? hostingEnv.WebRootFileProvider;
             //  appBuilder.

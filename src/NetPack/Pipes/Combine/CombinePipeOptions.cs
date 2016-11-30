@@ -1,13 +1,20 @@
 namespace NetPack.Pipes
 {
+
+    public enum SourceMapMode
+    {
+        None = 0,
+        Inline = 1, // each source map for a file being combined, will be inlined into an index source map file, produced for the combined file.
+        Url = 2 // each source map for a file being combined, will be included in the index source map file, as a url.
+    }
     public class JsCombinePipeOptions
     {
 
         public JsCombinePipeOptions()
         {
             //EnableJavascriptBundle = true;
-           // EnableCssBundle = false;
-            EnableIndexSourceMap = true;
+            // EnableCssBundle = false;
+            SourceMapMode = SourceMapMode.Inline;
         }
 
         /// <summary>
@@ -16,13 +23,14 @@ namespace NetPack.Pipes
         /// to work against the combined file.
         /// If this is not enabled, then source mapping url's will be stripped from the combined file.
         /// </summary>
-        public bool EnableIndexSourceMap { get; set; }
+        public SourceMapMode SourceMapMode { get; set; }
 
         /// <summary>
-        /// The filename for the combined javascript file.
+        /// The file path (including the filename) for the combined javascript file.
         /// </summary>
-        public string CombinedJsFileName { get; set; }
+        public string OutputFilePath { get; set; }
 
+       
         ///// <summary>
         ///// The filename for the combined css file.
         ///// </summary>

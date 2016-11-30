@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NetPack.Pipes;
 using Xunit;
@@ -8,26 +9,33 @@ namespace NetPack.Tests.Pipes
     public class CombinePipeTests : PipeTestBase
     {
 
-
-        [Fact]
-        public async Task Combines_Javascript_Files_With_Source_Maps()
+        [InlineData(SourceMapMode.None, new string[] { "js/red.js", "js/green.js", "js/blue.js" })]
+        [InlineData(SourceMapMode.Inline, new string[] { "js/red.js", "js/green.js", "js/blue.js" })]
+        [Theory]
+        public async Task Combines_Javascript_Files_With_Source_Maps(SourceMapMode sourceMapMode, params string[] jsFilePaths)
         {
 
-            // Given some files with source mapping url declarations.
-            var jsFile1 = GivenAFileInfo("js/red.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/red.js.map");
-            var jsFile2 = GivenAFileInfo("js/green.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/green.js.map");
-            var jsFile3 = GivenAFileInfo("js/blue.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/blue.js.map");
+            // Given some javascript files, that have source mapping url declarations, and their corresponding .map files.
+            List<FileWithDirectory> jsFiles = new List<FileWithDirectory>();
+            foreach (var jsFilePath in jsFilePaths)
+            {
+                var jsFileMapPath = jsFilePath + ".map";
+                var jsFile = GivenAFileInfo(jsFilePath, () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + jsFileMapPath);
+                var jsFileMap = GivenAFileInfo(jsFileMapPath, () => "{some: true, json: true}");
+
+                jsFiles.Add(jsFile);
+            }
 
             // When they are processed by the following combine pipe
             await WhenFilesProcessedByPipe(() =>
             {
                 var options = new JsCombinePipeOptions()
                 {
-                    CombinedJsFileName = "mybundle.js",
-                    EnableIndexSourceMap = true
+                    OutputFilePath = "mybundle.js",
+                    SourceMapMode = sourceMapMode
                 };
                 return new JsCombinePipe(options);
-            }, jsFile1, jsFile2, jsFile3);
+            }, jsFiles.ToArray());
 
 
             // The the combined file should be output from the pipe.
@@ -47,49 +55,30 @@ namespace NetPack.Tests.Pipes
                 Assert.DoesNotContain("//# sourceMappingURL=/" + "js/blue.js.map", content);
             });
 
-            // The combined file should have a single source mapping url, which is the index map.
-            ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
+            // The combined file should have a source mapping url, which points to its own map file, containing the index source map.
+
+            if (sourceMapMode != SourceMapMode.None)
             {
-                var content = combinedFile.ReadAllContent();
-                Assert.Contains("//# sourceMappingURL=/" + "mybundle.js.map", content);
-            });
-
-            // The index map file should be output from the pipe.
-            ThenTheOutputFileFromPipe("mybundle.js.map", Assert.NotNull);
-
-        }
-
-        [Fact]
-        public async Task Allows_Non_Js_Files_To_Flow_Through()
-        {
-
-            // Given a mixture of js files and other file types.
-            var jsFile1 = GivenAFileInfo("js/red.js", () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + "js/red.js.map");
-            var nonJsFile1 = GivenAFileInfo("other/green.other", () => TestUtils.GenerateString(1000));
-            var nonJsFile2 = GivenAFileInfo("blue.other", () => TestUtils.GenerateString(1000) + Environment.NewLine);
-
-            // When they are processed to combine JS files
-            await WhenFilesProcessedByPipe(() =>
-            {
-                var options = new JsCombinePipeOptions()
+                ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
                 {
-                  //  EnableJavascriptBundle = true,
-                    CombinedJsFileName = "mybundle.js",
-                    EnableIndexSourceMap = true
-                };
-                return new JsCombinePipe(options);
-            }, jsFile1, nonJsFile1, nonJsFile2);
+                    var content = combinedFile.ReadAllContent();
+                    Assert.Contains("//# sourceMappingURL=/" + "mybundle.js.map", content);
+                });
 
+                // The index map file should be output from the pipe.
+                ThenTheOutputFileFromPipe("mybundle.js.map", Assert.NotNull);
+            }
+            else
+            {
+                ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
+                {
+                    var content = combinedFile.ReadAllContent();
+                    Assert.DoesNotContain("//# sourceMappingURL=/" + "mybundle.js.map", content);
+                });
 
-            // The the combined file should be output from the pipe.
-            ThenTheOutputFileFromPipe("mybundle.js", Assert.NotNull);
-
-            // The original, now combined file should not be output from the pipe.
-            ThenTheOutputFileFromPipe("js/red.js", Assert.Null);
-
-            // The files that aren't js files so arent included in the js bundle should be output from the pipe
-            ThenTheOutputFileFromPipe("other/green.other", Assert.NotNull);
-            ThenTheOutputFileFromPipe("blue.other", Assert.NotNull);
+                // There shoudl be no index map file produce from the pipe.
+                ThenTheOutputFileFromPipe("mybundle.js.map", Assert.Null);
+            }
 
         }
 

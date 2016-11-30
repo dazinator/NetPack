@@ -13,6 +13,7 @@ using System.Linq;
 using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
+using Microsoft.AspNetCore.Http;
 
 namespace NetPack.Pipes
 {
@@ -81,23 +82,28 @@ namespace NetPack.Pipes
 
 
             // Now if there are source mapping url directives present, need to produce a new source map file and directive.
-            var outputFilePath = SubPathInfo.Parse(_options.CombinedJsFileName);
-            if (hasSourceMappingDirectives && _options.EnableIndexSourceMap)
+            var outputFilePath = SubPathInfo.Parse(_options.OutputFilePath);
+            if (hasSourceMappingDirectives && _options.SourceMapMode != SourceMapMode.None)
             {
 
                 // we are creating a new source map file for the new combined file.
                 // it will have the same name but ".map" appended.
-                var mapFilePath = SubPathInfo.Parse(context.BaseRequestPath + "/" + outputFilePath.ToString() + ".map");
-                var indexMapFile = BuildIndexMap(ms, scriptInfos, mapFilePath, outputFilePath, context);
+
+                var mapFileName = outputFilePath.ToString() + ".map";
+                //var mapFilePath = context.GetServePath(outputFilePath.ToString() + ".map");
+
+                // SubPathInfo.Parse(context.BaseRequestPath + "/" + outputFilePath.ToString() + ".map");
+                var indexMapFile = BuildIndexMap(ms, scriptInfos, mapFileName, outputFilePath, context);
 
                 // Output the new map file in the pipeline.
                 context.AddOutput(outputFilePath.Directory, indexMapFile);
 
+                var mapServePath = context.GetRequestPath(outputFilePath.Directory, indexMapFile);
                 // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
                 using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
                 {
                     writer.WriteLine();
-                    await writer.WriteLineAsync($"//# sourceMappingURL=/{mapFilePath.ToString()}");
+                    await writer.WriteLineAsync($"//# sourceMappingURL={mapServePath.ToString()}");
                 }
             }
 
@@ -109,7 +115,7 @@ namespace NetPack.Pipes
 
         }
 
-        private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, SubPathInfo mapFilePath, SubPathInfo combinedFilePath, IPipelineContext context)
+        private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, string mapFileName, SubPathInfo combinedFilePath, IPipelineContext context)
         {
             // todo
             // throw new NotImplementedException();
@@ -133,23 +139,34 @@ namespace NetPack.Pipes
                     sectionObject["offset"]["line"] = script.LineNumberOffset;
                     sectionObject["offset"]["column"] = 0;
 
-                    
-                    var sourceMapFilePath = SubPathInfo.Parse(declaration.SourceMappingUrl);
+                    bool isAbsoluteUri = false;
+                    if (declaration.SourceMappingUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                        declaration.SourceMappingUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isAbsoluteUri = true;
+                    }
 
-                    // now find the source map file.
-                    // TODO: could allow a callback to be supplied and use that to resolve the source map file.
-                    // this is because the source map url in the javascript file being combined, might not be a path that makese sense to the 
-                    // current file provider.
-                
+                    if (isAbsoluteUri)
+                    {
+                        // we need to find the local source map file to inline it.
+                        throw new NotImplementedException("Combine pipe cannot combine source maps for files that have sourcemaps with absolute urls.");
+                    }
+
+                    // ok so the referenced source map is in a relative location.
+                    // we need to be able to resolve the source map.
+                    var sourceMapFilePath = SubPathInfo.Parse(declaration.SourceMappingUrl);
                     var sourceMapFile = context.FileProvider.GetFileInfo(sourceMapFilePath.ToString());
+
+                    if (sourceMapFile == null || !sourceMapFile.Exists || sourceMapFile.IsDirectory)
+                    {
+                        throw new FileNotFoundException("Could not find a source map file which is referenced by a script", sourceMapFilePath.ToString());
+                    }
 
                     // read the contents of the source map file, and inline it into the new source map file.
                     JObject sourceMapObject = null;
-                    if (sourceMapFile != null && !sourceMapFile.IsDirectory && sourceMapFile.Exists)
-                    {
-                        var sourceMapFileContents = sourceMapFile.ReadAllContent();
-                        sourceMapObject = JObject.Parse(sourceMapFileContents);
-                    }
+                    var sourceMapFileContents = sourceMapFile.ReadAllContent();
+                    sourceMapObject = JObject.Parse(sourceMapFileContents);
+
 
                     // if we couldn't find the source map file, then it means the source mapping url declaration in the 
                     // js file that we processed, does not take a form that identifies a file with the IFileProvider.
@@ -178,7 +195,7 @@ namespace NetPack.Pipes
             }
 
             indexMap["sections"] = sections;
-            var file = new StringFileInfo(indexMap.ToString(), mapFilePath.Name);
+            var file = new StringFileInfo(indexMap.ToString(), mapFileName);
             return file;
 
 
