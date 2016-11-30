@@ -11,6 +11,8 @@ using NetPack.Pipes.Typescript;
 using NetPack.Requirements;
 using NetPack.Utils;
 using Xunit;
+using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders;
 
 namespace NetPack.Tests.Pipes
 {
@@ -24,15 +26,15 @@ namespace NetPack.Tests.Pipes
             // arrange
             var mockNodeInstance = new Moq.Mock<INodeServices>();
             mockNodeInstance.Setup(a => a.InvokeAsync<TypeScriptCompilePipe.TypeScriptCompileResult>(It.IsAny<string>(), It.IsAny<TypeScriptCompilePipe.TypescriptCompileRequestDto>()))
-                                .ReturnsAsync(new TypeScriptCompilePipe.TypeScriptCompileResult() { Sources = new Dictionary<string, string>() { { "SomeFolder/somefile.js", "come code"} } });
-                               //.ReturnsAsync(new TypeScriptCompileResult() { });
+                                .ReturnsAsync(new TypeScriptCompilePipe.TypeScriptCompileResult() { Sources = new Dictionary<string, string>() { { "SomeFolder/somefile.js", "come code" } } });
+            //.ReturnsAsync(new TypeScriptCompileResult() { });
 
             var mockJsRequirement = new Moq.Mock<NodeJsRequirement>();
             mockJsRequirement.Setup(a => a.Check());
 
-            var testInputFiles = new SourceFile[]
+            var testInputFiles = new FileWithDirectory[]
             {
-                new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "SomeFolder")
+                new FileWithDirectory() { Directory = "SomeFolder", FileInfo = new StringFileInfo(TsContentOne, "somefile.ts") }
             };
 
             var embeddedScript = new StringFileInfo("some embedded script", "netpack-typescript");
@@ -43,17 +45,16 @@ namespace NetPack.Tests.Pipes
             IPipe sut = new TypeScriptCompilePipe(mockNodeInstance.Object, mockEmbeddedResources.Object);
 
             var pipelineContext = new Moq.Mock<IPipelineContext>();
-            pipelineContext.Setup(a => a.Input).Returns(testInputFiles);
+            //  pipelineContext.Setup(a => a.Input).Returns(testInputFiles);
 
-            var outputFiles = new List<SourceFile>();
-            pipelineContext.Setup(a => a.AddOutput(It.IsAny<SourceFile>())).Callback<SourceFile>((a) =>
+            var outputFiles = new List<FileWithDirectory>();
+            pipelineContext.Setup(a => a.AddOutput(It.IsAny<string>(), It.IsAny<IFileInfo>())).Callback<string, IFileInfo>((a, b) =>
             {
-                outputFiles.Add(a);
+                outputFiles.Add(new FileWithDirectory() { Directory = a, FileInfo = b });
             });
 
-            
             // act
-            await sut.ProcessAsync(pipelineContext.Object, CancellationToken.None);
+            await sut.ProcessAsync(pipelineContext.Object, testInputFiles, CancellationToken.None);
 
             // assert
 
@@ -65,7 +66,7 @@ namespace NetPack.Tests.Pipes
             Assert.Equal(outputFile.FileInfo.Name, "somefile.js");
 
             // The output should have a directory returned from node.
-            Assert.Equal(outputFile.ContentPathInfo.Directory.ToString(), "SomeFolder");
+            Assert.Equal(outputFile.Directory, "SomeFolder");
 
         }
 

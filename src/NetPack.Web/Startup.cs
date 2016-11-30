@@ -88,28 +88,27 @@ namespace NetPack.Web
         private void CompileIndividualTypescriptFiles(IApplicationBuilder app, IFileProvider typescriptFileProvider)
         {
 
-
             var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
-             {
-                 pipelineBuilder
-                    .Take(files =>
-                    {
-                        files
-                            .Include("Another.ts")
-                            .Include("Greeter.ts");
-                    }, typescriptFileProvider)
-                                    .Watch()
-                    .BeginPipeline()
-                        .AddTypeScriptPipe(tsConfig =>
-                        {
-                            tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                            tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                            tsConfig.NoImplicitAny = true;
-                            tsConfig.RemoveComments = false;
-                            tsConfig.SourceMap = true;
-                        })
-                     .ProcessPipeLine();
-             })
+            {
+                // pipelineBuilder.WithContentFileProvider(typescriptFileProvider)
+                    //.Take(files =>
+                    //{ files
+                         //   .Include("Another.ts")
+                        //    .Include("Greeter.ts");
+
+                //}, typescriptFileProvider)
+                //                .Watch()
+                //.BeginPipeline()
+                //    .AddTypeScriptPipe(tsConfig =>
+                //    {
+                //        tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                //        tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                //        tsConfig.NoImplicitAny = true;
+                //        tsConfig.RemoveComments = false;
+                //        tsConfig.SourceMap = true;
+                //    })
+                // .ProcessPipeLine();
+            })
              .UseOutputAsStaticFiles("netpack/ts");
 
             // Can access useful properties of the pipeline here like the FileProvider used to serve outputs from the pipeline.
@@ -117,7 +116,7 @@ namespace NetPack.Web
             //  var existingFileProvider = environment.WebRootFileProvider;
             // var allFiles = existingFileProvider.GetDirectoryContents("");
 
-            _fileProviders.Add(contentPipeline.PipelineFileProvider);
+           // _fileProviders.Add(contentPipeline.PipelineFileProvider);
 
         }
 
@@ -125,35 +124,35 @@ namespace NetPack.Web
         private void CompileIndividualTypescriptFilesThenCombineThem(IApplicationBuilder app, IFileProvider typescriptFileProvider)
         {
             
-            var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
-            {
-                pipelineBuilder
-                   .Take(files =>
-                   {
-                       files
-                           .Include("Another.ts")
-                           .Include("Greeter.ts");
-                   }, typescriptFileProvider)
-                                   .Watch()
-                   .BeginPipeline()
-                       .AddTypeScriptPipe(tsConfig =>
-                       {
-                           tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                           tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                           tsConfig.NoImplicitAny = true;
-                           tsConfig.RemoveComments = false;
-                           tsConfig.SourceMap = true;
+            //var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
+            //{
+            //    pipelineBuilder
+            //       .Take(files =>
+            //       {
+            //           files
+            //               .Include("Another.ts")
+            //               .Include("Greeter.ts");
+            //       }, typescriptFileProvider)
+            //                       .Watch()
+            //       .BeginPipeline()
+            //           .AddTypeScriptPipe(tsConfig =>
+            //           {
+            //               tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+            //               tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+            //               tsConfig.NoImplicitAny = true;
+            //               tsConfig.RemoveComments = false;
+            //               tsConfig.SourceMap = true;
 
-                       })
-                       .AddJsCombinePipe(combineConfig =>
-                       {
-                           combineConfig.CombinedJsFileName = "bundleA.js";
-                       })
-                    .ProcessPipeLine();
-            })
-              .UseOutputAsStaticFiles("netpack/tsbundle");
+            //           })
+            //           .AddJsCombinePipe(combineConfig =>
+            //           {
+            //               combineConfig.CombinedJsFileName = "bundleA.js";
+            //           })
+            //        .ProcessPipeLine();
+            //})
+            //  .UseOutputAsStaticFiles("netpack/tsbundle");
 
-            _fileProviders.Add(contentPipeline.PipelineFileProvider);
+           // _fileProviders.Add(contentPipeline.PipelineFileProvider);
         }
 
 

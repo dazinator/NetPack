@@ -24,17 +24,32 @@ namespace NetPack.Pipeline
 
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
 
-        public Pipeline(IFileProvider fileProvider, List<PipeConfiguration> pipes, List<IRequirement> requirements, IDirectory directory = null)
+        public Pipeline(IFileProvider environmentFileProvider, List<PipeConfiguration> pipes, List<IRequirement> requirements, IDirectory directory = null)
         {
-            FileProvider = fileProvider;
+            EnvironmentFileProvider = environmentFileProvider;
             Pipes = pipes;
             Requirements = requirements;
             //  IsWatching = watch;
             HasFlushed = false;
             Directory = directory ?? new InMemoryDirectory();
+            OutputFileProvider = new InMemoryFileProvider(Directory);
+            InputAndOutputFileProvider = new CompositeFileProvider(EnvironmentFileProvider, OutputFileProvider);
         }
 
-        public IFileProvider FileProvider { get; set; }
+        /// <summary>
+        /// Provides access to files that need to be processed from the environment. 
+        /// This does not include access to new files that are produced only as a result of pipeline processing.
+        /// </summary>
+        public IFileProvider EnvironmentFileProvider { get; set; }
+
+        /// <summary>
+        /// Provides access too all output files only. These are files that were output from pipes that processed inputs.
+        /// </summary>
+        public IFileProvider OutputFileProvider { get; set; }
+        /// <summary>
+        /// Provides access to all files, this means files accessed from the environment, plus files that are produced only as a product of pipeline processing.
+        /// </summary>
+        public IFileProvider InputAndOutputFileProvider { get; set; }
 
         public IDirectory Directory { get; set; }
 
@@ -79,10 +94,14 @@ namespace NetPack.Pipeline
         /// Processes all pipes.
         /// </summary>
         /// <returns></returns>
-        public async Task ProcessAsync(CancellationToken cancelationToken)
+        public Task ProcessAsync(CancellationToken cancelationToken)
         {
+            return ProcessPipesAsync(Pipes, cancelationToken);
+        }
 
-            var context = new PipelineContext(this.FileProvider, this.Directory, this.RequestPath);
+        public async Task ProcessPipesAsync(IEnumerable<PipeConfiguration> pipes, CancellationToken cancellationToken)
+        {
+            var context = new PipelineContext(this.InputAndOutputFileProvider, this.Directory, this.RequestPath);
 
             try
             {
@@ -98,11 +117,27 @@ namespace NetPack.Pipeline
         // TODO: Log exception    
     });
 
-                foreach (var pipe in Pipes)
+                foreach (var pipe in pipes)
                 {
-                    var inputs = pipe.Input;
-                    var inputFiles = GetInputFiles(inputs, context.FileProvider);
-                    await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(context, inputFiles, ct), cancelationToken);
+                    try
+                    {
+                        pipe.LastProcessStartTime = DateTime.UtcNow;
+                        pipe.IsProcessing = true;
+                        var input = pipe.Input;
+                        var inputFiles = input.GetFiles(context.FileProvider);
+                        await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(context, inputFiles, ct), cancellationToken);
+                        pipe.LastProcessedEndTime = DateTime.UtcNow;
+                    }
+                    catch (Exception e)
+                    {
+                        //todo: log exception..
+                        throw;
+                    }
+                    finally
+                    {
+                        pipe.IsProcessing = false;
+                    }
+
                     //  await pipe.ProcessAsync(context);
                 }
 
@@ -114,29 +149,36 @@ namespace NetPack.Pipeline
                 // retry?
                 throw;
             }
-
         }
 
-        private FileWithDirectory[] GetInputFiles(PipelineInput inputs, IFileProvider fileProvider)
+
+        //private FileWithDirectory[] GetInputFiles(PipelineInput inputs, IFileProvider fileProvider)
+        //{
+        //    var results = new Dictionary<string, FileWithDirectory>();
+        //    foreach (var input in inputs.IncludeList)
+        //    {
+        //        var files = fileProvider.Search(input);
+        //        // check if file already present? Multiple input patterns can match the same files.
+        //        foreach (var file in files)
+        //        {
+        //            var path = $"{file.Item1}/{file.Item2.Name}";
+        //            if (!results.ContainsKey(path))
+        //            {
+        //                var item = new FileWithDirectory() { Directory = file.Item1, FileInfo = file.Item2 };
+        //                results.Add(path, item);
+        //            }
+        //        }
+
+        //    }
+        //    return results.Values.ToArray();
+        //}
+
+        public IEnumerable<PipeConfiguration> GetDirtyPipes()
         {
-            var results = new Dictionary<string, FileWithDirectory>();
-            foreach (var input in inputs.IncludeList)
-            {
-                var files = fileProvider.Search(input);
-                // check if file already present? Multiple input patterns can match the same files.
-                foreach (var file in files)
-                {
-                    var path = $"{file.Item1}/{file.Item2.Name}";
-                    if (!results.ContainsKey(path))
-                    {
-                        var item = new FileWithDirectory() { Directory = file.Item1, FileInfo = file.Item2 };
-                        results.Add(path, item);
-                    }
-                }
-
-            }
-            return results.Values.ToArray();
+            return Pipes.Where(a => a.IsDirty());
         }
+
+
 
         //public bool IsWatching { get; set; }
 
@@ -145,28 +187,28 @@ namespace NetPack.Pipeline
         public bool HasFlushed { get; set; }
 
 
-        public IEnumerable<IChangeToken> WatchInputs()
-        {
+        //public IEnumerable<IChangeToken> WatchInputs()
+        //{
 
-            var inputs = Pipes.Select(a => a.Input);
-            List<IChangeToken> _tokens;
+        //    var inputs = Pipes.Select(a => a.Input);
+        //    List<IChangeToken> _tokens;
 
-            foreach (var input in inputs)
-            {
-                input.IncludeList.ForEach((include) =>
-                {
-                    var token = FileProvider.Watch(include);
-                    yield return token;
-                });
+        //    foreach (var input in inputs)
+        //    {
+        //        input.IncludeList.ForEach((include) =>
+        //        {
+        //            var token = FileProvider.Watch(include);
+        //            yield return token;
+        //        });
 
 
-            }
+        //    }
 
-            //input.IncludeList.ForEach((include) =>
-            //{
-            //    var changeToken = pipeline.FileProvider.Watch(include);
-            //});
-        }
+        //    //input.IncludeList.ForEach((include) =>
+        //    //{
+        //    //    var changeToken = pipeline.FileProvider.Watch(include);
+        //    //});
+        //}
 
 
     }

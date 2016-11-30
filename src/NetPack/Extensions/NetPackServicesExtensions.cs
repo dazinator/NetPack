@@ -53,7 +53,7 @@ namespace NetPack
             var builder = new PipelineConfigurationBuilder(appBuilder);
             processorBuilder(builder);
 
-            var pipeline = builder.ProcessPipeLine();
+            var pipeline = builder.BuildPipeLine();
             pipeLineManager.AddPipeLine(pipeline);
 
             var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
@@ -66,14 +66,14 @@ namespace NetPack
             //  var existingStaticFilesProvider = staticFilesOptions.Value.FileProvider ?? hostingEnv.WebRootFileProvider;
             //  appBuilder.
             //  var pipelineFileProvider = new NetPackPipelineFileProvider(pipeLine);
-            return new NetPackApplicationBuilder(appBuilder, pipeline, pipelineFileProvider);
+            return new NetPackApplicationBuilder(appBuilder, pipeline);
         }
 
         public static INetPackApplicationBuilder UseOutputAsStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "/netpack")
         {
 
             // NetPackPipelineFileProvider
-            var fileProvider = appBuilder.PipelineFileProvider;
+            var fileProvider = appBuilder.Pipeline.EnvironmentFileProvider;
             if (!string.IsNullOrWhiteSpace(servePath))
             {
                 if (!servePath.StartsWith("/"))

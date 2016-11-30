@@ -91,18 +91,27 @@ namespace NetPack.Tests.Integration
                 var embeddedResourceProvider = context.RequestServices.GetService<IEmbeddedResourceProvider>();
               
                 var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider);
-                var pipelineContext = new PipelineContext();
-                pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
 
-                await pipe.ProcessAsync(pipelineContext, CancellationToken.None);
+                var inMemoryFileProvider = new InMemoryFileProvider();
+                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
+               // inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
+
+                var pipelineContext = new PipelineContext(inMemoryFileProvider);
+                var input = new PipelineInput();
+                input.IncludeList.Add("wwwroot/*.js");
+                var files = input.GetFiles(inMemoryFileProvider);
+                //  var pipelineContext = new PipelineContext();
+                //  pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
+
+                await pipe.ProcessAsync(pipelineContext, files, CancellationToken.None);
 
                 var builder = new StringBuilder();
 
-                foreach (var output in pipelineContext.OutputFiles)
+                foreach (var output in pipelineContext.Output.GetFolder("wwwroot"))
                 {
                     using (var reader = new StreamReader(output.FileInfo.CreateReadStream()))
                     {
-                        builder.AppendLine("File Name: " + output.FileInfo.Name + " Path: " + output.ContentPathInfo.ToString());
+                        builder.AppendLine("File Name: " + output.Path.ToString());
                         builder.Append(reader.ReadToEnd());
                     }
                 }

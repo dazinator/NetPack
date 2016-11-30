@@ -146,26 +146,20 @@ namespace NetPack.Tests.Integration
 
                 app.UseFileProcessing(pipelineBuilder =>
                 {
-                    pipelineBuilder
-                        //.AddPipe(someOtherPipe)
-                        .Take((inputBuilder)
-                                     =>
+                    pipelineBuilder.WithFileProvider(mockFileProvider)
+                    .AddTypeScriptPipe(input =>
                         {
-                            inputBuilder
-                                .Include("wwwroot/somefile.ts")
-                                .Include("wwwroot/someOtherfile.ts");
-                        }, mockFileProvider)
-                                        .Watch()
-                        .BeginPipeline()
-                            .AddTypeScriptPipe(tsConfig =>
-                                     {
-                                         tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                                         tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                                         tsConfig.NoImplicitAny = true;
-                                         tsConfig.RemoveComments = false; // important: we are not removing comments because we test for a modification that involves a comment being added!
-                                         tsConfig.SourceMap = true;
-                                     })
-                        .ProcessPipeLine();
+                            input.Include("wwwroot/somefile.ts")
+                                 .Include("wwwroot/someOtherfile.ts");
+                        }, tsConfig =>
+                        {
+                            tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
+                            tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                            tsConfig.NoImplicitAny = true;
+                            tsConfig.RemoveComments = false; // important: we are not removing comments because we test for a modification that involves a comment being added!
+                            tsConfig.SourceMap = true;
+                        }
+                    ).Watch();
                 })
                 .UseOutputAsStaticFiles("netpack/ts");
 

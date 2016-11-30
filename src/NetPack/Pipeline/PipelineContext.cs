@@ -11,6 +11,14 @@ namespace NetPack.Pipeline
     public class PipelineContext : IPipelineContext
     {
 
+        public PipelineContext(IFileProvider fileProvider):this(fileProvider, new InMemoryDirectory())
+        {
+        }
+
+        public PipelineContext(IFileProvider fileProvider, IDirectory directory) : this(fileProvider, directory, string.Empty)
+        {
+        }
+
         public PipelineContext(IFileProvider fileProvider, IDirectory directory, string baseRequestPath)
         {
             FileProvider = fileProvider;

@@ -12,11 +12,11 @@ namespace NetPack
     {
 
         private readonly IApplicationBuilder _builder;
-        public NetPackApplicationBuilder(IApplicationBuilder appBuilder, IPipeLine pipeline, IFileProvider pipelineFileProvider)
+        public NetPackApplicationBuilder(IApplicationBuilder appBuilder, IPipeLine pipeline)
         {
             _builder = appBuilder;
             Pipeline = pipeline;
-            PipelineFileProvider = pipelineFileProvider;
+           // PipelineFileProvider = pipelineFileProvider;
         }
 
         public IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware)
@@ -45,7 +45,5 @@ namespace NetPack
         public IFeatureCollection ServerFeatures => _builder.ServerFeatures;
         public IDictionary<string, object> Properties => _builder.Properties;
         public IPipeLine Pipeline { get; }
-
-        public IFileProvider PipelineFileProvider { get; }
     }
 }

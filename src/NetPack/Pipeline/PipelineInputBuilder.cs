@@ -8,13 +8,13 @@ namespace NetPack.Pipeline
     public class PipelineInputBuilder
     {
 
-        private readonly IFileProvider _sourceFileProvider;
+        //   private readonly IFileProvider _sourceFileProvider;
         //private readonly IHostingEnvironment _hostingEnv;
-        public PipelineInputBuilder(IFileProvider sourceFileProvider)
+        public PipelineInputBuilder()
         {
-            _sourceFileProvider = sourceFileProvider;
+            //  _sourceFileProvider = sourceFileProvider;
             // _sources = new Sources();
-            Input = new PipelineInput(sourceFileProvider);
+            Input = new PipelineInput();
         }
 
         public PipelineInputBuilder Include(string pattern)
@@ -23,7 +23,7 @@ namespace NetPack.Pipeline
             Input.AddInclude(pattern);
             return this;
         }
-        
+
         public PipelineInput Input { get; set; }
 
     }

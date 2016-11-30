@@ -30,9 +30,8 @@ namespace NetPack.Pipeline
 
         IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);
        
-        // flushes the input through the pipeline. The input will be processed according to the pipeline, and outputs
-        // will be returned.  
-        IPipeLine ProcessPipeLine();
+        
+        IPipeLine BuildPipeLine();
 
         /// <summary>
         /// Adds a requirement to this pipeline. When the pipeline is initialised, all requirements are checked.

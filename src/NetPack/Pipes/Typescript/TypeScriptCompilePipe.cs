@@ -32,7 +32,7 @@ namespace NetPack.Pipes.Typescript
             _options = options;
         }
 
-        public Task ProcessAsync(IPipelineContext context, IFileInfo[] input, CancellationToken cancelationToken)
+        public async Task ProcessAsync(IPipelineContext context, FileWithDirectory[] input, CancellationToken cancelationToken)
         {
             var requestDto = new TypescriptCompileRequestDto();
             requestDto.Options = _options;
@@ -41,12 +41,12 @@ namespace NetPack.Pipes.Typescript
             {
                 //var inputFileInfo = inputFile.FileInfo;
 
-                var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
+               // var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
                 //if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
                 //{
                 // var inputFileInfo = inputFile.FileInfo;
-                var contents = inputFileInfo.ReadAllContent();
-                requestDto.Files.Add(inputFile.ContentPathInfo.ToString(), contents);
+                var contents = inputFileInfo.FileInfo.ReadAllContent();
+                requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
 
                 //// tsFiles.Add(inputFile);
                 //// allow ts files to flow through pipeline if sourcemaps enabled, as this means we want the original
@@ -92,12 +92,14 @@ namespace NetPack.Pipes.Typescript
                     //var compiledTs = output.Value;
                     // fix source mapping url declaration
                     var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                    context.AddOutput(new SourceFile(outputFileInfo, subPathInfo.Directory));
+                    context.AddOutput(subPathInfo.Directory, outputFileInfo);
                 }
 
             }
 
         }
+
+      
 
         public class TypeScriptCompileResult
         {

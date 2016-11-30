@@ -14,7 +14,7 @@ namespace NetPack
     public static class PipelineBuilderTypescriptExtensions
     {
 
-        public static IPipelineBuilder AddTypeScriptPipe(this IPipelineBuilder builder, Action<TypeScriptPipeOptions> configureOptions)
+        public static IPipelineBuilder AddTypeScriptPipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<TypeScriptPipeOptions> configureOptions)
         {
             var appServices = builder.ApplicationBuilder.ApplicationServices;
             var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
@@ -39,7 +39,7 @@ namespace NetPack
             configureOptions(tsOptions);
             var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider, tsOptions);
 
-            builder.AddPipe(pipe);
+            builder.AddPipe(input, pipe);
             return builder;
         }
 
@@ -48,12 +48,12 @@ namespace NetPack
     public static class PipelineBuilderCombineExtensions
     {
 
-        public static IPipelineBuilder AddJsCombinePipe(this IPipelineBuilder builder, Action<JsCombinePipeOptions> configureOptions)
+        public static IPipelineBuilder AddJsCombinePipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<JsCombinePipeOptions> configureOptions)
         {
             var options = new JsCombinePipeOptions();
             configureOptions(options);
             var pipe = new JsCombinePipe(options);
-            builder.AddPipe(pipe);
+            builder.AddPipe(input, pipe);
             return builder;
         }
 

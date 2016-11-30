@@ -12,7 +12,7 @@ namespace NetPack.Pipeline
         // IPipelineInputOptionsBuilder Take(PipelineInput sources);
         IPipelineBuilder WithHostingEnvironmentWebrootProvider();
         IPipelineBuilder WithHostingEnvironmentContentProvider();
-        IPipelineBuilder WithContentProvider(IFileProvider fileProvider);
+        IPipelineBuilder WithFileProvider(IFileProvider fileProvider);
 
 
     }

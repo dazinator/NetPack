@@ -1,24 +1,35 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using NetPack.Pipes;
 
 namespace NetPack.Pipeline
 {
+
+    public class StateInfo
+    {
+        public string Input { get; set; }
+        public IPipeLine Pipeline { get; set; }
+        public PipeConfiguration PipeConfig { get; set; }
+
+
+
+    }
+
     public class PipelineWatcher : IPipelineWatcher
     {
         private CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private ConcurrentBag<IPipeLine> _pipelines = new ConcurrentBag<IPipeLine>();
         private Task _monitoringTask = null;
-        private ConcurrentBag<IPipe> _pipelineFlushRequest = new ConcurrentBag<IPipe>();
-
+        private readonly ConcurrentDictionary<string, IChangeToken> _activeChangeTokens = new ConcurrentDictionary<string, IChangeToken>();
         private ILogger<PipelineWatcher> _logger = null;
-
-
 
 
         public PipelineWatcher(ILogger<PipelineWatcher> logger)
@@ -37,16 +48,8 @@ namespace NetPack.Pipeline
                 {
                     //input.IncludeList.ForEach((include) =>
                     //{
-                    var changeToken = pipeline.FileProvider.Watch(include);
-                    changeToken.RegisterChangeCallback((a) =>
-                    {
-                        // mark the pipe as dirty.
-                        // it will be picked up and re-processed on background thread;
-                        
-                    }, include);
-                    //});
-
-
+                    var state = new StateInfo() { Input = include, PipeConfig = pipe, Pipeline = pipeline };
+                    WatchChangeToken(state);
                 }
             }
 
@@ -59,11 +62,41 @@ namespace NetPack.Pipeline
             EnsureMonitorTaskRunning();
         }
 
+        private void HandleChangeTokenExpired(object state)
+        {
+            var stateInfo = state as StateInfo;
+            IChangeToken expired;
+            _activeChangeTokens.TryRemove(stateInfo.Input, out expired);
+
+            // Mark the input as changed.
+            var changeTime = DateTime.UtcNow;
+            _logger.LogInformation("Changed signalled @ {0} for {1}", changeTime, stateInfo.Input);
+            stateInfo.PipeConfig.Input.LastChanged = changeTime;
+            // _changedSinceLastTime.Add(stateInfo);
+            // re-watch the input as token will have expired.
+            WatchChangeToken(stateInfo);
+        }
+
+        private IChangeToken WatchChangeToken(StateInfo state)
+        {
+            IChangeToken changeToken;
+            changeToken = _activeChangeTokens.GetOrAdd(state.Input, (key) =>
+            {
+                var token = state.Pipeline.InputAndOutputFileProvider.Watch(key);
+                return token;
+            });
+
+            // var pipeWithInclude = new Tuple<PipeConfiguration, string>(pipeConfig, key);
+            changeToken.RegisterChangeCallback(HandleChangeTokenExpired, state);
+            return changeToken;
+        }
+
         private void EnsureMonitorTaskRunning()
         {
             if (_monitoringTask == null)
             {
                 _monitoringTask = Task.Run(async () => await FlushPipelineAsync());
+                _logger.LogInformation("Watching..");
             }
         }
 
@@ -71,18 +104,43 @@ namespace NetPack.Pipeline
         {
             while (!_tokenSource.Token.IsCancellationRequested)
             {
-                // are there file changes to process?
-                if (!_pipelineFlushRequest.IsEmpty)
+
+                var pipeLines = _pipelines.ToArray();
+
+               // IEnumerable<PipeConfiguration> dirtyPipeLiness = pipeLines.Select(p => p.GetDirtyPipes());
+
+                var dirtyPipeLines = pipeLines.Select(p =>
+                       new
+                       {
+                           DirtyPipes = p.GetDirtyPipes(),
+                           Pipeline = p
+                       });
+                bool hasWork = dirtyPipeLines.Any();
+                while (hasWork)
                 {
-                    _logger.LogInformation("Flushing pipeline");
-                    IPipeLine outPipeline;
-                    while (_pipelineFlushRequest.TryTake(out outPipeline))
+
+                    List<Task> _tasks = new List<Task>(dirtyPipeLines.Count());
+
+                    foreach (var dirtyPipeline in dirtyPipeLines)
                     {
-                        await outPipeline.ProcessAsync(CancellationToken.None);
+                        //todo: use proper cancellation token, so we can signal cancellation if more files change whilst processing?
+                        _tasks.Add(dirtyPipeline.Pipeline.ProcessPipesAsync(dirtyPipeline.DirtyPipes, CancellationToken.None));
                     }
+
+                    _logger.LogInformation("Processing changed pipes..");
+                    await Task.WhenAll(_tasks);
+
+                    // processing pipes may have lead to other pipes becoming dirty, so check again and process those new pipes straight away if so
+                    dirtyPipeLines = pipeLines.Select(p =>
+                       new
+                       {
+                           DirtyPipes = p.GetDirtyPipes(),
+                           Pipeline = p
+                       });
+                    hasWork = dirtyPipeLines.Any();
                 }
-                // wait some delay between flushing pipes, as if several files are modified at once,
-                // we would rather 
+
+                // check again in x seconds.
                 await Task.Delay(TimeSpan.FromSeconds(2), _tokenSource.Token);
             }
 

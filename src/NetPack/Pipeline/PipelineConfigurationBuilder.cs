@@ -13,9 +13,22 @@ namespace NetPack.Pipeline
 
     public class PipeConfiguration
     {
+
         public IPipe Pipe { get; set; }
         public PipelineInput Input { get; set; }
+        public DateTime LastProcessedEndTime { get; set; } = DateTime.MinValue.ToUniversalTime();
+        public DateTime LastProcessStartTime { get; set; } = DateTime.MinValue.ToUniversalTime();
+        public bool IsProcessing { get; set; }
 
+        /// <summary>
+        /// Returns true if the pipe has updated inputs that need to be processed.
+        /// </summary>
+        /// <returns></returns>
+        internal bool IsDirty()
+        {
+            return ((Input.LastChanged > LastProcessStartTime) && Input.LastChanged <= LastProcessedEndTime)
+            || Input.LastChanged > LastProcessedEndTime;
+        }
     }
 
     public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineBuilder
@@ -45,7 +58,7 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public IPipelineBuilder WithContentProvider(IFileProvider fileProvider)
+        public IPipelineBuilder WithFileProvider(IFileProvider fileProvider)
         {
             if (fileProvider == null)
             {
@@ -59,7 +72,7 @@ namespace NetPack.Pipeline
 
         public IFileProvider FileProvider { get; set; }
 
-       // public IDirectory Directory { get; set; }
+        // public IDirectory Directory { get; set; }
 
         //public IFileProvider FileProvider { get; set; }
 
@@ -69,7 +82,7 @@ namespace NetPack.Pipeline
 
         public IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe)
         {
-            var builder = new PipelineInputBuilder(FileProvider);
+            var builder = new PipelineInputBuilder();
             inputBuilder(builder);
             Pipes.Add(new PipeConfiguration() { Input = builder.Input });
             return this;
@@ -99,7 +112,7 @@ namespace NetPack.Pipeline
 
         public bool WachInput { get; protected set; }
 
-       // public string WebRootPath { get; set; }
+        // public string WebRootPath { get; set; }
 
         public IPipelineBuilder Watch()
         {
@@ -116,7 +129,7 @@ namespace NetPack.Pipeline
         public IPipeLine BuildPipeLine()
         {
             var pipeLine = new Pipeline(FileProvider, Pipes, Requirements);
-           // var fileProvider = new NetPackPipelineFileProvider(pipeLine);
+            // var fileProvider = new NetPackPipelineFileProvider(pipeLine);
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
 

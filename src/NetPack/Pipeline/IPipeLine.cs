@@ -14,9 +14,26 @@ namespace NetPack.Pipeline
 
         List<PipeConfiguration> Pipes { get; }
 
+        /// <summary>
+        /// Processes all pipes in the pipeline.
+        /// </summary>
+        /// <param name="cancelationToken"></param>
+        /// <returns></returns>
         Task ProcessAsync(CancellationToken cancelationToken);
 
-        IFileProvider FileProvider { get; set; }
+        /// <summary>
+        /// Processes only the specified pipes.
+        /// </summary>
+        /// <param name="pipes"></param>
+        /// <param name="none"></param>
+        /// <returns></returns>
+        Task ProcessPipesAsync(IEnumerable<PipeConfiguration> pipes, CancellationToken none);
+
+        IFileProvider EnvironmentFileProvider { get; set; }
+
+        IFileProvider OutputFileProvider { get; set; }
+
+        IFileProvider InputAndOutputFileProvider { get; set; }
 
         //PipelineOutput Flush(TimeSpan? timeout = null);
 
@@ -28,5 +45,6 @@ namespace NetPack.Pipeline
 
         // bool IsFlushing { get; }
         void Initialise();
+        IEnumerable<PipeConfiguration> GetDirtyPipes();
     }
 }

@@ -18,29 +18,29 @@ namespace NetPack.Tests.Pipes
 
         private IDirectory _directory = new InMemoryDirectory();
 
-        public IFileInfo GivenAFileInfo(string path, int length)
+        public FileWithDirectory GivenAFileInfo(string path, int length)
         {
             var subPath = SubPathInfo.Parse(path);
             var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + subPath.ToString();
             //  _fileProvider.AddFile(subPath, content);
             var fileInfo = new StringFileInfo(content, subPath.Name);
             _directory.AddFile(subPath.Directory, fileInfo);
-            return fileInfo;
+            return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
         }
 
-        public IFileInfo GivenAFileInfo(string fileName, Func<string> content)
+        public FileWithDirectory GivenAFileInfo(string fileName, Func<string> content)
         {
             var subPath = SubPathInfo.Parse(fileName);
             var fileContent = content();
             //  _fileProvider.AddFile(subPath, content);
             var fileInfo = new StringFileInfo(fileContent, subPath.Name);
             _directory.AddFile(subPath.Directory, fileInfo);
-            return fileInfo;
+            return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
         }
-
-        protected async Task WhenFilesProcessedByPipe(Func<IPipe> pipeFactory, params IFileInfo[] files)
+        
+        protected async Task WhenFilesProcessedByPipe(Func<IPipe> pipeFactory, params FileWithDirectory[] files)
         {
-            var sourceFilesList = new List<IFileInfo>(files);
+            //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
             PipelineContext = new PipelineContext(provider, _directory, "");
             Sut = pipeFactory();
@@ -50,8 +50,8 @@ namespace NetPack.Tests.Pipes
         protected IFileInfo ThenTheOutputFileFromPipe(string filePath, Action<IFileInfo> assertions)
         {
             var outputFile = _directory.GetFile(filePath);
-                //_directory.FirstOrDefault(
-                //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
+            //_directory.FirstOrDefault(
+            //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(outputFile.FileInfo);
             return outputFile.FileInfo;
         }

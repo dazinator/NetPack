@@ -21,21 +21,22 @@ namespace NetPack.Tests
             // arrange 
             var services = new ServiceCollection();
 
-            var mockHostingEnv = new Mock<IHostingEnvironment>();
-            mockHostingEnv.SetupAllProperties();
+            //var mockHostingEnv = new Mock<IHostingEnvironment>();
+            //mockHostingEnv.SetupAllProperties();
 
             var fileProvider = new InMemoryFileProvider();
             fileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
             fileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
+            fileProvider.Directory.AddFile("wwwroot", new StringFileInfo("blah", "foo.txt"));
 
-            mockHostingEnv.Object.ContentRootFileProvider = fileProvider;
+            // mockHostingEnv.Object.ContentRootFileProvider = fileProvider;
 
             //var mockFileProvider =
             //    TestUtils.GetMockFileProvider(new[] { "wwwroot/somefile.ts", "wwwroot/someOtherfile.ts" },
             //        new[] { TestUtils.TsContentOne, TestUtils.TsContentTwo });
             //mockHostingEnv.Object.ContentRootFileProvider = mockFileProvider;
 
-            services.AddSingleton<IHostingEnvironment>(mockHostingEnv.Object);
+            // services.AddSingleton<IHostingEnvironment>(mockHostingEnv.Object);
 
             var serviceProvider = services.BuildServiceProvider();
             IApplicationBuilder app = new ApplicationBuilder(serviceProvider);
@@ -50,25 +51,38 @@ namespace NetPack.Tests
 
             var sut = (IPipelineConfigurationBuilder)new PipelineConfigurationBuilder(app);
 
-            var pipeLine = sut.Take((inputBuilder) =>
-                                             inputBuilder.Include("wwwroot/somefile.ts")
-                                                         .Include("wwwroot/someOtherfile.ts"))
-                                                         .Watch()
-                                                         .BeginPipeline()
-                                                            .AddPipe(mockPipe.Object)
-                                                            .AddPipe(mockAnotherPipe.Object)
-                                                         .BuildPipeLine();
-
+            var pipeLine = sut.WithFileProvider(fileProvider)
+                .AddPipe(input =>
+                {
+                    input.Include("wwwroot/somefile.ts")
+                        .Include("wwwroot/someOtherfile.ts");
+                }, mockPipe.Object)
+                .AddPipe(input =>
+                {
+                    input.Include("**/*.txt");
+                }, mockAnotherPipe.Object)
+                .BuildPipeLine();
+            
             // assert
             Assert.NotNull(pipeLine);
-            Assert.NotNull(pipeLine.Input);
-            Assert.True(pipeLine.Input.Files.Count == 2);
-
             Assert.False(pipeLine.HasFlushed);
-           // Assert.True(pipeLine.IsWatching);
-
+            Assert.NotNull(pipeLine.Directory);
+            Assert.NotNull(pipeLine.EnvironmentFileProvider);
+            Assert.NotNull(pipeLine.InputAndOutputFileProvider);
+            Assert.NotNull(pipeLine.OutputFileProvider);
+           
             Assert.NotNull(pipeLine.Pipes);
             Assert.True(pipeLine.Pipes.Count == 2);
+
+            Assert.NotNull(pipeLine.Pipes[0].Input);
+            Assert.NotNull(pipeLine.Pipes[0].Pipe);
+            Assert.False(pipeLine.Pipes[0].IsProcessing);
+            Assert.True(pipeLine.Pipes[0].Input.IncludeList.Count == 2);
+
+            Assert.NotNull(pipeLine.Pipes[1].Input);
+            Assert.NotNull(pipeLine.Pipes[1].Pipe);
+            Assert.False(pipeLine.Pipes[1].IsProcessing);
+            Assert.True(pipeLine.Pipes[1].Input.IncludeList.Count == 1);
 
         }
 

@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -91,20 +92,27 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
                 var sut = new RequireJsOptimisePipe(nodeServices, embeddedResourceProvider);
 
                 // Provide some AMD modules as input for the RequireJs Optimise Pipe
-                var pipelineContext = new PipelineContext();
-                pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(AmdModuleAFileContent, "moduleA.js"), "wwwroot"));
-                pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(AmdModuleBFileContent, "moduleB.js"), "wwwroot"));
+                var inMemoryFileProvider = new InMemoryFileProvider();
+                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleA.js"));
+                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
 
-                await sut.ProcessAsync(pipelineContext, CancellationToken.None);
+                var pipelineContext = new PipelineContext(inMemoryFileProvider);
+                // pipelineContext.InputFiles.Add(new SourceFile(, "wwwroot"));
+                // pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(AmdModuleBFileContent, "moduleB.js"), "wwwroot"));
+                var input = new PipelineInput();
+                input.IncludeList.Add("wwwroot/*.js");
+                var files = input.GetFiles(inMemoryFileProvider);
+
+                await sut.ProcessAsync(pipelineContext, files, CancellationToken.None);
 
                 // Write the content of any outputs to the response for inspection.
                 var builder = new StringBuilder();
-
-                foreach (var output in pipelineContext.OutputFiles)
+               
+                foreach (var outputFile in pipelineContext.Output.GetFolder("wwwroot"))
                 {
-                    using (var reader = new StreamReader(output.FileInfo.CreateReadStream()))
+                    using (var reader = new StreamReader(outputFile.FileInfo.CreateReadStream()))
                     {
-                        builder.AppendLine("File Name: " + output.FileInfo.Name + " Content Path: " + output.ContentPathInfo);
+                        builder.AppendLine("File: " + outputFile.Path);
                         builder.Append(reader.ReadToEnd());
                     }
                 }
