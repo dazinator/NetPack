@@ -1,90 +1,49 @@
 ﻿
 //var mock = require('mock-fs');
 //var requirejs = require('requirejs');
-var requirejs = require("requirejs-memfiles");
+var requirejs = require("netpack-requirejs");
 
 module.exports = function (callback, options) {
 
     // set up virtual file system to resolve files from memory when r.js requests them.
-    var inMemoryFiles = {};
+    var requireJsOptions = new netpackrequirejs.RequireJsOptions();
+    requireJsOptions.files = new Array();
     var files = options.Files;
 
-    var arrayLength = files.length;
-    for (var i = 0; i < arrayLength; i++) {
-
-        var file = files[i];
-        inMemoryFiles[file.FilePath] = file.FileContents;
-        //Do something
-    }
-
-    //mock(dir);
-
-    var baseUrl = options.BaseUrl;
-    var appDir = options.AppDir;
-    var modules = options.Modules;
-    var out = options.Out;
-    var dir = options.Dir;
-    var mainConfig = options.MainConfig;
-    //   name: 'moduleB',
-    var config = {
-        baseUrl: baseUrl,
-        modules: modules,
-        mainConfigFile: mainConfig,
-        // out: out,
-        dir: dir
-    };
-
-
-    var allDone = function (done) {
-        done();
-        callback();
-    }
-
-    requirejs.setFiles(inMemoryFiles, function (done) {
-        requirejs.optimize({
-            optimize: 'uglify2',
-            preserveLicenseComments: false,
-            generateSourceMaps: true,
-            appDir: appDir,
-            baseUrl: baseUrl,
-            dir: dir,
-            modules: modules
-        }, function () {
-            // var output = inMemoryFiles["dist/output.js"];
-            callback(null, inMemoryFiles);
-            done();
-
-        }, function (error) {
-            // handle error
-            callback(null, error);
-            done();
-
-        });
+    files.forEach(function (file) {
+        requireJsOptions.push({ "path": file.FilePath, "contents": file.FileContents })
     });
 
-    //    requirejs.optimize(config, function (buildResponse) {
-    //        //buildResponse is just a text output of the modules
-    //        //included. Load the built file for the contents.
-    //        //Use config.out to get the optimized file contents.
+    var modules = options.Modules;
+    modules.forEach(function (module) {
 
-    //        // unmock filesystem.
-    //        mock.restore();
+        var amdModule = new netpackrequirejs.Module();
+        var exclude = amdModule.Exclude;
+        var include = amdModule.Include;
+        requireJsOptions.modules.push({ "name": amdModule.Name, "exclude": exclude, "include": include })
+    });
 
-    //        // Invoke some external transpiler (e.g., an NPM module) then:
-    //        var contents = fs.readFileSync(config.out, 'utf8');
+    requireJsOptions.mainConfigFile = options.MainConfigFile;
+    requireJsOptions.baseUrl = options.BaseUrl;
+    requireJsOptions.dir = options.Dir;
 
-    //        callback(null, {
-    //            Result: contents
-    //        });
-
-    //    }, function (err) {
-    //        //optimization err callback
-    //        var errorMessage = err.toString();
-    //        callback(null,
-    //            {
-    //                Error: errorMessage
-    //            });
-    //    });
+    var optimiser = new netpackrequirejs.NetPackRequireJs();
+    optimiser.optimise(requireJsOptions, function (results) {
+        for (var property in results) {
+            if (results.hasOwnProperty(property)) {
+                // do stuff
+                console.log("Property Name: " + property);
+                console.log("=====================================");
+                var propVal = results[property];
+                console.log(propVal);
+            }
+        }
+        callback(null, results);
+    }, function (message) {
+        console.log("Error: " + message);
+        callback(null, message);
+        //done(message);
+    });
 
 };
 

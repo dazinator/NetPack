@@ -75,11 +75,13 @@ namespace NetPack.Requirements
             while (reader.Peek() != -1)
             {
                 var packageLine = reader.ReadLine();
-                if (packageLine.StartsWith("?"))
+                if (packageLine.StartsWith("?") || packageLine.StartsWith("+--"))
                 {
                     //  var lastIndex = packageLine.LastIndexOf('?');
                     //  var packageName = packageLine.Substring(lastIndex + 1);
                     var packageNameWithVersion = packageLine.TrimStart(nonAsciiChars).Trim();
+                    packageNameWithVersion = packageNameWithVersion.TrimStart(new char[] {'+','-','-'}).Trim();
+                    
                     if (packageNameWithVersion == "(empty)")
                     {
                         continue;

@@ -72,8 +72,8 @@ namespace NetPack
             var nodeJsRequirement = new NodeJsRequirement();
             builder.IncludeRequirement(nodeJsRequirement);
 
-            var memfilesNpmPackageRequirement = new NpmModuleRequirement("requirejs-memfiles", true, "2.1.15-3");
-            builder.IncludeRequirement(memfilesNpmPackageRequirement);
+            var netpackRequireJsRequirement = new NpmModuleRequirement("netpack-requirejs", true);
+            builder.IncludeRequirement(netpackRequireJsRequirement);
 
             var options = new RequireJsOptimisationPipeOptions();
             configureOptions(options);
