@@ -8,6 +8,7 @@ using NetPack.Extensions;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace NetPack.Pipes
 {
@@ -49,17 +50,37 @@ namespace NetPack.Pipes
                     // expose all input files to the node process, so r.js can see them using fs.
                     optimiseRequest.Files.Add(new NodeInMemoryFile()
                     {
-                        FileContents = fileContent,
-                        FilePath = file.FileSubPath
+                        Contents = fileContent,
+                        Path = file.FileSubPath.TrimStart(new char[] { '/' })
                     });
 
+                  
+                    // optimiseRequest.Modules.Add(new ModuleInfo() { Name = "ModuleA"});
+                    // optimiseRequest.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
+                    //   optimiseRequest.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
+
+
+                    // optimiseRequest.BaseUrl = "/";
+                    // optimiseRequest.Dir = "build";
                 }
 
-                var result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(nodeScript.FileName, optimiseRequest);
-                if (!string.IsNullOrWhiteSpace(result.Error))
+                optimiseRequest.Options = _options;
+
+                try
                 {
-                    throw new RequireJsOptimiseException(result.Error);
+                    var result = await _nodeServices.InvokeAsync<JObject>(nodeScript.FileName, optimiseRequest);
+                    //if (!string.IsNullOrWhiteSpace(result.Error))
+                    //{
+                    //    throw new RequireJsOptimiseException(result.Error);
+                    //}
                 }
+                catch (Exception e)
+                {
+
+                    throw;
+                }
+
+
             }
         }
 
@@ -116,21 +137,19 @@ namespace NetPack.Pipes
     }
     public class RequireJsOptimiseRequestDto
     {
+
         public RequireJsOptimiseRequestDto()
         {
             Files = new List<NodeInMemoryFile>();
-            Modules = new List<ModuleInfo>();
         }
 
+        public RequireJsOptimisationPipeOptions Options { get; set; }
+
+        /// <summary>
+        /// Allows the script file paths and contents to be sourced from this array (in memory)
+        /// rather than disk IO calls.
+        /// </summary>
         public List<NodeInMemoryFile> Files { get; set; }
-
-        public List<ModuleInfo> Modules { get; set; }
-
-        public string MainConfigFile { get; set; }
-
-        public string BaseUrl { get; set; }
-
-        public string Dir { get; set; }
 
 
 
@@ -141,6 +160,13 @@ namespace NetPack.Pipes
 
     }
 
+    public enum Optimisers
+    {
+        none,
+        uglify,
+        uglify2
+    }
+
     public class RequireJsOptimiseResult
     {
         public string Result { get; set; }
@@ -149,8 +175,8 @@ namespace NetPack.Pipes
 
     public class NodeInMemoryFile
     {
-        public string FilePath { get; set; }
-        public string FileContents { get; set; }
+        public string Path { get; set; }
+        public string Contents { get; set; }
         // public string FileName { get; set; }
 
     }

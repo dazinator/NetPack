@@ -48,7 +48,7 @@ namespace NetPack.Tests.Integration
 
 
         [Fact]
-        public async void Processes_TypescriptFiles_And_Outputs_Js_Files()
+        public async void Optimise_Specified_Js_Files()
         {
 
             // Act
@@ -74,11 +74,16 @@ namespace NetPack.Tests.Integration
 ";
 
         public const string AmdModuleBFileContent = @"
-define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, exports, moduleB) {
+define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, exports, moduleA) {
     ""use strict"";
 });
 
 ";
+
+        public const string ConfigFileContent =
+            @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
+
+
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -88,8 +93,9 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
 
             // Provide some AMD modules as input for the RequireJs Optimise Pipe
             var inMemoryFileProvider = new InMemoryFileProvider();
-            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleA.js"));
-            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
+            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
+            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
+            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(ConfigFileContent, "Common.js"));
 
             var fileProcessingBuilder = app.UseFileProcessing(a =>
              {
@@ -99,7 +105,12 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
                          input.Include("wwwroot/*.js");
                      }, options =>
                      {
-                         //
+                        // options.Out = "build.js";
+                       //  options.AppDir = ".";
+                         options.BaseUrl = "wwwroot";
+                         // options.BaseUrl = "wwwroot"; // append request path
+                         options.Dir = "built";
+                         options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
                      });
              });
 
