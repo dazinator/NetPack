@@ -8,5 +8,5 @@ var Another = (function () {
     return Another;
 }());
 ;
-var another = new Another("Hello!");
+var another = new Another("Heldlo!");
 another.doSomething();

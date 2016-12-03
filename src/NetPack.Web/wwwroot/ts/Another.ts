@@ -5,5 +5,5 @@
     }
 };
 
-var another = new Another("Hello!");
+var another = new Another("Heldlo!");
 another.doSomething(); 

@@ -149,6 +149,7 @@ namespace NetPack.Pipeline
 
         public IPipelineBuilder ServeOutputAsStaticFiles(string baseRequestPath = null)
         {
+
             if (baseRequestPath != null)
             {
                 if (!baseRequestPath.StartsWith("/"))

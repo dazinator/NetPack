@@ -8,5 +8,5 @@ var Greeter = (function () {
     return Greeter;
 }());
 ;
-var greeter = new Greeter("Hi there!!!!");
+var greeter = new Greeter("Hi tdhere!!!!");
 document.body.querySelector(".message").innerHTML = greeter.greet();

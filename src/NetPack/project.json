@@ -18,7 +18,7 @@
     "NUglify": "1.5.2",
     "Polly": "4.3.0",
     "ReflectionBridge": "0.0.11",
-    "Dazinator.AspNet.Extensions.FileProviders": "1.1.0-unstable0006"
+    "Dazinator.AspNet.Extensions.FileProviders": "1.1.0-unstable0009"
   },
 
   "frameworks": {

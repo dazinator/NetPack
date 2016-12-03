@@ -81,7 +81,7 @@ namespace NetPack.Web
                     // Another processor that combines multiple js files into a bundle file.
                     .AddJsCombinePipe(input =>
                     {
-                        input.Include("ts/*.ts");
+                        input.Include("ts/*.js");
                     }, () => "bundle.js")
                     .ServeOutputAsStaticFiles("netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
