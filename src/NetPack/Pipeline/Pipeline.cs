@@ -24,11 +24,12 @@ namespace NetPack.Pipeline
 
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
 
-        public Pipeline(IFileProvider environmentFileProvider, List<PipeConfiguration> pipes, List<IRequirement> requirements, IDirectory directory = null)
+        public Pipeline(IFileProvider environmentFileProvider, List<PipeConfiguration> pipes, List<IRequirement> requirements, string baseRequestPath = null, IDirectory directory = null)
         {
             EnvironmentFileProvider = environmentFileProvider;
             Pipes = pipes;
             Requirements = requirements;
+            BaseRequestPath = baseRequestPath;
             //  IsWatching = watch;
             HasFlushed = false;
             Directory = directory ?? new InMemoryDirectory();
@@ -57,13 +58,13 @@ namespace NetPack.Pipeline
 
         public List<IRequirement> Requirements { get; set; }
 
-        private string _requestPath;
-        public string RequestPath
+        private string _baseRequestPath;
+        public string BaseRequestPath
         {
-            get { return _requestPath; }
+            get { return _baseRequestPath; }
             set
             {
-                _requestPath = value;
+                _baseRequestPath = value;
                 //Output.SetRequestPaths(_requestPath);
             }
         }
@@ -101,7 +102,7 @@ namespace NetPack.Pipeline
 
         public async Task ProcessPipesAsync(IEnumerable<PipeConfiguration> pipes, CancellationToken cancellationToken)
         {
-            var context = new PipelineContext(this.InputAndOutputFileProvider, this.Directory, this.RequestPath);
+            var context = new PipelineContext(this.InputAndOutputFileProvider, this.Directory, this.BaseRequestPath);
 
             try
             {

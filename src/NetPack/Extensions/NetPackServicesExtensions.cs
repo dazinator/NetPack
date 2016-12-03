@@ -35,20 +35,12 @@ namespace NetPack
         public static INetPackApplicationBuilder UseFileProcessing(this IApplicationBuilder appBuilder,
             Action<IPipelineConfigurationBuilder> processorBuilder)
         {
-            //var staticFilesOptions = appBuilder.ApplicationServices.GetService<IOptions<StaticFileOptions>>();
-            //if (staticFilesOptions == null)
-            //{
-            //    throw new Exception(
-            //        "StaticFiles not detected in the pipeline. Please call app.UseStaticFiles() before calling UseNetPackPipeLine()");
-            //}
-
             var pipeLineManager = appBuilder.ApplicationServices.GetService<PipelineManager>();
             if (pipeLineManager == null)
             {
                 throw new Exception(
                     "Could not find a required netpack service. Have you called services.AddNetPack() in your startup class?");
             }
-
 
             var builder = new PipelineConfigurationBuilder(appBuilder);
             processorBuilder(builder);
@@ -62,65 +54,26 @@ namespace NetPack
                 pipeLineWatcher.WatchPipeline(pipeline);
             }
 
-            pipeline.Initialise();
-
-            //   var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
-            //  var existingStaticFilesProvider = staticFilesOptions.Value.FileProvider ?? hostingEnv.WebRootFileProvider;
-            //  appBuilder.
-            //  var pipelineFileProvider = new NetPackPipelineFileProvider(pipeLine);
-            return new NetPackApplicationBuilder(appBuilder, pipeline);
-        }
-
-        public static INetPackApplicationBuilder UseOutputAsStaticFiles(this INetPackApplicationBuilder appBuilder, string servePath = "/netpack")
-        {
-
-            // NetPackPipelineFileProvider
-            var fileProvider = appBuilder.Pipeline.EnvironmentFileProvider;
-            if (!string.IsNullOrWhiteSpace(servePath))
+            var outputFileProvider = pipeline.OutputFileProvider;
+            if (!string.IsNullOrWhiteSpace(pipeline.BaseRequestPath))
             {
-                if (!servePath.StartsWith("/"))
-                {
-                    servePath = "/" + servePath;
-                }
-
-                fileProvider = new RequestPathFileProvider(servePath, fileProvider);
-
+                outputFileProvider = new RequestPathFileProvider(pipeline.BaseRequestPath, outputFileProvider);
             }
 
             var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
             if (hostingEnv.WebRootFileProvider == null)
             {
-                hostingEnv.WebRootFileProvider = fileProvider;
+                hostingEnv.WebRootFileProvider = outputFileProvider;
             }
             else
             {
-                var composite = new CompositeFileProvider(hostingEnv.WebRootFileProvider, fileProvider);
+                var composite = new CompositeFileProvider(hostingEnv.WebRootFileProvider, outputFileProvider);
                 hostingEnv.WebRootFileProvider = composite;
             }
 
-
-            //PathString requestPath = string.IsNullOrWhiteSpace(servePath) ? null : new PathString(servePath);
-
-            //var staticFileOptions = new StaticFileOptions()
-            //{
-            //    FileProvider = fileProvider,
-            //    RequestPath = requestPath
-            //};
-
-            appBuilder.Pipeline.RequestPath = servePath;
-
-            // appBuilder.UseStaticFiles(staticFileOptions);
-
-            appBuilder.Pipeline.Initialise();
-
-            //if (builder.WachInput)
-            //{
-            //    pipeLineWatcher.WatchPipeline(pipeLine);
-            //}
-
-            return appBuilder;
+            pipeline.Initialise();
+          
+            return new NetPackApplicationBuilder(appBuilder, pipeline);
         }
-
-
     }
 }

@@ -72,6 +72,9 @@ namespace NetPack.Pipeline
 
         public IFileProvider FileProvider { get; set; }
 
+        public string BaseRequestPath { get; set; }
+
+
         // public IDirectory Directory { get; set; }
 
         //public IFileProvider FileProvider { get; set; }
@@ -128,7 +131,7 @@ namespace NetPack.Pipeline
 
         public IPipeLine BuildPipeLine()
         {
-            var pipeLine = new Pipeline(FileProvider, Pipes, Requirements);
+            var pipeLine = new Pipeline(FileProvider, Pipes, Requirements, BaseRequestPath);
             // var fileProvider = new NetPackPipelineFileProvider(pipeLine);
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
@@ -141,6 +144,20 @@ namespace NetPack.Pipeline
             {
                 Requirements.Add(requirement);
             }
+            return this;
+        }
+
+        public IPipelineBuilder ServeOutputAsStaticFiles(string baseRequestPath = null)
+        {
+            if (baseRequestPath != null)
+            {
+                if (!baseRequestPath.StartsWith("/"))
+                {
+                    baseRequestPath = "/" + baseRequestPath;
+                }
+            }
+
+            BaseRequestPath = baseRequestPath;
             return this;
         }
     }

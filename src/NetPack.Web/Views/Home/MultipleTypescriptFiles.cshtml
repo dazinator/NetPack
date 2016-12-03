@@ -3,8 +3,6 @@
 }
 
 <p>
-    Currently not working due to <a href="https://github.com/aspnet/StaticFiles/issues/158">this issue.</a>
-
     The following uses the standard script TagHelper to include multiple scripts on the page, specified by a glob.
     These happen to be outputs from the NetPack typescript compilation pipeline.
 </p>
@@ -14,7 +12,7 @@
 @section scripts
 {
 @*see https://github.com/aspnet/StaticFiles/issues/158*@
-    @*<script asp-src-include="/netpack/ts/**/*.js"></script>*@
+    @*<script type="text/javascript" asp-src-include="netpack/**/*.js"></script>*@
 
     <script type="text/javascript" src="/netpack/ts/Greeter.js"></script>
     <script type="text/javascript" src="/netpack/ts/Another.js"></script>

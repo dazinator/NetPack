@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.File;
@@ -53,22 +54,20 @@ namespace NetPack.Pipes
                         Contents = fileContent,
                         Path = file.FileSubPath.TrimStart(new char[] { '/' })
                     });
-
-                  
-                    // optimiseRequest.Modules.Add(new ModuleInfo() { Name = "ModuleA"});
-                    // optimiseRequest.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
-                    //   optimiseRequest.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
-
-
-                    // optimiseRequest.BaseUrl = "/";
-                    // optimiseRequest.Dir = "build";
                 }
 
                 optimiseRequest.Options = _options;
 
                 try
                 {
-                    var result = await _nodeServices.InvokeAsync<JObject>(nodeScript.FileName, optimiseRequest);
+                    var result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(nodeScript.FileName, optimiseRequest);
+                    foreach (var file in result.Files)
+                    {
+                        var filePath = file.Path.Replace('\\', '/');
+                        var subPathInfo = SubPathInfo.Parse(filePath);
+                        context.AddOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
+                    }
+               
                     //if (!string.IsNullOrWhiteSpace(result.Error))
                     //{
                     //    throw new RequireJsOptimiseException(result.Error);
@@ -76,7 +75,6 @@ namespace NetPack.Pipes
                 }
                 catch (Exception e)
                 {
-
                     throw;
                 }
 
@@ -169,8 +167,8 @@ namespace NetPack.Pipes
 
     public class RequireJsOptimiseResult
     {
-        public string Result { get; set; }
-        public string Error { get; set; }
+        public List<NodeInMemoryFile> Files { get; set; }
+       // public string Error { get; set; }
     }
 
     public class NodeInMemoryFile

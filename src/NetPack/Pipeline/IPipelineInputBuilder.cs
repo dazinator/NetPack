@@ -29,8 +29,11 @@ namespace NetPack.Pipeline
         IPipelineBuilder Watch();
 
         IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);
-       
-        
+
+        IPipelineBuilder ServeOutputAsStaticFiles(string baseRequestPath = null);
+
+        string BaseRequestPath { get; set; }
+
         IPipeLine BuildPipeLine();
 
         /// <summary>

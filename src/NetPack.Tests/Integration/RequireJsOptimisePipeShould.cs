@@ -46,20 +46,13 @@ namespace NetPack.Tests.Integration
             return await response.Content.ReadAsStringAsync();
         }
 
-
         [Fact]
-        public async void Optimise_Specified_Js_Files()
+        public async Task Optimise_Specified_Js_Files()
         {
-
             // Act
             var responseString = await GetResponseString();
-
-
-            // Assert
-            //   Assert.Equal("Pass in a number to check in the form /checkprime?5", responseString);
-
+            Assert.Contains("File: built/ModuleA.js", responseString);
         }
-
     }
 
     public class RequireJsOptimisePipeTestsStartup
@@ -79,24 +72,17 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
 });
 
 ";
-
-        public const string ConfigFileContent =
-            @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
-
-
-
+        //public const string ConfigFileContent =
+        //    @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
+        
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            //var nodeServices = app.ApplicationServices.GetService<INodeServices>();
-            //var embeddedResourceProvider = app.ApplicationServices.GetService<IEmbeddedResourceProvider>();
-            //var sut = new RequireJsOptimisePipe(nodeServices, embeddedResourceProvider);
-
-            // Provide some AMD modules as input for the RequireJs Optimise Pipe
+            // Provide some in memory files, that are AMD modules to be used as input for the RequireJs Optimise Pipe
             var inMemoryFileProvider = new InMemoryFileProvider();
             inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
             inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
-            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(ConfigFileContent, "Common.js"));
 
+            var outputFolder = "built";
             var fileProcessingBuilder = app.UseFileProcessing(a =>
              {
                  a.WithFileProvider(inMemoryFileProvider)
@@ -105,11 +91,8 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
                          input.Include("wwwroot/*.js");
                      }, options =>
                      {
-                        // options.Out = "build.js";
-                       //  options.AppDir = ".";
                          options.BaseUrl = "wwwroot";
-                         // options.BaseUrl = "wwwroot"; // append request path
-                         options.Dir = "built";
+                         options.Dir = outputFolder;
                          options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
                      });
              });
@@ -119,33 +102,19 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
 
             app.Run(async (context) =>
             {
-
-
-
-                // var pipelineContext = new PipelineContext(inMemoryFileProvider);
-                // pipelineContext.InputFiles.Add(new SourceFile(, "wwwroot"));
-                // pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(AmdModuleBFileContent, "moduleB.js"), "wwwroot"));
-                //  var input = new PipelineInput();
-                // input.IncludeList.Add("wwwroot/*.js");
-                // var files = input.GetFiles(inMemoryFileProvider);
-
-                // await sut.ProcessAsync(pipelineContext, files, CancellationToken.None);
-
-                // Write the content of any outputs to the response for inspection.
+                // Write the content of outputs files to the response for inspection.
                 var builder = new StringBuilder();
-                var outputFolder = "wwwroot";
                 foreach (var outputFile in pipeline.OutputFileProvider.GetDirectoryContents(outputFolder))
                 {
                     using (var reader = new StreamReader(outputFile.CreateReadStream()))
                     {
                         builder.AppendLine("File: " + outputFolder + "/" + outputFile.Name);
                         builder.Append(reader.ReadToEnd());
+                        builder.AppendLine();
                     }
                 }
 
                 await context.Response.WriteAsync(builder.ToString());
-
-
             });
 
         }

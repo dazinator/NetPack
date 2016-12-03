@@ -14,7 +14,7 @@ namespace NetPack
     public static class PipelineBuilderTypescriptExtensions
     {
 
-        public static IPipelineBuilder AddTypeScriptPipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<TypeScriptPipeOptions> configureOptions)
+        public static IPipelineBuilder AddTypeScriptPipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<TypeScriptPipeOptions> configureOptions = null)
         {
             var appServices = builder.ApplicationBuilder.ApplicationServices;
             var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
@@ -36,7 +36,11 @@ namespace NetPack
             var embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));
 
             var tsOptions = new TypeScriptPipeOptions();
-            configureOptions(tsOptions);
+            if (configureOptions != null)
+            {
+                configureOptions(tsOptions);
+            }
+
             var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider, tsOptions);
 
             builder.AddPipe(input, pipe);
@@ -48,10 +52,19 @@ namespace NetPack
     public static class PipelineBuilderCombineExtensions
     {
 
-        public static IPipelineBuilder AddJsCombinePipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<JsCombinePipeOptions> configureOptions)
+        public static IPipelineBuilder AddJsCombinePipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Func<string> outputFilePath, Action<JsCombinePipeOptions> configureOptions = null)
         {
             var options = new JsCombinePipeOptions();
-            configureOptions(options);
+            var outputfile = outputFilePath();
+            if (string.IsNullOrEmpty(outputfile))
+            {
+                throw new ArgumentNullException(nameof(outputfile));
+            }
+            options.OutputFilePath = outputfile;
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
             var pipe = new JsCombinePipe(options);
             builder.AddPipe(input, pipe);
             return builder;
@@ -62,7 +75,7 @@ namespace NetPack
     public static class PipelineBuilderRequireJsOptimiseExtensions
     {
 
-        public static IPipelineBuilder AddRequireJsOptimisePipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<RequireJsOptimisationPipeOptions> configureOptions)
+        public static IPipelineBuilder AddRequireJsOptimisePipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<RequireJsOptimisationPipeOptions> configureOptions = null)
         {
 
             var appServices = builder.ApplicationBuilder.ApplicationServices;
@@ -76,7 +89,10 @@ namespace NetPack
             builder.IncludeRequirement(netpackRequireJsRequirement);
 
             var options = new RequireJsOptimisationPipeOptions();
-            configureOptions(options);
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
 
             var embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));
 

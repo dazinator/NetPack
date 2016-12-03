@@ -9,7 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetPack;
-using NetPack.Pipes.Typescript;
+using NUglify;
+using static NetPack.Pipes.Typescript.TypeScriptPipeOptions;
+using NetPack.Pipes;
 
 namespace NetPack.Web
 {
@@ -56,19 +58,6 @@ namespace NetPack.Web
 
             app.UseStaticFiles();
 
-           
-
-            var tsFileProvider = new PhysicalFileProvider(env.ContentRootPath + "\\wwwroot\\ts\\");
-
-            CompileIndividualTypescriptFiles(app, tsFileProvider);
-            CompileIndividualTypescriptFilesThenCombineThem(app, tsFileProvider);
-
-
-            //_fileProviders.Add(env.WebRootFileProvider);
-
-            // See issue: https://github.com/aspnet/StaticFiles/issues/158
-           // env.WebRootFileProvider = new CompositeFileProvider(_fileProviders);
-
             if (!env.IsProduction())
             {
                 // add another pipeline that takes outputs from previous pipeline and bundles them
@@ -76,87 +65,36 @@ namespace NetPack.Web
 
             }
 
-            app.UseMvc(routes =>
+            app.UseFileProcessing(a =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
+                a.WithHostingEnvironmentWebrootProvider()
+                    // Simple processor, that compiles typescript files.
+                    .AddTypeScriptPipe(input =>
+                    {
+                        input.Include("ts/*.ts");
+                    }, options =>
+                    {
+                        // configure various typescript compilation options here..
+                        // options.InlineSourceMap = true;
+                        //  options.Module = ModuleKind.Amd;
+                    })
+                    // Another processor that combines multiple js files into a bundle file.
+                    .AddJsCombinePipe(input =>
+                    {
+                        input.Include("ts/*.ts");
+                    }, () => "bundle.js")
+                    .ServeOutputAsStaticFiles("netpack") // serves all outputs using the specified base request path.
+                    .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
             });
 
-        }
-
-        private void CompileIndividualTypescriptFiles(IApplicationBuilder app, IFileProvider typescriptFileProvider)
-        {
-
-            var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
-            {
-                // pipelineBuilder.WithContentFileProvider(typescriptFileProvider)
-                    //.Take(files =>
-                    //{ files
-                         //   .Include("Another.ts")
-                        //    .Include("Greeter.ts");
-
-                //}, typescriptFileProvider)
-                //                .Watch()
-                //.BeginPipeline()
-                //    .AddTypeScriptPipe(tsConfig =>
-                //    {
-                //        tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                //        tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                //        tsConfig.NoImplicitAny = true;
-                //        tsConfig.RemoveComments = false;
-                //        tsConfig.SourceMap = true;
-                //    })
-                // .ProcessPipeLine();
-            })
-             .UseOutputAsStaticFiles("netpack/ts");
-
-            // Can access useful properties of the pipeline here like the FileProvider used to serve outputs from the pipeline.
-            //  var pipelineOutputsFileProvider = contentPipeline.PipelineFileProvider;
-            //  var existingFileProvider = environment.WebRootFileProvider;
-            // var allFiles = existingFileProvider.GetDirectoryContents("");
-
-           // _fileProviders.Add(contentPipeline.PipelineFileProvider);
+            app.UseMvc(routes =>
+             {
+                 routes.MapRoute(
+                     name: "default",
+                     template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
+             });
 
         }
-
-
-        private void CompileIndividualTypescriptFilesThenCombineThem(IApplicationBuilder app, IFileProvider typescriptFileProvider)
-        {
-            
-            //var contentPipeline = app.UseFileProcessing(pipelineBuilder =>
-            //{
-            //    pipelineBuilder
-            //       .Take(files =>
-            //       {
-            //           files
-            //               .Include("Another.ts")
-            //               .Include("Greeter.ts");
-            //       }, typescriptFileProvider)
-            //                       .Watch()
-            //       .BeginPipeline()
-            //           .AddTypeScriptPipe(tsConfig =>
-            //           {
-            //               tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-            //               tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-            //               tsConfig.NoImplicitAny = true;
-            //               tsConfig.RemoveComments = false;
-            //               tsConfig.SourceMap = true;
-
-            //           })
-            //           .AddJsCombinePipe(combineConfig =>
-            //           {
-            //               combineConfig.CombinedJsFileName = "bundleA.js";
-            //           })
-            //        .ProcessPipeLine();
-            //})
-            //  .UseOutputAsStaticFiles("netpack/tsbundle");
-
-           // _fileProviders.Add(contentPipeline.PipelineFileProvider);
-        }
-
-
-
 
     }
 }
