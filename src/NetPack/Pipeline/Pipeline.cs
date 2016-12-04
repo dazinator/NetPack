@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
@@ -106,8 +107,22 @@ namespace NetPack.Pipeline
 
             try
             {
+                Policy policy = null;
+                //            // If debugger attach, use a policy that retries after 60 minutes instead of 
+                //            if (Debugger.IsAttached)
+                //            {
+                //                policy = Policy.Handle<IOException>()
+                //                   .WaitAndRetryAsync(new[]
+                // {
+                //TimeSpan.FromMinutes(60)
+                // }, (exception, timeSpan) =>
+                // {
+                //     // TODO: Log exception    
+                // });
 
-                var policy = Policy.Handle<IOException>()
+                //            }
+
+                policy = Policy.Handle<IOException>()
                       .WaitAndRetryAsync(new[]
     {
     TimeSpan.FromSeconds(1),

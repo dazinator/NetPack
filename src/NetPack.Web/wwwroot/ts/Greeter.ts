@@ -6,4 +6,4 @@
 };
 
 var greeter = new Greeter("Hi tdhere!!!!");
-document.body.querySelector(".message").innerHTML = greeter.greet(); 
+document.body.querySelector(".message").innerHTML = greeter.greet();  

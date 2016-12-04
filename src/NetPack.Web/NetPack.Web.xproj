@@ -20,4 +20,7 @@
     <DnxInvisibleContent Include=".bowerrc" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\DotNet.Web\Microsoft.DotNet.Web.targets" Condition="'$(VSToolsPath)' != ''" />
+  <PropertyGroup>
+    <TypeScriptEnabled>false</TypeScriptEnabled>
+  </PropertyGroup>
 </Project>

@@ -6,4 +6,4 @@
 };
 
 var another = new Another("Heldlo!");
-another.doSomething(); 
+another.doSomething();   
