@@ -61,7 +61,7 @@ namespace NetPack
             }
 
             var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
-            if (hostingEnv.WebRootFileProvider == null)
+            if (hostingEnv.WebRootFileProvider == null || hostingEnv.WebRootFileProvider is NullFileProvider)
             {
                 hostingEnv.WebRootFileProvider = outputFileProvider;
             }

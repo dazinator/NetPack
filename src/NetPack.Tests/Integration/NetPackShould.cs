@@ -57,7 +57,7 @@ namespace NetPack.Tests.Integration
             // in our application, configured in the applications startup.cs
 
             // Act
-            var responseString = await GetResponseString("netpack/ts/wwwroot/somefile.js");
+            var responseString = await GetResponseString("netpack/ts/somefile.js");
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(responseString));
@@ -78,18 +78,18 @@ namespace NetPack.Tests.Integration
             //   and these are then being served to the browser when requested.
 
             //1.
-            var originalFileContents = await GetResponseString("netpack/ts/wwwroot/somefile.js");
+            var originalFileContents = await GetResponseString("netpack/ts/somefile.js");
 
             //2. This causes the `IChangeToken for the file `wwwroot/somefile.ts` on the server to activate,
             // and as the pipeline is watching its inputs, it should detect this and re-process.
-            await GetResponseString("/", "change=wwwroot/somefile.ts");
+            await GetResponseString("/", "change=ts/somefile.ts");
 
             //3. The pipeline should re-process all its inputs to produce updated outputs.
             // Give it 5 seconds to complete this.
             await Task.Delay(new TimeSpan(0, 0, 5));
 
             //4. Now request the same javascript file again - it should have been autoamtically updated by the pipeline.
-            var updatedFileContents = await GetResponseString("netpack/ts/wwwroot/somefile.js");
+            var updatedFileContents = await GetResponseString("netpack/ts/somefile.js");
 
             Assert.NotEqual(originalFileContents, updatedFileContents);
             Assert.True(updatedFileContents.Contains("// modified on"));
@@ -131,6 +131,7 @@ namespace NetPack.Tests.Integration
 
             public void ConfigureServices(IServiceCollection services)
             {
+               
                 services.AddNetPack();
             }
 
@@ -138,32 +139,35 @@ namespace NetPack.Tests.Integration
             {
 
                 var mockFileProvider = new InMemoryFileProvider();
-                mockFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
-                mockFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
+                mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentOne, "somefile.ts"));
+                mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
 
-                env.ContentRootFileProvider = mockFileProvider;
+                // env.WebRootFileProvider = mockFileProvider;
                 //   env.WebRootFileProvider = 
 
+               
                 app.UseFileProcessing(pipelineBuilder =>
                 {
                     pipelineBuilder.WithFileProvider(mockFileProvider)
                         .AddTypeScriptPipe(input =>
                         {
-                            input.Include("wwwroot/somefile.ts")
-                                .Include("wwwroot/someOtherfile.ts");
+                            input.Include("ts/somefile.ts")
+                                 .Include("ts/someOtherfile.ts");
                         }, tsConfig =>
                         {
                             tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
                             tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
                             tsConfig.NoImplicitAny = true;
                             tsConfig.RemoveComments = false;
-                                // important: we are not removing comments because we test for a modification that involves a comment being added!
+                            // important: we are not removing comments because we test for a modification that involves a comment being added!
                             tsConfig.SourceMap = true;
                         }
                         )
-                        .ServeOutputAsStaticFiles("netpack/ts")
+                        .ServeOutputAsStaticFiles("netpack")
                         .Watch();
                 });
+
+                app.UseStaticFiles();
 
                 app.Run(async (a) =>
                 {
