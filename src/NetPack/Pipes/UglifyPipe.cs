@@ -12,10 +12,10 @@ namespace NetPack.Pipes
 {
     public class UglifyMinifyJsPipe : IPipe
     {
-        public async Task ProcessAsync(IPipelineContext context, FileWithDirectory[] input, CancellationToken cancelationToken)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
             // Need to run uglify on any .js, .css, .html, or .htm files passed through the pipeline.
-            foreach (var inputFile in input)
+            foreach (var inputFile in context.InputFiles)
             {
                 // only interested in typescript files.
                 var inputFileInfo = inputFile.FileInfo;

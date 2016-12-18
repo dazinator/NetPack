@@ -32,16 +32,16 @@ namespace NetPack.Pipes.Typescript
             _options = options;
         }
 
-        public async Task ProcessAsync(IPipelineContext context, FileWithDirectory[] input, CancellationToken cancelationToken)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
             var requestDto = new TypescriptCompileRequestDto();
             requestDto.Options = _options;
 
-            foreach (var inputFileInfo in input)
+            foreach (var inputFileInfo in context.InputFiles)
             {
                 //var inputFileInfo = inputFile.FileInfo;
 
-               // var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
+                // var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
                 //if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
                 //{
                 // var inputFileInfo = inputFile.FileInfo;
@@ -95,11 +95,23 @@ namespace NetPack.Pipes.Typescript
                     context.AddOutput(subPathInfo.Directory, outputFileInfo);
                 }
 
+                // also output the original ts files, as this will allow them to be served from the output file provider
+                // which is integrated as webroot file provider. This means they can then be served to the browser
+                // which is needed only when sourcemaps are being used and you wish to step throughh the ts.
+                if (_options.SourceMap)
+                {
+                    foreach (var inputFileInfo in context.InputFiles)
+                    {
+                        context.AddOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
+                    }                  
+
+                }
+
             }
 
         }
 
-      
+
 
         public class TypeScriptCompileResult
         {

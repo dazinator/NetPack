@@ -43,8 +43,9 @@ namespace NetPack.Tests.Pipes
             //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
             PipelineContext = new PipelineContext(provider);
+            PipelineContext.SetInput(files);
             Sut = pipeFactory();
-            await Sut.ProcessAsync(PipelineContext, files, CancellationToken.None);
+            await Sut.ProcessAsync(PipelineContext, CancellationToken.None);
         }
 
         protected IFileInfo ThenTheOutputFileFromPipe(string filePath, Action<IFileInfo> assertions)

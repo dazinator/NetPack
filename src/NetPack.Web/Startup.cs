@@ -36,8 +36,9 @@ namespace NetPack.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc();
             services.AddNetPack();
+            services.AddMvc();
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -94,6 +95,14 @@ namespace NetPack.Web
                      template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
              });
 
+            app.Use(async (context, next) =>
+            {
+                //  await context.Response.WriteAsync("Pre Processing");
+
+                await next();
+
+                //  await context.Response.WriteAsync("Post Processing");
+            });
         }
 
     }

@@ -26,8 +26,11 @@ namespace NetPack.Pipeline
         /// <returns></returns>
         internal bool IsDirty()
         {
-            return ((Input.LastChanged > LastProcessStartTime) && Input.LastChanged <= LastProcessedEndTime)
-            || Input.LastChanged > LastProcessedEndTime;
+            var isDirty = (Input.LastChanged > LastProcessStartTime);
+            isDirty = isDirty && Input.LastChanged <= LastProcessedEndTime;
+            isDirty = isDirty || Input.LastChanged > LastProcessedEndTime;
+
+            return isDirty;
         }
     }
 

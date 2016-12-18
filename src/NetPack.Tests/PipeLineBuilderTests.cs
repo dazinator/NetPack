@@ -7,6 +7,7 @@ using Moq;
 using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Pipes;
+using System.Linq;
 using Xunit;
 
 namespace NetPack.Tests
@@ -77,12 +78,12 @@ namespace NetPack.Tests
             Assert.NotNull(pipeLine.Pipes[0].Input);
             Assert.NotNull(pipeLine.Pipes[0].Pipe);
             Assert.False(pipeLine.Pipes[0].IsProcessing);
-            Assert.True(pipeLine.Pipes[0].Input.IncludeList.Count == 2);
+            Assert.True(pipeLine.Pipes[0].Input.GetIncludes().Count() == 2);
 
             Assert.NotNull(pipeLine.Pipes[1].Input);
             Assert.NotNull(pipeLine.Pipes[1].Pipe);
             Assert.False(pipeLine.Pipes[1].IsProcessing);
-            Assert.True(pipeLine.Pipes[1].Input.IncludeList.Count == 1);
+            Assert.True(pipeLine.Pipes[1].Input.GetIncludes().Count() == 1);
 
         }
 

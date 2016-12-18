@@ -23,6 +23,8 @@ namespace NetPack.Pipes
         private JObject _sourceMap;
         private JsCombinePipeOptions _options;
 
+        private Dictionary<string, FileWithDirectory> _lastProcessed = new Dictionary<string, FileWithDirectory>();
+
         public JsCombinePipe() : this(new JsCombinePipeOptions())
         {
 
@@ -33,35 +35,19 @@ namespace NetPack.Pipes
             _options = options;
         }
 
-        public async Task ProcessAsync(IPipelineContext context, FileWithDirectory[] input, CancellationToken cancelationToken)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
-            var fileInfos = input.Select(a => a.FileInfo);
-            await CombineJs(context, fileInfos, cancelationToken);
-        }
-
-        //private bool IsCssFile(SourceFile sourceFile)
-        //{
-        //    if (sourceFile.FileInfo != null && System.IO.Path.GetExtension(sourceFile.FileInfo.Name)
-        //        .Equals(".css", StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        _cssFiles.Add(sourceFile); // add the css file to our collection for later.
-        //        return true;
-        //    }
-        //    return false;
-        //}
-
-        private async Task CombineJs(IPipelineContext context, IEnumerable<IFileInfo> jsFiles, CancellationToken cancelationToken)
-        {
-
+          
             bool hasSourceMappingDirectives = false;
             var combiner = new ScriptCombiner();
-            var scriptInfos = new List<CombinedScriptInfo>();
+            var scriptInfos = new List<CombinedScriptInfo>(context.InputFiles.Length);
             var ms = new MemoryStream();
             int totalLineCount = 0;
             var encoding = Encoding.UTF8;
 
-            foreach (var fileInfo in jsFiles)
+            foreach (var fileWithDirectory in context.InputFiles)
             {
+                var fileInfo = fileWithDirectory.FileInfo;
                 if (fileInfo.Exists && !fileInfo.IsDirectory)
                 {
                     using (var sourceFileStream = fileInfo.CreateReadStream())
@@ -71,6 +57,7 @@ namespace NetPack.Pipes
                         {
                             var sourceScript = await combiner.AddScript(sourceFileStream, writer);
                             sourceScript.LineNumberOffset = totalLineCount;
+                            sourceScript.FileWithDirectory = fileWithDirectory;
                             //  sourceScript.Path = fileInfo.Name;
                             scriptInfos.Add(sourceScript);
                             hasSourceMappingDirectives = hasSourceMappingDirectives | sourceScript.SourceMapDeclaration != null;
@@ -98,8 +85,10 @@ namespace NetPack.Pipes
                 // Output the new map file in the pipeline.
                 context.AddOutput(outputFilePath.Directory, indexMapFile);
 
-                var mapServePath = context.GetRequestPath(outputFilePath.Directory, indexMapFile);
-                // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
+                // sourcemapping url is resolved relative to the source ifle
+                var mapServePath = $"/{indexMapFile.Name}"; // context.GetRequestPath(outputFilePath.Directory, indexMapFile);
+                                                            //  var mapServePath = context.GetRequestPath(outputFilePath.Directory, indexMapFile);
+                                                            // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
                 using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
                 {
                     writer.WriteLine();
@@ -112,8 +101,19 @@ namespace NetPack.Pipes
             var bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
             // Output the new combines file.
             context.AddOutput(outputFilePath.Directory, bundleJsFile);
-
         }
+
+        //private bool IsCssFile(SourceFile sourceFile)
+        //{
+        //    if (sourceFile.FileInfo != null && System.IO.Path.GetExtension(sourceFile.FileInfo.Name)
+        //        .Equals(".css", StringComparison.OrdinalIgnoreCase))
+        //    {
+        //        _cssFiles.Add(sourceFile); // add the css file to our collection for later.
+        //        return true;
+        //    }
+        //    return false;
+        //}
+
 
         private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, string mapFileName, SubPathInfo combinedFilePath, IPipelineContext context)
         {
@@ -154,18 +154,39 @@ namespace NetPack.Pipes
 
                     // ok so the referenced source map is in a relative location.
                     // we need to be able to resolve the source map.
-                    var sourceMapFilePath = SubPathInfo.Parse(declaration.SourceMappingUrl);
-                    var sourceMapFile = context.FileProvider.GetFileInfo(sourceMapFilePath.ToString());
+
+                    // The map file should live in path relative to its source file.
+                    // if it already starts with a / then its relative to site root allready.
+                    string sourceMapFileSubPath;
+                    if (!declaration.SourceMappingUrl.StartsWith("/"))
+                    {
+                        sourceMapFileSubPath = $"/{script.FileWithDirectory.Directory}/{declaration.SourceMappingUrl}";
+                    }
+                    else
+                    {
+                        sourceMapFileSubPath = declaration.SourceMappingUrl;
+                    }
+
+                    var sourceMapFile = context.FileProvider.GetFileInfo(sourceMapFileSubPath);
 
                     if (sourceMapFile == null || !sourceMapFile.Exists || sourceMapFile.IsDirectory)
                     {
-                        throw new FileNotFoundException("Could not find a source map file which is referenced by a script", sourceMapFilePath.ToString());
+                        throw new FileNotFoundException("Could not find the specified source map file which is referenced by a script", sourceMapFileSubPath);
                     }
 
                     // read the contents of the source map file, and inline it into the new source map file.
                     JObject sourceMapObject = null;
                     var sourceMapFileContents = sourceMapFile.ReadAllContent();
                     sourceMapObject = JObject.Parse(sourceMapFileContents);
+
+                    // We will now change the paths in the inlined map, that will currenlty be relative to original source file, 
+                    // to be paths that are relative to the site root instead. 
+                    // i.e /somefile.js will become /full/path/somefile.js
+                    // This is because the new map file may live in a different location and the browser still needs to be able to resolve these files.
+                    AdjustSourceMapPathsRelativeToSiteRoot(sourceMapObject, script, context);
+
+
+
 
 
                     // if we couldn't find the source map file, then it means the source mapping url declaration in the 
@@ -218,6 +239,30 @@ namespace NetPack.Pipes
             //                      }
             //                    ],
             //             }
+
+        }
+
+        private void AdjustSourceMapPathsRelativeToSiteRoot(JObject sourceMapObject, CombinedScriptInfo script, IPipelineContext context)
+        {
+            var siteRootRelativeFilePath = context.GetRequestPath(script.FileWithDirectory.Directory, script.FileWithDirectory.FileInfo);
+            sourceMapObject["file"] = siteRootRelativeFilePath.ToString();
+
+            var sourcesArray = sourceMapObject["sources"] as JArray;
+            if (sourcesArray != null)
+            {
+                for (int i = 0; i < sourcesArray.Count; i++)
+                {
+                    var item = sourcesArray[i];
+                    var sourceFileSubPath = $"{script.FileWithDirectory.Directory}/{item.ToString()}";
+                    var sourceFile = context.FileProvider.GetFileInfo(sourceFileSubPath);
+                    if (!sourceFile.Exists)
+                    {
+                        // todo throw an exception because the sourcemap appears to be pointing to a file that doesnt exist.?
+                    }
+                    sourcesArray[i] = context.GetRequestPath(script.FileWithDirectory.Directory, sourceFile).ToString();
+                }
+            }
+
 
         }
     }

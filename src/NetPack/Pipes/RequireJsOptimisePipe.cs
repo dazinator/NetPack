@@ -32,7 +32,7 @@ namespace NetPack.Pipes
         }
 
 
-        public async Task ProcessAsync(IPipelineContext context, FileWithDirectory[] input, CancellationToken cancelationToken)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
             Assembly assy = this.GetType().GetAssemblyFromType();
             var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
@@ -42,7 +42,7 @@ namespace NetPack.Pipes
             {
                 var optimiseRequest = new RequireJsOptimiseRequestDto();
 
-                foreach (var file in input)
+                foreach (var file in context.InputFiles)
                 {
                     var fileContent = file.FileInfo.ReadAllContent();
                     //  var dir = file.Directory;

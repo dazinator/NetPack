@@ -1,6 +1,10 @@
 ﻿using System.IO;
 using Microsoft.Extensions.FileProviders;
 using ReflectionBridge.Extensions;
+using NetPack.Pipeline;
+using System.Collections.Generic;
+using Dazinator.AspNet.Extensions.FileProviders;
+using System.Linq;
 
 namespace NetPack
 {
@@ -32,8 +36,29 @@ namespace NetPack
                 return reader.ReadToEnd();
             }
         }
-        
-  
+
+        public static FileWithDirectory[] GetFiles(this IFileProvider fileProvider, PipelineInput inputs)
+        {
+            var results = new Dictionary<string, FileWithDirectory>();
+            var includes = inputs.GetIncludes().ToArray();
+            var excludes = inputs.GetExcludes().ToArray();
+
+            var files = fileProvider.Search(includes, excludes);
+            // check if file already present? Multiple input patterns can match the same files.
+            foreach (var file in files)
+            {
+                var path = $"{file.Item1}/{file.Item2.Name}";
+                if (!results.ContainsKey(path))
+                {
+                    var item = new FileWithDirectory() { Directory = file.Item1, FileInfo = file.Item2 };
+                    results.Add(path, item);
+                }
+            }
+
+            return results.Values.ToArray();
+        }
+
+
 
 
     }

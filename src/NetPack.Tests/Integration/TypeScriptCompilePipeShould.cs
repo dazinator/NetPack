@@ -89,21 +89,21 @@ namespace NetPack.Tests.Integration
                 var nodeServices = context.RequestServices.GetService<INodeServices>();
                 var nodeJsRequirement = context.RequestServices.GetService<NodeJsRequirement>();
                 var embeddedResourceProvider = context.RequestServices.GetService<IEmbeddedResourceProvider>();
-              
+
                 var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider);
 
                 var inMemoryFileProvider = new InMemoryFileProvider();
                 inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
-               // inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
+                // inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
 
                 var pipelineContext = new PipelineContext(inMemoryFileProvider);
                 var input = new PipelineInput();
-                input.IncludeList.Add("wwwroot/*.ts");
-                var files = input.GetFiles(inMemoryFileProvider);
+                input.AddInclude("wwwroot/*.ts");
+                pipelineContext.SetInput(input);
                 //  var pipelineContext = new PipelineContext();
                 //  pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
 
-                await pipe.ProcessAsync(pipelineContext, files, CancellationToken.None);
+                await pipe.ProcessAsync(pipelineContext, CancellationToken.None);
 
                 var builder = new StringBuilder();
 

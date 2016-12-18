@@ -19,8 +19,13 @@ namespace NetPack.Pipeline
 
         public PipelineInputBuilder Include(string pattern)
         {
-
             Input.AddInclude(pattern);
+            return this;
+        }
+
+        public PipelineInputBuilder Exclude(string pattern)
+        {
+            Input.AddExclude(pattern);
             return this;
         }
 

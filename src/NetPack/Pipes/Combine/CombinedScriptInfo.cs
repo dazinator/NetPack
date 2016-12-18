@@ -18,6 +18,9 @@ namespace NetPack.Pipes
         /// The number of lines, from line 1, where this script starts, in the combinded script.
         /// </summary>
         public int LineNumberOffset { get; set; }
+
+
+        public FileWithDirectory FileWithDirectory { get; set; }
         /// <summary>
         /// The path to the script.
         /// </summary>

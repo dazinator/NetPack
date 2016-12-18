@@ -21,10 +21,10 @@ namespace NetPack.Tests
 
             var input = new PipelineInput();
             input.AddInclude("wwwroot/*.js");
-            var results = input.GetFiles(fileProvider);
+            var results = fileProvider.GetFiles(input);
 
             Assert.Equal(1, results.Length);
-            Assert.Equal("wwwroot/somefile.js", results[0].FileSubPath);
+            Assert.Equal("/wwwroot/somefile.js", results[0].FileSubPath);
 
         }
 

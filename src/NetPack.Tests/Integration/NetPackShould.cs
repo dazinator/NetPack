@@ -131,7 +131,7 @@ namespace NetPack.Tests.Integration
 
             public void ConfigureServices(IServiceCollection services)
             {
-               
+
                 services.AddNetPack();
             }
 
@@ -145,7 +145,7 @@ namespace NetPack.Tests.Integration
                 // env.WebRootFileProvider = mockFileProvider;
                 //   env.WebRootFileProvider = 
 
-               
+
                 app.UseFileProcessing(pipelineBuilder =>
                 {
                     pipelineBuilder.WithFileProvider(mockFileProvider)
@@ -186,9 +186,13 @@ namespace NetPack.Tests.Integration
                                 var modifiedFileContents = existingFileContents + Environment.NewLine +
                                                            "// modified on " + DateTime.UtcNow;
 
+                                var retrievedFolder = mockFileProvider.Directory.GetFolder(subPath.Directory);
+
                                 var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
-                                var fileToBeUpdated = mockFileProvider.Directory.GetFile(subPath.ToString());
-                                fileToBeUpdated.Update(modifiedFile);
+
+                                //  var fileToBeUpdated = mockFileProvider.Directory.GetFile(subPath.ToString());
+                                retrievedFolder.UpdateFile(modifiedFile);
+                                //  fileToBeUpdated.Update(modifiedFile);
 
                             }
                         }

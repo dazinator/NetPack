@@ -1,9 +1,9 @@
 ﻿class Another {
     constructor(public another: string) { }
-    doSomething() {
-        // return ""<h1>"" + this.greeting + ""</h1>"";
+    greet() {
+        return " < h1 > " + this.another + " < /h1>";
     }
 };
 
-var another = new Another("Heldlo!");
-another.doSomething();   
+var another = new Another("seasons greetings!");
+document.body.querySelector(".message").innerHTML += another.greet();  

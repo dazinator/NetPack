@@ -18,9 +18,6 @@ namespace NetPack.Pipeline
         public string Input { get; set; }
         public IPipeLine Pipeline { get; set; }
         public PipeConfiguration PipeConfig { get; set; }
-
-
-
     }
 
     public class PipelineWatcher : IPipelineWatcher
@@ -44,8 +41,9 @@ namespace NetPack.Pipeline
 
             foreach (var pipe in pipeline.Pipes)
             {
-                foreach (var include in pipe.Input.IncludeList)
+                foreach (var include in pipe.Input.GetIncludes())
                 {
+
                     //input.IncludeList.ForEach((include) =>
                     //{
                     var state = new StateInfo() { Input = include, PipeConfig = pipe, Pipeline = pipeline };
@@ -107,7 +105,7 @@ namespace NetPack.Pipeline
 
                 var pipeLines = _pipelines.ToArray();
 
-               // IEnumerable<PipeConfiguration> dirtyPipeLiness = pipeLines.Select(p => p.GetDirtyPipes());
+                // IEnumerable<PipeConfiguration> dirtyPipeLiness = pipeLines.Select(p => p.GetDirtyPipes());
 
                 var dirtyPipeLines = pipeLines.Select(p =>
                        new

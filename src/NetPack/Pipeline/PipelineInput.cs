@@ -4,6 +4,7 @@ using Microsoft.Extensions.FileProviders;
 using NetPack.File;
 using Dazinator.AspNet.Extensions.FileProviders;
 using System.Linq;
+using System.Collections;
 
 namespace NetPack.Pipeline
 {
@@ -13,76 +14,48 @@ namespace NetPack.Pipeline
         {
             //  FileProvider = fileProvider;
             IncludeList = new List<string>();
+            ExcludeList = new List<string>();
         }
 
         //  public IFileProvider FileProvider { get; set; }
-        public List<string> IncludeList { get; }
+        protected List<string> IncludeList { get; }
+
+        protected List<string> ExcludeList { get; }
+
         public void AddInclude(string pattern)
         {
-            IncludeList.Add(pattern);
+            string searchPattern = pattern;
+            if (!pattern.StartsWith("/"))
+            {
+                searchPattern = "/" + pattern;
+            }
+            IncludeList.Add(searchPattern);
+            LastChanged = DateTime.UtcNow;
+        }
+
+        public void AddExclude(string pattern)
+        {
+            string searchPattern = pattern;
+            if (!pattern.StartsWith("/"))
+            {
+                searchPattern = "/" + pattern;
+            }
+            ExcludeList.Add(searchPattern);
             LastChanged = DateTime.UtcNow;
         }
 
         public DateTime LastChanged { get; set; }
 
-        public FileWithDirectory[] GetFiles(IFileProvider fileProvider)
+        public IEnumerable<string> GetIncludes()
         {
-            var results = new Dictionary<string, FileWithDirectory>();
-            foreach (var input in IncludeList)
-            {
-                //string searchPattern = input;
-                //if (!input.StartsWith("/"))
-                //{
-                //    searchPattern = "/" + input;
-                //}
-                var files = fileProvider.Search(input);
-                // check if file already present? Multiple input patterns can match the same files.
-                foreach (var file in files)
-                {
-                    var path = $"{file.Item1}/{file.Item2.Name}";
-                    if (!results.ContainsKey(path))
-                    {
-                        var item = new FileWithDirectory() { Directory = file.Item1, FileInfo = file.Item2 };
-                        results.Add(path, item);
-                    }
-                }
-
-            }
-            return results.Values.ToArray();
+            return IncludeList.AsEnumerable();
         }
 
-
-        //public void WatchFiles(Action<string> action)
-        //{
-        //    foreach (var file in IncludeList)
-        //    {
-        //        // var path = file.GetPath();
-        //        WatchFile(file, action);
-
-
-
-        //        //changeToken.RegisterChangeCallback((obj =>
-        //        //{
-        //        //    action(file);
-        //        //}), file);
-        //    }
-        //}
-
-        //private void WatchFile(string pattern, Action<string> action)
-        //{
-        //    // var path = file.ContentPathInfo.ToString();
-        //    var changeToken = FileProvider.Watch(pattern);
-        //    changeToken.RegisterChangeCallback((a) =>
-        //    {
-        //        // var newFileInfo = (IFileInfo)a;
-        //        //  file.Update(newFileInfo);
-        //        action(pattern);
-        //        // must watch file again as old change token expired.
-        //        WatchFile(pattern, action);
-
-        //    }, pattern);
-
-        //}
+        public IEnumerable<string> GetExcludes()
+        {
+            return ExcludeList.AsEnumerable();
+        }       
+       
     }
 
 

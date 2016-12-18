@@ -22,7 +22,6 @@ namespace NetPack.Pipeline
     public class Pipeline : IPipeLine
     {
 
-
         public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
 
         public Pipeline(IFileProvider environmentFileProvider, List<PipeConfiguration> pipes, List<IRequirement> requirements, string baseRequestPath = null, IDirectory directory = null)
@@ -36,7 +35,10 @@ namespace NetPack.Pipeline
             Directory = directory ?? new InMemoryDirectory();
             OutputFileProvider = new InMemoryFileProvider(Directory);
             InputAndOutputFileProvider = new CompositeFileProvider(EnvironmentFileProvider, OutputFileProvider);
+            Context = new PipelineContext(this.InputAndOutputFileProvider, this.Directory, this.BaseRequestPath);
         }
+
+        protected PipelineContext Context { get; set; }
 
         /// <summary>
         /// Provides access to files that need to be processed from the environment. 
@@ -103,7 +105,7 @@ namespace NetPack.Pipeline
 
         public async Task ProcessPipesAsync(IEnumerable<PipeConfiguration> pipes, CancellationToken cancellationToken)
         {
-            var context = new PipelineContext(this.InputAndOutputFileProvider, this.Directory, this.BaseRequestPath);
+
 
             try
             {
@@ -140,8 +142,8 @@ namespace NetPack.Pipeline
                         pipe.LastProcessStartTime = DateTime.UtcNow;
                         pipe.IsProcessing = true;
                         var input = pipe.Input;
-                        var inputFiles = input.GetFiles(context.FileProvider);
-                        await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(context, inputFiles, ct), cancellationToken);
+                        Context.SetInput(input);
+                        await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(Context, ct), cancellationToken);
                         pipe.LastProcessedEndTime = DateTime.UtcNow;
                     }
                     catch (Exception e)
@@ -191,7 +193,8 @@ namespace NetPack.Pipeline
 
         public IEnumerable<PipeConfiguration> GetDirtyPipes()
         {
-            return Pipes.Where(a => a.IsDirty());
+            var dirty = Pipes.Where(a => a.IsDirty());
+            return dirty;
         }
 
 

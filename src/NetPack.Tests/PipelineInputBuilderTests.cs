@@ -4,6 +4,7 @@ using NetPack.File;
 using NetPack.Pipeline;
 using Xunit;
 using Dazinator.AspNet.Extensions.FileProviders;
+using System.Linq;
 
 namespace NetPack.Tests
 {
@@ -18,7 +19,7 @@ namespace NetPack.Tests
                 .Include("wwwroot/somefile.ts")
                 .Include("wwwroot/someOtherfile.ts");
 
-            Assert.True(sut.Input.IncludeList.Count == 2);
+            Assert.True(sut.Input.GetIncludes().Count() == 2);
 
         }
 

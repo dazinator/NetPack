@@ -1,0 +1,3 @@
+[submodule "src/Dazinator.AspNet.Extensions.FileProviders"]
+	path = src/Dazinator.AspNet.Extensions.FileProviders
+	url = https://github.com/dazinator/Dazinator.AspNet.Extensions.FileProviders.git

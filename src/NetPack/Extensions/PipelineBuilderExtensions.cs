@@ -66,6 +66,14 @@ namespace NetPack
                 configureOptions(options);
             }
             var pipe = new JsCombinePipe(options);
+
+            builder.AddPipe((inputBuilder) =>
+            {
+                // automatically exclude the output / combined file from pipe input.
+                inputBuilder.Exclude(outputfile);
+                input(inputBuilder);
+            }, pipe);
+
             builder.AddPipe(input, pipe);
             return builder;
         }
