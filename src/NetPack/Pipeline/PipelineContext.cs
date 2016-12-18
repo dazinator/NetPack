@@ -95,9 +95,12 @@ namespace NetPack.Pipeline
 
         public FileWithDirectory[] InputFiles { get; set; }
 
+        public FileWithDirectory[] ExcludeFiles { get; set; }
+
         public void SetInput(PipelineInput input)
         {            
             SetInput(FileProvider.GetFiles(input));
+           // ExcludeFiles = FileProvider.GetFiles(input.e)
         }
 
         public void SetInput(FileWithDirectory[] input)
@@ -105,6 +108,7 @@ namespace NetPack.Pipeline
             // grab the input files from the file provider.
             PreviousInputFiles = InputFiles;
             InputFiles = input;
+           
         }
 
 

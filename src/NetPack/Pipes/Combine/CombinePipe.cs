@@ -37,7 +37,36 @@ namespace NetPack.Pipes
 
         public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
-          
+            bool hasChanges = false;
+
+            string outputSubPath;
+            if (!_options.OutputFilePath.StartsWith("/"))
+            {
+                outputSubPath = "/" + _options.OutputFilePath;
+            }
+            else
+            {
+                outputSubPath = _options.OutputFilePath;
+            }
+
+            foreach (var item in context.InputFiles)
+            {
+
+                if (item.FileSubPath == outputSubPath)
+                {
+                    continue;
+                }
+                if (context.IsDifferentFromLastTime(item))
+                {
+                    hasChanges = true;
+                }
+            }
+
+            if(!hasChanges)
+            {
+                return;
+            }
+
             bool hasSourceMappingDirectives = false;
             var combiner = new ScriptCombiner();
             var scriptInfos = new List<CombinedScriptInfo>(context.InputFiles.Length);
