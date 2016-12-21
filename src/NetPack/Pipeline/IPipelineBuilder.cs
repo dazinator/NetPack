@@ -2,7 +2,6 @@
 using NetPack.Pipes;
 using NetPack.Requirements;
 using System;
-using NetPack.Pipes.Typescript;
 
 namespace NetPack.Pipeline
 {

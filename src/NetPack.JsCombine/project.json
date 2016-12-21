@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.0.0-*",
+
+  "buildOptions": {
+    "embed": {
+      "include": "Embedded"
+    },
+    "define": []
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.6.0",
+    "Microsoft.Extensions.FileProviders.Composite": "1.0.0",
+    "Microsoft.Extensions.FileProviders.Embedded": "1.0.0",
+    "Microsoft.Extensions.Options": "1.0.0",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0",
+    "ReflectionBridge": "0.0.11",
+    "Dazinator.AspNet.Extensions.FileProviders": "1.2.0",
+    "NetPack": "1.0.0-*"
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": "dnxcore50",
+      "buildOptions": { "define": [ "NETSTANDARD" ] }
+    },
+    "net452": {
+
+    }
+  }
+}

@@ -19,12 +19,8 @@ var configuration = Argument("configuration", "Release");
 // GLOBAL VARIABLES
 ///////////////////////////////////////////////////////////////////////////////
 var artifactsDir = "./artifacts";
-var projectName = "NetPack";
 var globalAssemblyFile = "./src/GlobalAssemblyInfo.cs";
-var projectToPackage = $"./src/{projectName}";
 var repoBranchName = "master";
-
-
 var isContinuousIntegrationBuild = !BuildSystem.IsLocalBuild;
 
 var gitVersionInfo = GitVersion(new GitVersionSettings {
@@ -134,12 +130,20 @@ Task("__UpdateProjectJsonVersion")
     .WithCriteria(isContinuousIntegrationBuild)
     .Does(() =>
 {
-    var projectToPackagePackageJson = $"{projectToPackage}/project.json";
-    Information("Updating {0} version -> {1}", projectToPackagePackageJson, nugetVersion);
+        GetFiles("**/project.json")
+        .ToList()
+        .ForEach(projectToPackagePackageJson => 
+        {           
+            var projectDir = projectToPackagePackageJson.GetDirectory();
+            if(!projectDir.FullPath.Contains("Tests"))
+            {
+                Information("Updating {0} version -> {1}", projectToPackagePackageJson.FullPath, nugetVersion);
 
-    TransformConfig(projectToPackagePackageJson, projectToPackagePackageJson, new TransformationCollection {
-        { "version", nugetVersion }
-    });
+                TransformConfig(projectToPackagePackageJson.FullPath, projectToPackagePackageJson.FullPath, new TransformationCollection {
+                    { "version", nugetVersion }
+                });
+            }            
+        });    
 });
 
 Task("__Pack")
@@ -150,8 +154,19 @@ Task("__Pack")
         Configuration = "Release",
         OutputDirectory = $"{artifactsDir}"        
     };
-            
-    DotNetCorePack($"{projectToPackage}", settings);
+
+     GetFiles("**/project.json")
+        .ToList()
+        .ForEach(projectToPackagePackageJson => 
+        {           
+            var projectDir = projectToPackagePackageJson.GetDirectory();
+            if(!projectDir.FullPath.Contains("Tests"))
+            {
+                Information("Packing {0}", projectToPackagePackageJson.FullPath);
+                DotNetCorePack($"{projectToPackagePackageJson.FullPath}", settings);               
+            }            
+        });    
+              
 });
 
 Task("__GenerateReleaseNotes")
@@ -169,7 +184,7 @@ Task("__GenerateReleaseNotes")
     RepoBranch               = repoBranchName,    
     Version                  = nugetVersion,
     AllLabels                = true
-});
+    });
 });
 
 
@@ -180,11 +195,8 @@ Task("__PublishNuGetPackages")
             if(isContinuousIntegrationBuild)
             {
 
-                var nugetPackageName = $"{artifactsDir}/{projectName}.{nugetVersion}.nupkg";
-                var nugetSourcePackageName = $"{artifactsDir}/{projectName}.{nugetVersion}.symbols.nupkg";
-
                 var feed = new
-                    {
+                {
                     Name = "NuGetOrg",
                     Source = EnvironmentVariable("PUBLIC_NUGET_FEED_SOURCE")
                 };
@@ -196,14 +208,22 @@ Task("__PublishNuGetPackages")
 
                 var apiKey = EnvironmentVariable("NuGetOrgApiKey");
 
-                 // Push the package. NOTE: this also pushes the symbols package alongside.
-                NuGetPush(nugetPackageName, new NuGetPushSettings {
-                    Source = feed.Source,
-                    ApiKey = apiKey
-                });
-                    
-            }  
-});
+                 GetFiles("{artifactsDir}/*.{nugetVersion}.nupkg")
+                .ToList()
+                .ForEach(nugetPackageToPublish => 
+                     {           
+
+                        // Push the package. NOTE: this also pushes the symbols package alongside.
+                        NuGetPush(nugetPackageToPublish, new NuGetPushSettings {
+                        Source = feed.Source,
+                        ApiKey = apiKey
+                     });
+
+                     
+            });
+
+
+            } });
 
 
 //////////////////////////////////////////////////////////////////////
