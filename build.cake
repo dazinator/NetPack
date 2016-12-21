@@ -22,6 +22,7 @@ var artifactsDir = "./artifacts";
 var globalAssemblyFile = "./src/GlobalAssemblyInfo.cs";
 var repoBranchName = "master";
 var isContinuousIntegrationBuild = !BuildSystem.IsLocalBuild;
+var excludeProjectFromPublish = "NetPack.Web";
 
 var gitVersionInfo = GitVersion(new GitVersionSettings {
     OutputType = GitVersionOutput.Json
@@ -212,18 +213,18 @@ Task("__PublishNuGetPackages")
                 .ToList()
                 .ForEach(nugetPackageToPublish => 
                      {           
-
-                        // Push the package. NOTE: this also pushes the symbols package alongside.
+                        if(!nugetPackageToPublish.FullPath.Contains(excludeProjectFromPublish))
+                        {
+                         // Push the package. NOTE: this also pushes the symbols package alongside.
                         NuGetPush(nugetPackageToPublish, new NuGetPushSettings {
                         Source = feed.Source,
                         ApiKey = apiKey
-                     });
+                        });                     
+                     }});                     
+            }});
 
-                     
-            });
 
-
-            } });
+          
 
 
 //////////////////////////////////////////////////////////////////////
