@@ -293,14 +293,19 @@ namespace NetPack.Pipes
 
             // var sourceMapFilePathString = PathStringExtensions.Parse(sourceMapFilePath);
             // var scriptFilePathString = PathStringExtensions.Parse(script.FileWithDirectory.FileSubPath);            
-            var relativeSubPath = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, script.FileWithDirectory.FileSubPath);
+            //var relativeSubPath = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, script.FileWithDirectory.FileSubPath);           
 
-            //sourceMapFilePathString.MakeRelative(scriptFilePathString);
+            // If the source file content is not inlined in the source map, then we will need
+            // to check the referenced file is accessbile to the browser, and if it isn't then make it accessbile
+            // by serving it on our own netpack path, and amendin the url path in the source map accordingly.
 
-            // var reverseRelativePath = scriptFilePathString.MakeRelative(sourceMapFilePathString);
+            var sourcesContent = sourceMapObject["sourcesContent"] as JArray;
+            if (sourcesContent.Count > 0)
+            {
+                // source file content specified inline, so no need to do anything.
+                return;
+            }
 
-            //  var siteRootRelativeFilePath = context.GetRequestPath, script.FileWithDirectory.FileInfo);
-            //  sourceMapObject["file"] =  relativeSubPath.ToString();
 
             var sourcesArray = sourceMapObject["sources"] as JArray;
             if (sourcesArray != null)
@@ -308,6 +313,8 @@ namespace NetPack.Pipes
                 for (int i = 0; i < sourcesArray.Count; i++)
                 {
                     var item = sourcesArray[i];
+
+                    // look for the source file in the same directory as the script. (a map may contain multiple source files)
                     var sourceFileSubPath = $"{script.FileWithDirectory.Directory}/{item.ToString()}";
                     var sourceFile = context.FileProvider.GetFileInfo(sourceFileSubPath);
                     if (!sourceFile.Exists)
@@ -319,18 +326,13 @@ namespace NetPack.Pipes
                         throw new Exception("Source map refers to a file that could not be found: " + sourceFileSubPath);
                     }
 
-                    // ensure the source file can be served up in the browser.
+                    // ensures the source file can be served.
                     context.AddSourceOutput(script.FileWithDirectory.Directory, sourceFile);
 
-                    //  var sourcesFilePathString = PathStringExtensions.Parse(sourceFileSubPath);
-                    // "sourcesContent": [null, null],
-
+                    // fix up the path to be relative to this index map file, rather than relative to the original map file.
                     var relativePathToSourceFile = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, sourceFileSubPath);
-
-                    //sourceMapFilePathString.MakeRelative(sourcesFilePathString);
-
                     sourcesArray[i] = relativePathToSourceFile.ToString();
-                    //context.GetRequestPath(script.FileWithDirectory.Directory, sourceFile).ToString();
+                
                 }
             }
 

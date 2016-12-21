@@ -98,7 +98,7 @@ namespace NetPack.Pipes.Typescript
                 // also output the original ts files, as this will allow them to be served from the output file provider
                 // which is integrated as webroot file provider. This means they can then be served to the browser
                 // which is needed only when sourcemaps are being used and you wish to step throughh the ts.
-                if (_options.SourceMap)
+                if (_options.SourceMap && _options.InlineSources)
                 {
                     foreach (var inputFileInfo in context.InputFiles)
                     {
