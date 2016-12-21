@@ -8,23 +8,25 @@
 
 ### What problem does it solve?
 
-When developing an ASP.NET Core application, you often have content files in your project like:-
+NetPack is a very easy to use library, that performs file processing for your asp.net core application at runtime. 
+NetPack can watch files, and re-process them when they change.
+NetPack currently has processors for:
 
-- Typescript
-- Javascript
-- Css
-- Sass
-- Less
+- [x] Typescript Compilation
+- [x] Combining multiple Javascript files into a single sjavascript file, with source map.
+- [x] Optimising a set of AMD javascript files, into a bundle, using the rjs optimiser.
 
-`NetPack` allows you to:
+`NetPack` is easy. NetPack will:
 
-1. Define your pre-processing requirements using a C# fluent API.
-2. Pre-process any files that are visible to your ASP.NET Core application (via an IFileProvider), at runtime.
-2. Can `Watch` for changes to any of those files, and re-processes the pipeline when files change. This enables you to edit a source file (e.g Typescript) whilst your application is running, and then refresh your browser and see the updated javascript file from the pipeline.
-3. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
+1. Use C# fluent API to setup your file pre-processing needs in `startup.cs`
+2. Pre-process any files that are accessbile to your ASP.NET Core application at runtime.
+3 `Watch` for changes to any of those files, and re-processes when they change. This enables you to edit a source file (e.g Typescript) whilst your application is running, and then refresh your browser and see the updated javascript file from the pipeline.
+4. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
    (can be embedded files etc)
 
-`NetPack` performs all pre-processing in memory, and it then it allows the outputs (the processed files - also still in memory) to be served up by your ASP.NET Core application by integrating with the `StaticFiles` middleware.
+`NetPack` performs all pre-processing in memory. It allows generated files to be served up to the browser by integrating it's own InMemory FileProvider with your applications IHostingEnvironment.WebRootFileProvider.
+
+All generated files, are held in memory, and accessible by your applications IHotingEnvironment.WebRootFileProvider. This means all of the standard asp.net mvc TagHelpers will resolve any generated scripts that NetPack produces..
 
 # NetPack is different from Gulp / WebPack / Grunt etc etc
 
@@ -46,35 +48,42 @@ Let me show you a startup.cs file, and then i'll break it down..
 
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
             {
-                app.UseContentPipeLine(pipelineBuilder =>
-                {
-                    return pipelineBuilder
-                        .WithInput((inputBuilder) 
-                                     => inputBuilder
-                                        .Include("wwwroot/somefile.ts")
-                                        .Include("wwwroot/someOtherfile.ts"))
-                        .DefinePipeline()
-                            .AddTypeScriptPipe(tsConfig =>
-                                     {
-                                         tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                                         tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                                         tsConfig.NoImplicitAny = true;
-                                         tsConfig.RemoveComments = true;
-                                         tsConfig.SourceMap = true;
-                                     })
-                           //.AddPipe(someOtherPipe) can add more pipes like minification, bundling etc.
-                        .BuildPipeLine();
-                })
-                .UsePipelineOutputAsStaticFiles(); // makes the files output from the pipepline visible to static files middleware
-            }
+            
+             app.UseStaticFiles();
+             
+             app.UseFileProcessing(a =>
+             {
+                a.WithHostingEnvironmentWebrootProvider()
+                    // Simple processor, that compiles typescript files.
+                    .AddTypeScriptPipe(input =>
+                    {
+                        input.Include("ts/*.ts");
+                   }, options =>
+                    {
+                        // options.InlineSourceMap = true;
+                        options.InlineSources = true;
+                        // configure various typescript compilation options here..
+                        // options.InlineSourceMap = true;
+                        //  options.Module = ModuleKind.Amd;
+                    })
+                    // Another processor that combines multiple js files into a bundle file.
+                    .AddJsCombinePipe(input =>
+                    {
+                        input.Include("ts/*.js");
+                    }, () => "bundle.js")
+                    .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
+                    .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
+             });
+
+             app.UseMvc();
         }
 
 
 ```
 
-So, straight off, you can tell this is a proper ASP.NET Core library because we call `services.AddNetPack()` to register the NetPack services with the DI system :-)
+So, straight off, we call `services.AddNetPack()` to register the NetPack services with the DI system :-)
 
-Next, we (fluently?) configure a `Pipeline` for our assets. Intellisense every step of the way baby!
+Next, we (fluently?) configure   for our assets. Intellisense every step of the way baby!
 Configuring a pipeline consists of:
 
 1. Specifying the files you want to be processed by this pipeline.  
