@@ -20,7 +20,7 @@ NetPack currently has processors for:
 - [x] rjs optimisation. (Optimises your AMD javascript files, into bundles, using the rjs optimiser.)
 - [ ] [SystemJS Production workflows](https://github.com/systemjs/systemjs/blob/master/docs/production-workflows.md)
 
-`NetPack` is easy. NetPack will:
+`NetPack` is easy. 
 
 1. Use C# fluent API to setup your file pre-processing needs in `startup.cs`
 2. Pre-process any files that are accessbile to your ASP.NET Core application at runtime.
