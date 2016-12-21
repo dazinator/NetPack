@@ -102,8 +102,17 @@ namespace NetPack.Pipes.Typescript
                 {
                     foreach (var inputFileInfo in context.InputFiles)
                     {
-                        context.AddOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
-                    }                  
+                        //  context.AllowServe(inputFileInfo);
+                        if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
+                        {
+                            context.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
+                        }
+                        else
+                        {
+                            // source file is already being served.
+                        }
+
+                    }
 
                 }
 

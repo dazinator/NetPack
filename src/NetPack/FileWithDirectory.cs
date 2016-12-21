@@ -36,5 +36,7 @@ namespace NetPack
                 return (Directory.GetHashCode()*397) ^ FileInfo.GetHashCode();
             }
         }
+
+      
     }
 }

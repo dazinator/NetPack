@@ -14,7 +14,7 @@ namespace NetPack.Pipeline
 
         IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);
 
-        IPipelineBuilder ServeOutputAsStaticFiles(string baseRequestPath = null);
+        IPipelineBuilder UseBaseRequestPath(string baseRequestPath = null);
 
         string BaseRequestPath { get; set; }
 

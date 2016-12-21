@@ -10,7 +10,7 @@ namespace NetPack.Pipeline
 {
     public interface IPipeLine
     {
-        IDirectory Directory { get; set; }
+        IDirectory ProcessedOutputDirectory { get; set; }
 
         List<PipeConfiguration> Pipes { get; }
 
@@ -31,9 +31,15 @@ namespace NetPack.Pipeline
 
         IFileProvider EnvironmentFileProvider { get; set; }
 
-        IFileProvider OutputFileProvider { get; set; }
+        IFileProvider ProcessedOutputFileProvider { get; set; }
 
         IFileProvider InputAndOutputFileProvider { get; set; }
+
+        IDirectory SourcesOutputDirectory { get; set; }
+
+        IFileProvider SourcesFileProvider { get; set; }
+
+        IFileProvider WebrootFileProvider { get; set; }
 
         //PipelineOutput Flush(TimeSpan? timeout = null);
 

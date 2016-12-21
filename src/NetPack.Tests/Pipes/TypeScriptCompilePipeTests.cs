@@ -55,8 +55,8 @@ namespace NetPack.Tests.Pipes
 
 
             // Assert
-            ThenTheOutputFileFromPipe("SomeFolder/somefile.js", Assert.NotNull);
-            ThenTheOutputFileFromPipe("SomeFolder/somefile.js.map", Assert.NotNull);
+            ThenTheProcessedOutputDirectoryFile("SomeFolder/somefile.js", Assert.NotNull);
+            ThenTheProcessedOutputDirectoryFile("SomeFolder/somefile.js.map", Assert.NotNull);
 
         }
 

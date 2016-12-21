@@ -104,7 +104,7 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
             {
                 // Write the content of outputs files to the response for inspection.
                 var builder = new StringBuilder();
-                foreach (var outputFile in pipeline.OutputFileProvider.GetDirectoryContents(outputFolder))
+                foreach (var outputFile in pipeline.ProcessedOutputFileProvider.GetDirectoryContents(outputFolder))
                 {
                     using (var reader = new StreamReader(outputFile.CreateReadStream()))
                     {

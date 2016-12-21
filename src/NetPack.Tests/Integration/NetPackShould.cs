@@ -163,7 +163,7 @@ namespace NetPack.Tests.Integration
                             tsConfig.SourceMap = true;
                         }
                         )
-                        .ServeOutputAsStaticFiles("netpack")
+                        .UseBaseRequestPath("netpack")
                         .Watch();
                 });
 

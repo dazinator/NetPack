@@ -7,6 +7,7 @@ using Microsoft.Extensions.FileProviders;
 using NetPack.File;
 using NetPack.Pipes;
 using NetPack.Requirements;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 
 namespace NetPack.Pipeline
 {
@@ -37,11 +38,12 @@ namespace NetPack.Pipeline
     public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineBuilder
     {
 
-        public PipelineConfigurationBuilder(IApplicationBuilder appBuilder, IFileProvider fileProvider = null)
+        public PipelineConfigurationBuilder(IApplicationBuilder appBuilder, IDirectory sourcesOutputDirectory)
         {
             ApplicationBuilder = appBuilder;
             Pipes = new List<PipeConfiguration>();
             Requirements = new List<IRequirement>();
+            SourcesOutputDirectory = sourcesOutputDirectory;
             //FileProvider = fileProvider ?? GetHostingEnvironmentContentFileProvider();
         }
 
@@ -76,6 +78,8 @@ namespace NetPack.Pipeline
         public IFileProvider FileProvider { get; set; }
 
         public string BaseRequestPath { get; set; }
+
+        public IDirectory SourcesOutputDirectory { get; }
 
 
         // public IDirectory Directory { get; set; }
@@ -134,7 +138,7 @@ namespace NetPack.Pipeline
 
         public IPipeLine BuildPipeLine()
         {
-            var pipeLine = new Pipeline(FileProvider, Pipes, Requirements, BaseRequestPath);
+            var pipeLine = new Pipeline(FileProvider, Pipes, Requirements, SourcesOutputDirectory, BaseRequestPath);
             // var fileProvider = new NetPackPipelineFileProvider(pipeLine);
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
@@ -150,7 +154,7 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public IPipelineBuilder ServeOutputAsStaticFiles(string baseRequestPath = null)
+        public IPipelineBuilder UseBaseRequestPath(string baseRequestPath = null)
         {
 
             if (baseRequestPath != null)

@@ -106,13 +106,22 @@ namespace NetPack.Pipeline
                 var pipeLines = _pipelines.ToArray();
 
                 // IEnumerable<PipeConfiguration> dirtyPipeLiness = pipeLines.Select(p => p.GetDirtyPipes());
+                //foreach (var pipe in pipeLines)
+                //{
+                //    if(pipe.GetDirtyPipes())
+                //    {
+
+                //    }
+                //}
+
 
                 var dirtyPipeLines = pipeLines.Select(p =>
                        new
                        {
                            DirtyPipes = p.GetDirtyPipes(),
                            Pipeline = p
-                       });
+                       }).Where(a => a.DirtyPipes.Any());
+
                 bool hasWork = dirtyPipeLines.Any();
                 while (hasWork)
                 {
@@ -134,7 +143,7 @@ namespace NetPack.Pipeline
                        {
                            DirtyPipes = p.GetDirtyPipes(),
                            Pipeline = p
-                       });
+                       }).Where(a => a.DirtyPipes.Any());
                     hasWork = dirtyPipeLines.Any();
                 }
 

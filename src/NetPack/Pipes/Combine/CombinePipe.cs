@@ -62,7 +62,7 @@ namespace NetPack.Pipes
                 }
             }
 
-            if(!hasChanges)
+            if (!hasChanges)
             {
                 return;
             }
@@ -70,7 +70,9 @@ namespace NetPack.Pipes
             bool hasSourceMappingDirectives = false;
             var combiner = new ScriptCombiner();
             var scriptInfos = new List<CombinedScriptInfo>(context.InputFiles.Length);
+
             var ms = new MemoryStream();
+
             int totalLineCount = 0;
             var encoding = Encoding.UTF8;
 
@@ -96,6 +98,7 @@ namespace NetPack.Pipes
                 }
             }
 
+            //   var outputFilep = FileWithDirectory.Parse(_options.OutputFilePath);
 
             // Now if there are source mapping url directives present, need to produce a new source map file and directive.
             var outputFilePath = SubPathInfo.Parse(_options.OutputFilePath);
@@ -105,24 +108,32 @@ namespace NetPack.Pipes
                 // we are creating a new source map file for the new combined file.
                 // it will have the same name but ".map" appended.
 
-                var mapFileName = outputFilePath.ToString() + ".map";
-                //var mapFilePath = context.GetServePath(outputFilePath.ToString() + ".map");
 
+                //var mapFilePath = context.GetServePath(outputFilePath.ToString() + ".map");
+                //  var mapFileWithDirectory = new FileWithDirectory() { Directory = }
                 // SubPathInfo.Parse(context.BaseRequestPath + "/" + outputFilePath.ToString() + ".map");
-                var indexMapFile = BuildIndexMap(ms, scriptInfos, mapFileName, outputFilePath, context);
+                var indexMapFile = BuildIndexMap(ms, scriptInfos, outputFilePath, context);
 
                 // Output the new map file in the pipeline.
                 context.AddOutput(outputFilePath.Directory, indexMapFile);
 
                 // sourcemapping url is resolved relative to the source ifle
-                var mapServePath = $"/{indexMapFile.Name}"; // context.GetRequestPath(outputFilePath.Directory, indexMapFile);
-                                                            //  var mapServePath = context.GetRequestPath(outputFilePath.Directory, indexMapFile);
-                                                            // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
+                var mapServePath = $"{indexMapFile.Name}"; // context.GetRequestPath(outputFilePath.Directory, indexMapFile);
+                                                           //  var mapServePath = context.GetRequestPath(outputFilePath.Directory, indexMapFile);
+                                                           // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
                 using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
                 {
                     writer.WriteLine();
                     await writer.WriteLineAsync($"//# sourceMappingURL={mapServePath.ToString()}");
                 }
+
+                // make sure all the source js files can be served up to the browser.
+                foreach (var item in scriptInfos)
+                {
+                    context.AddSourceOutput(item.FileWithDirectory.Directory, item.FileWithDirectory.FileInfo);
+                }
+
+
             }
 
             //ensure it's reset
@@ -144,10 +155,12 @@ namespace NetPack.Pipes
         //}
 
 
-        private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, string mapFileName, SubPathInfo combinedFilePath, IPipelineContext context)
+        private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, SubPathInfo combinedFilePath, IPipelineContext context)
         {
             // todo
             // throw new NotImplementedException();
+
+
 
             // 1. Create a new index map json object, and append sections for each of the existing source map declarations.
             JObject indexMap = new JObject();
@@ -158,6 +171,7 @@ namespace NetPack.Pipes
 
             // for each of the original scripts that was combined.
             // check for a source map declaration - which is a requestpath to a .map file.
+            var mapFileName = combinedFilePath.ToString() + ".map";
             foreach (var script in scriptInfos)
             {
                 var declaration = script.SourceMapDeclaration;
@@ -189,7 +203,7 @@ namespace NetPack.Pipes
                     string sourceMapFileSubPath;
                     if (!declaration.SourceMappingUrl.StartsWith("/"))
                     {
-                        sourceMapFileSubPath = $"/{script.FileWithDirectory.Directory}/{declaration.SourceMappingUrl}";
+                        sourceMapFileSubPath = $"{script.FileWithDirectory.Directory}/{declaration.SourceMappingUrl}";
                     }
                     else
                     {
@@ -208,15 +222,10 @@ namespace NetPack.Pipes
                     var sourceMapFileContents = sourceMapFile.ReadAllContent();
                     sourceMapObject = JObject.Parse(sourceMapFileContents);
 
-                    // We will now change the paths in the inlined map, that will currenlty be relative to original source file, 
-                    // to be paths that are relative to the site root instead. 
-                    // i.e /somefile.js will become /full/path/somefile.js
-                    // This is because the new map file may live in a different location and the browser still needs to be able to resolve these files.
-                    AdjustSourceMapPathsRelativeToSiteRoot(sourceMapObject, script, context);
 
 
 
-
+                    AdjustSourceMapPathsRelativeToSiteRoot(sourceMapObject, combinedFilePath.Directory, script, context);
 
                     // if we couldn't find the source map file, then it means the source mapping url declaration in the 
                     // js file that we processed, does not take a form that identifies a file with the IFileProvider.
@@ -245,6 +254,7 @@ namespace NetPack.Pipes
             }
 
             indexMap["sections"] = sections;
+
             var file = new StringFileInfo(indexMap.ToString(), mapFileName);
             return file;
 
@@ -271,10 +281,26 @@ namespace NetPack.Pipes
 
         }
 
-        private void AdjustSourceMapPathsRelativeToSiteRoot(JObject sourceMapObject, CombinedScriptInfo script, IPipelineContext context)
+
+        private void AdjustSourceMapPathsRelativeToSiteRoot(JObject sourceMapObject, string sourceMapDirectory, CombinedScriptInfo script, IPipelineContext context)
         {
-            var siteRootRelativeFilePath = context.GetRequestPath(script.FileWithDirectory.Directory, script.FileWithDirectory.FileInfo);
-            sourceMapObject["file"] = siteRootRelativeFilePath.ToString();
+
+            // because we are inlining this source map into our index source map,
+            // the file / source file paths in the source map need to be adjuted to be relative to our index source map.
+
+           // var sourceMapFilePath = $"{outputFileSubPath.Directory}/{sourceMapFileName}";
+         //   var sourceMapSubPathInfo = SubPathInfo.Parse(sourceMapFilePath);
+
+            // var sourceMapFilePathString = PathStringExtensions.Parse(sourceMapFilePath);
+            // var scriptFilePathString = PathStringExtensions.Parse(script.FileWithDirectory.FileSubPath);            
+            var relativeSubPath = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, script.FileWithDirectory.FileSubPath);
+
+                //sourceMapFilePathString.MakeRelative(scriptFilePathString);
+
+           // var reverseRelativePath = scriptFilePathString.MakeRelative(sourceMapFilePathString);
+
+            //  var siteRootRelativeFilePath = context.GetRequestPath, script.FileWithDirectory.FileInfo);
+            sourceMapObject["file"] = relativeSubPath.ToString();
 
             var sourcesArray = sourceMapObject["sources"] as JArray;
             if (sourcesArray != null)
@@ -287,8 +313,22 @@ namespace NetPack.Pipes
                     if (!sourceFile.Exists)
                     {
                         // todo throw an exception because the sourcemap appears to be pointing to a file that doesnt exist.?
+                        // ensure that source file is accessbile.
+                        //TODO: Need a way to serve up sources without triggering a change.
+                        //  if(!out)
+                        throw new Exception("Source map refers to a file that could not be found: " + sourceFileSubPath);
                     }
-                    sourcesArray[i] = context.GetRequestPath(script.FileWithDirectory.Directory, sourceFile).ToString();
+
+                    // ensure the source file can be served up in the browser.
+                    context.AddSourceOutput(script.FileWithDirectory.Directory, sourceFile);
+
+                  //  var sourcesFilePathString = PathStringExtensions.Parse(sourceFileSubPath);
+                    var relativePathToSourceFile = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, sourceFileSubPath);
+
+                    //sourceMapFilePathString.MakeRelative(sourcesFilePathString);
+
+                    sourcesArray[i] = relativePathToSourceFile.ToString();
+                    //context.GetRequestPath(script.FileWithDirectory.Directory, sourceFile).ToString();
                 }
             }
 

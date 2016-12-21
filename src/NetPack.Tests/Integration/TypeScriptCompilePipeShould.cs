@@ -17,6 +17,7 @@ using NetPack.Pipeline;
 using NetPack.Pipes.Typescript;
 using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 
 namespace NetPack.Tests.Integration
 {
@@ -34,9 +35,9 @@ namespace NetPack.Tests.Integration
             _client = _server.CreateClient();
         }
 
-        private async Task<string> GetResponseString(string querystring = "")
+        private async Task<string> GetResponseString(string path, string querystring = "")
         {
-            var request = "/compilets";
+            var request = path;
             if (!string.IsNullOrEmpty(querystring))
             {
                 request += "?" + querystring;
@@ -53,7 +54,16 @@ namespace NetPack.Tests.Integration
         {
 
             // Act
-            var responseString = await GetResponseString();
+            var responseString = await GetResponseString("/netpack/wwwroot/somefile.js");
+            Assert.False(string.IsNullOrWhiteSpace(responseString));
+
+            // because we have source maps enabled, we should also be able to resolve the sourcemap, as well as the original source file.
+            responseString = await GetResponseString("/netpack/wwwroot/somefile.js.map");
+            Assert.False(string.IsNullOrWhiteSpace(responseString));
+
+
+            responseString = await GetResponseString("/netpack/wwwroot/somefile.ts");
+            Assert.False(string.IsNullOrWhiteSpace(responseString));
 
             // Assert
             //   Assert.Equal("Pass in a number to check in the form /checkprime?5", responseString);
@@ -83,46 +93,76 @@ namespace NetPack.Tests.Integration
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
 
+            app.UseStaticFiles(new StaticFileOptions() { });
 
-            app.Run(async (context) =>
+            var inputFileProvider = new InMemoryFileProvider();
+            inputFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
+
+            app.UseFileProcessing(a =>
             {
-                var nodeServices = context.RequestServices.GetService<INodeServices>();
-                var nodeJsRequirement = context.RequestServices.GetService<NodeJsRequirement>();
-                var embeddedResourceProvider = context.RequestServices.GetService<IEmbeddedResourceProvider>();
-
-                var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider);
-
-                var inMemoryFileProvider = new InMemoryFileProvider();
-                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
-                // inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
-
-                var pipelineContext = new PipelineContext(inMemoryFileProvider);
-                var input = new PipelineInput();
-                input.AddInclude("wwwroot/*.ts");
-                pipelineContext.SetInput(input);
-                //  var pipelineContext = new PipelineContext();
-                //  pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
-
-                await pipe.ProcessAsync(pipelineContext, CancellationToken.None);
-
-                var builder = new StringBuilder();
-
-                foreach (var output in pipelineContext.Output.GetFolder("wwwroot"))
-                {
-                    using (var reader = new StreamReader(output.FileInfo.CreateReadStream()))
+                a.WithFileProvider(inputFileProvider)
+                    // Simple processor, that compiles typescript files.
+                    .AddTypeScriptPipe(input =>
                     {
-                        builder.AppendLine("File Name: " + output.Path.ToString());
-                        builder.Append(reader.ReadToEnd());
-                    }
-                }
+                        input.Include("wwwroot/*.ts");
+                    }, options =>
+                    {
+                        // configure various typescript compilation options here..
+                        options.SourceMap = true;
+                        // options.InlineSourceMap = true;
+                        //  options.Module = ModuleKind.Amd;
+                    })
+                    .UseBaseRequestPath("netpack")
 
-                await context.Response.WriteAsync(builder.ToString());
-
+                    // allows the files produced from processing to be resolved via the environemtns webroot file provider..
+                    .Watch(); // Input files are watched, and when changes occur, pipeline will automatically trigger necessary processing.
+                    
             });
+
+            //   app.Run(async (context) =>
+            // {
+            //var nodeServices = context.RequestServices.GetService<INodeServices>();
+            //var nodeJsRequirement = context.RequestServices.GetService<NodeJsRequirement>();
+            //var embeddedResourceProvider = context.RequestServices.GetService<IEmbeddedResourceProvider>();
+
+            //var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider);
+
+
+            //// inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
+
+            //// When source maps are encountered, the processor need to ensure thats source files being processed (such as typescript files etc)
+            //// can be served up to the browser. The following directory is where such source files will be added by the processor, so we can
+            //// check after processing that it has added the correct source files.
+            //IDirectory sourcesOutputDirectory = new InMemoryDirectory();
+
+            //var pipelineContext = new PipelineContext(inputFileProvider, sourcesOutputDirectory);
+            //var input = new PipelineInput();
+            //input.AddInclude("wwwroot/*.ts");
+            //pipelineContext.SetInput(input);
+            //  var pipelineContext = new PipelineContext();
+            //  pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
+
+            //await pipe.ProcessAsync(pipelineContext, CancellationToken.None);
+
+            //var builder = new StringBuilder();
+
+            //foreach (var output in pipelineContext.ProcessedOutput.GetFolder("wwwroot"))
+            //{
+            //    using (var reader = new StreamReader(output.FileInfo.CreateReadStream()))
+            //    {
+            //        builder.AppendLine("File Name: " + output.Path.ToString());
+            //        builder.Append(reader.ReadToEnd());
+            //    }
+            //}
+
+            //await context.Response.WriteAsync(builder.ToString());
+
+            //   });
 
         }
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddNetPack();
         }
     }

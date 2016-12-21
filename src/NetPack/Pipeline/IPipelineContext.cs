@@ -14,7 +14,9 @@ namespace NetPack.Pipeline
 
         void AddOutput(string directory, IFileInfo info);
 
-        IDirectory Output { get; set; }
+        IDirectory ProcessedOutput { get; set; }
+
+        IDirectory SourcesOutput { get; }
 
         IFileProvider FileProvider { get; set; }
 
@@ -44,6 +46,8 @@ namespace NetPack.Pipeline
         /// Returns all the files that are detected as inputs for processing.
         /// </summary>
         FileWithDirectory[] InputFiles { get; set; }
+
+        void AddSourceOutput(string directory, IFileInfo file);
 
         //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
 

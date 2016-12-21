@@ -39,15 +39,15 @@ namespace NetPack.Tests.Pipes
 
 
             // The the combined file should be output from the pipe.
-            ThenTheOutputFileFromPipe("mybundle.js", Assert.NotNull);
+            ThenTheProcessedOutputDirectoryFile("mybundle.js", Assert.NotNull);
 
-            // The original, individual files. should not be output from the pipe.
-            ThenTheOutputFileFromPipe("js/red.js", Assert.Null);
-            ThenTheOutputFileFromPipe("js/green.js", Assert.Null);
-            ThenTheOutputFileFromPipe("js/blue.js", Assert.Null);
+            // The original, source files. should not be in the processed output directory.
+            ThenTheProcessedOutputDirectoryFile("js/red.js", Assert.Null);
+            ThenTheProcessedOutputDirectoryFile("js/green.js", Assert.Null);
+            ThenTheProcessedOutputDirectoryFile("js/blue.js", Assert.Null);           
 
-            // The combined file should not have any of the source mapping urls present in the input files.
-            ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
+            // The combined file should not have any of the source mapping urls that were present in the original input files.
+            ThenTheProcessedOutputDirectoryFile("mybundle.js", (combinedFile) =>
             {
                 var content = combinedFile.ReadAllContent();
                 Assert.DoesNotContain("//# sourceMappingURL=/" + "js/red.js.map", content);
@@ -55,29 +55,42 @@ namespace NetPack.Tests.Pipes
                 Assert.DoesNotContain("//# sourceMappingURL=/" + "js/blue.js.map", content);
             });
 
-            // The combined file should have a source mapping url, which points to its own map file, containing the index source map.
-
+        
             if (sourceMapMode != SourceMapMode.None)
             {
-                ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
+                // The combined file should have a source mapping url, which points to its own index source map file.
+                ThenTheProcessedOutputDirectoryFile("mybundle.js", (combinedFile) =>
                 {
                     var content = combinedFile.ReadAllContent();
-                    Assert.Contains("//# sourceMappingURL=/" + "mybundle.js.map", content);
+                    Assert.Contains("//# sourceMappingURL=" + "mybundle.js.map", content);
                 });
 
-                // The index map file should be output from the pipe.
-                ThenTheOutputFileFromPipe("mybundle.js.map", Assert.NotNull);
+                // There should be an index source map.
+                ThenTheProcessedOutputDirectoryFile("mybundle.js.map", Assert.NotNull);
+
+                // Because source maps are enabled, the processor should place the source files into the sources directory which will allow them to be
+                // served up to the browser.
+                ThenTheSourcesDirectoryFile("js/red.js", Assert.NotNull);
+                ThenTheSourcesDirectoryFile("js/green.js", Assert.NotNull);
+                ThenTheSourcesDirectoryFile("js/blue.js", Assert.NotNull);
             }
             else
             {
-                ThenTheOutputFileFromPipe("mybundle.js", (combinedFile) =>
+                // The combined file should not have any source mapping url.
+                ThenTheProcessedOutputDirectoryFile("mybundle.js", (combinedFile) =>
                 {
                     var content = combinedFile.ReadAllContent();
                     Assert.DoesNotContain("//# sourceMappingURL=/" + "mybundle.js.map", content);
                 });
 
-                // There shoudl be no index map file produce from the pipe.
-                ThenTheOutputFileFromPipe("mybundle.js.map", Assert.Null);
+                // There should not be an index source map.
+                ThenTheProcessedOutputDirectoryFile("mybundle.js.map", Assert.Null);
+
+                // Because source maps are not enabled, the processor should not place the source files into the sources directory, as they will not be served up to the 
+                // browser using the net pack integrated webroot file provider.
+                ThenTheSourcesDirectoryFile("js/red.js", Assert.Null);
+                ThenTheSourcesDirectoryFile("js/green.js", Assert.Null);
+                ThenTheSourcesDirectoryFile("js/blue.js", Assert.Null);
             }
 
         }

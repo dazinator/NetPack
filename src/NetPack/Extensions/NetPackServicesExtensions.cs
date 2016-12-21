@@ -1,3 +1,4 @@
+
 using System;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,7 @@ using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -28,6 +30,7 @@ namespace NetPack
             // services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
             services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
             services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
+            services.AddTransient<IDirectory, InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
 
             return services;
         }
@@ -42,7 +45,8 @@ namespace NetPack
                     "Could not find a required netpack service. Have you called services.AddNetPack() in your startup class?");
             }
 
-            var builder = new PipelineConfigurationBuilder(appBuilder);
+            var sourcesDirectory = appBuilder.ApplicationServices.GetService<IDirectory>();
+            var builder = new PipelineConfigurationBuilder(appBuilder, sourcesDirectory);
             processorBuilder(builder);
 
             var pipeline = builder.BuildPipeLine();
@@ -54,7 +58,7 @@ namespace NetPack
                 pipeLineWatcher.WatchPipeline(pipeline);
             }
 
-            var outputFileProvider = pipeline.OutputFileProvider;
+            var outputFileProvider = pipeline.WebrootFileProvider;
             if (!string.IsNullOrWhiteSpace(pipeline.BaseRequestPath))
             {
                 outputFileProvider = new RequestPathFileProvider(pipeline.BaseRequestPath, outputFileProvider);
@@ -72,7 +76,7 @@ namespace NetPack
             }
 
             pipeline.Initialise();
-          
+
             return new NetPackApplicationBuilder(appBuilder, pipeline);
         }
     }

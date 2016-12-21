@@ -1,4 +1,5 @@
 using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Hosting;
@@ -50,7 +51,7 @@ namespace NetPack.Tests
             var mockAnotherPipe = new Mock<IPipe>();
             mockAnotherPipe.SetupAllProperties();
 
-            var sut = (IPipelineConfigurationBuilder)new PipelineConfigurationBuilder(app);
+            var sut = (IPipelineConfigurationBuilder)new PipelineConfigurationBuilder(app, new InMemoryDirectory());
 
             var pipeLine = sut.WithFileProvider(fileProvider)
                 .AddPipe(input =>
@@ -67,11 +68,13 @@ namespace NetPack.Tests
             // assert
             Assert.NotNull(pipeLine);
             Assert.False(pipeLine.HasFlushed);
-            Assert.NotNull(pipeLine.Directory);
+            Assert.NotNull(pipeLine.ProcessedOutputDirectory);
             Assert.NotNull(pipeLine.EnvironmentFileProvider);
             Assert.NotNull(pipeLine.InputAndOutputFileProvider);
-            Assert.NotNull(pipeLine.OutputFileProvider);
-           
+            Assert.NotNull(pipeLine.ProcessedOutputFileProvider);
+            Assert.NotNull(pipeLine.SourcesOutputDirectory);
+            Assert.NotNull(pipeLine.SourcesFileProvider);
+
             Assert.NotNull(pipeLine.Pipes);
             Assert.True(pipeLine.Pipes.Count == 2);
 

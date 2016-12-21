@@ -17,6 +17,7 @@ namespace NetPack.Tests.Pipes
     {
 
         private IDirectory _directory = new InMemoryDirectory();
+        private IDirectory _sourcesdirectory = new InMemoryDirectory();
 
         public FileWithDirectory GivenAFileInfo(string path, int length)
         {
@@ -42,19 +43,28 @@ namespace NetPack.Tests.Pipes
         {
             //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
-            PipelineContext = new PipelineContext(provider);
+            PipelineContext = new PipelineContext(provider, _sourcesdirectory);
             PipelineContext.SetInput(files);
             Sut = pipeFactory();
             await Sut.ProcessAsync(PipelineContext, CancellationToken.None);
         }
 
-        protected IFileInfo ThenTheOutputFileFromPipe(string filePath, Action<IFileInfo> assertions)
+        protected IFileInfo ThenTheProcessedOutputDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var outputFile = PipelineContext.Output.GetFile(filePath);
+            var outputFile = PipelineContext.ProcessedOutput.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(outputFile?.FileInfo);
             return outputFile?.FileInfo;
+        }
+
+        protected IFileInfo ThenTheSourcesDirectoryFile(string filePath, Action<IFileInfo> assertions)
+        {
+            var sourceFile = PipelineContext.SourcesOutput.GetFile(filePath);
+            //_directory.FirstOrDefault(
+            //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
+            assertions(sourceFile?.FileInfo);
+            return sourceFile?.FileInfo;
         }
 
         public IPipe Sut { get; set; }

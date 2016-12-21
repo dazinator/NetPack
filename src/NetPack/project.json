@@ -7,7 +7,6 @@
     },
     "define": []
   },
-
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Microsoft.AspNetCore.NodeServices": "1.0.0-beta-000007",
@@ -20,7 +19,6 @@
     "ReflectionBridge": "0.0.11",
     "Dazinator.AspNet.Extensions.FileProviders": "1.2.0"
   },
-
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50",

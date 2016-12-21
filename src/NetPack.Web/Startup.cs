@@ -84,7 +84,7 @@ namespace NetPack.Web
                     {
                         input.Include("ts/*.js");
                     }, () => "bundle.js")
-                    .ServeOutputAsStaticFiles("netpack") // serves all outputs using the specified base request path.
+                    .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
             });
 

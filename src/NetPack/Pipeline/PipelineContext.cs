@@ -13,18 +13,21 @@ namespace NetPack.Pipeline
     public class PipelineContext : IPipelineContext
     {
 
-        public PipelineContext(IFileProvider fileProvider) : this(fileProvider, new InMemoryDirectory())
+        public PipelineContext(IFileProvider fileProvider, IDirectory sourceOutput) : this(fileProvider, sourceOutput, new InMemoryDirectory())
         {
+
         }
 
-        public PipelineContext(IFileProvider fileProvider, IDirectory directory) : this(fileProvider, directory, string.Empty)
+        public PipelineContext(IFileProvider fileProvider, IDirectory sourceOutput, IDirectory directory) : this(fileProvider, sourceOutput, directory, string.Empty)
         {
+
         }
 
-        public PipelineContext(IFileProvider fileProvider, IDirectory directory, string baseRequestPath)
+        public PipelineContext(IFileProvider fileProvider, IDirectory sourceOutput, IDirectory directory, string baseRequestPath)
         {
             FileProvider = fileProvider;
-            Output = directory;
+            SourcesOutput = sourceOutput;
+            ProcessedOutput = directory;
             BaseRequestPath = baseRequestPath;
             //Input = input;
         }
@@ -33,10 +36,10 @@ namespace NetPack.Pipeline
 
         public void AddOutput(string directory, IFileInfo file)
         {
-            Output.AddOrUpdateFile(directory, file);
+            ProcessedOutput.AddOrUpdateFile(directory, file);
             // return new FileWithDirectory(directory, file);
             //  Output.AddFile(directory, info);
-        }
+        }       
 
         public PathString GetRequestPath(string directory, IFileInfo fileInfo)
         {
@@ -54,7 +57,9 @@ namespace NetPack.Pipeline
             //return BaseRequestPath.Add(directory).Add(fileInfo.Name);
         }
 
-        public IDirectory Output { get; set; }
+        public IDirectory ProcessedOutput { get; set; }
+
+        public IDirectory SourcesOutput { get; set; }
 
         public IFileProvider FileProvider { get; set; }
 
@@ -98,9 +103,9 @@ namespace NetPack.Pipeline
         public FileWithDirectory[] ExcludeFiles { get; set; }
 
         public void SetInput(PipelineInput input)
-        {            
+        {
             SetInput(FileProvider.GetFiles(input));
-           // ExcludeFiles = FileProvider.GetFiles(input.e)
+            // ExcludeFiles = FileProvider.GetFiles(input.e)
         }
 
         public void SetInput(FileWithDirectory[] input)
@@ -108,11 +113,21 @@ namespace NetPack.Pipeline
             // grab the input files from the file provider.
             PreviousInputFiles = InputFiles;
             InputFiles = input;
-           
+
         }
 
-
-
-
+        /// <summary>
+        /// Any file added here will be able to be served up to the browser, but will not trigger
+        /// any additional processing, as it's assumed to be a source file which is not modified, and for which some generated 
+        /// processed file was produced. Usually you want this method if you need to expose the original source file because source maps are
+        /// being used.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="fileInfo"></param>
+        public void AddSourceOutput(string directory, IFileInfo fileInfo)
+        {
+            this.SourcesOutput.AddOrUpdateFile(directory, fileInfo);
+            //  throw new NotImplementedException();
+        }
     }
 }
