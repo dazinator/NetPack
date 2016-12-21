@@ -2,6 +2,7 @@
 using NetPack.Pipes;
 using NetPack.Requirements;
 using System;
+using NetPack.Pipes.Typescript;
 
 namespace NetPack.Pipeline
 {
@@ -27,5 +28,6 @@ namespace NetPack.Pipeline
         /// <param name="requiement"></param>
         /// <returns></returns>
         IPipelineBuilder IncludeRequirement(IRequirement requiement);
+       
     }
 }

@@ -288,19 +288,19 @@ namespace NetPack.Pipes
             // because we are inlining this source map into our index source map,
             // the file / source file paths in the source map need to be adjuted to be relative to our index source map.
 
-           // var sourceMapFilePath = $"{outputFileSubPath.Directory}/{sourceMapFileName}";
-         //   var sourceMapSubPathInfo = SubPathInfo.Parse(sourceMapFilePath);
+            // var sourceMapFilePath = $"{outputFileSubPath.Directory}/{sourceMapFileName}";
+            //   var sourceMapSubPathInfo = SubPathInfo.Parse(sourceMapFilePath);
 
             // var sourceMapFilePathString = PathStringExtensions.Parse(sourceMapFilePath);
             // var scriptFilePathString = PathStringExtensions.Parse(script.FileWithDirectory.FileSubPath);            
             var relativeSubPath = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, script.FileWithDirectory.FileSubPath);
 
-                //sourceMapFilePathString.MakeRelative(scriptFilePathString);
+            //sourceMapFilePathString.MakeRelative(scriptFilePathString);
 
-           // var reverseRelativePath = scriptFilePathString.MakeRelative(sourceMapFilePathString);
+            // var reverseRelativePath = scriptFilePathString.MakeRelative(sourceMapFilePathString);
 
             //  var siteRootRelativeFilePath = context.GetRequestPath, script.FileWithDirectory.FileInfo);
-            sourceMapObject["file"] = relativeSubPath.ToString();
+            //  sourceMapObject["file"] =  relativeSubPath.ToString();
 
             var sourcesArray = sourceMapObject["sources"] as JArray;
             if (sourcesArray != null)
@@ -322,7 +322,9 @@ namespace NetPack.Pipes
                     // ensure the source file can be served up in the browser.
                     context.AddSourceOutput(script.FileWithDirectory.Directory, sourceFile);
 
-                  //  var sourcesFilePathString = PathStringExtensions.Parse(sourceFileSubPath);
+                    //  var sourcesFilePathString = PathStringExtensions.Parse(sourceFileSubPath);
+                    // "sourcesContent": [null, null],
+
                     var relativePathToSourceFile = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, sourceFileSubPath);
 
                     //sourceMapFilePathString.MakeRelative(sourcesFilePathString);

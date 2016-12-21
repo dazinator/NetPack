@@ -26,6 +26,9 @@ module.exports = function (callback, requestDto) {
     if (options.removeComments) {
         args = args + ' --removeComments';
     }
+    if (options.inlineSources) {
+        args = args + ' --inlineSources';
+    }
    
 
     //  '--traceResolution --baseUrl testFiles ';

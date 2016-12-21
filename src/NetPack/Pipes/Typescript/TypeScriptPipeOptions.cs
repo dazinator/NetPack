@@ -20,6 +20,8 @@
         public bool NoImplicitAny { get; set; }
         public string OutFile { get; set; }
         public string BaseUrl { get; set; }
+        public bool InlineSources { get; set; }
+
         public enum ScriptTarget
         {
             Es5,

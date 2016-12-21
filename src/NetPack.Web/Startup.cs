@@ -38,7 +38,7 @@ namespace NetPack.Web
             // Add framework services.
             services.AddNetPack();
             services.AddMvc();
-           
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -75,6 +75,8 @@ namespace NetPack.Web
                         input.Include("ts/*.ts");
                     }, options =>
                     {
+                        // options.InlineSourceMap = true;
+                        options.InlineSources = true;
                         // configure various typescript compilation options here..
                         // options.InlineSourceMap = true;
                         //  options.Module = ModuleKind.Amd;
