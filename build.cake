@@ -49,12 +49,12 @@ Teardown(context =>
 
 Task("__Default")    
     .IsDependentOn("__SetAppVeyorBuildNumber")
-    .IsDependentOn("__Clean")
+   // .IsDependentOn("__Clean")
     .IsDependentOn("__Restore")
     .IsDependentOn("__UpdateAssemblyVersionInformation")
-    .IsDependentOn("__Build")
-    .IsDependentOn("__Test")
     .IsDependentOn("__UpdateProjectJsonVersion")
+    .IsDependentOn("__Build")
+    .IsDependentOn("__Test")    
     .IsDependentOn("__Pack")
     .IsDependentOn("__GenerateReleaseNotes")
     .IsDependentOn("__PublishNuGetPackages");
@@ -209,7 +209,7 @@ Task("__PublishNuGetPackages")
 
                 var apiKey = EnvironmentVariable("NuGetOrgApiKey");
 
-                 GetFiles("{artifactsDir}/*.{nugetVersion}.nupkg")
+                 GetFiles($"{artifactsDir}/*.{nugetVersion}.nupkg")
                 .ToList()
                 .ForEach(nugetPackageToPublish => 
                      {           
@@ -221,7 +221,8 @@ Task("__PublishNuGetPackages")
                         ApiKey = apiKey
                         });                     
                      }});                     
-            }});
+                 }
+            });
 
 
           
