@@ -2,7 +2,7 @@ using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.Pipeline;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using NetPack.Utils;
 using System.Linq;
 using System.Reflection;

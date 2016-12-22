@@ -1,4 +1,7 @@
 ﻿/// <autosync enabled="true" />
+/// <reference path="amd/modulea.js" />
+/// <reference path="amd/moduleb.js" />
+/// <reference path="amd/somepage.js" />
 /// <reference path="js/site.js" />
 /// <reference path="lib/bootstrap/dist/js/bootstrap.js" />
 /// <reference path="lib/jquery/dist/jquery.js" />

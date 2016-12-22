@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.FileProviders;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 
 namespace NetPack.Pipeline
 {

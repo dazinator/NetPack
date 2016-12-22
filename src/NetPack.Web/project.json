@@ -22,7 +22,8 @@
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
     "NetPack": "1.0.0-*",
     "NetPack.Typescript": "1.0.0-*",
-    "NetPack.JsCombine": "1.0.0-*"
+    "NetPack.JsCombine": "1.0.0-*",
+    "NetPack.RequireJs": "1.0.0-*"
   },
 
   "tools": {

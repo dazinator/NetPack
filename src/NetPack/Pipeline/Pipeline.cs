@@ -11,7 +11,7 @@ using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using NetPack;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using NetPack.Requirements;
 using Polly;
 using NetPack.Pipeline;
@@ -112,6 +112,7 @@ namespace NetPack.Pipeline
             // before all assets have been processed..
             if (!HasFlushed)
             {
+                //todo: exception handling here.
                 ProcessAsync(CancellationToken.None).Wait(DefaultFlushTimeout);
                 // await pipeline.FlushAsync();
             }

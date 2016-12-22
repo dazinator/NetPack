@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Multiple Compiled Typescript Files";
+}
+
+<p>
+    The RequireJS processor for NetPack is a processor that is useful if you are using AMD modules. It does the following:
+
+</p>
+
+<ul>
+    <li>
+        Combines related scripts together into build layers and minifies them via UglifyJS (the default).
+    </li>
+    <li>
+        Optimizes CSS by inlining CSS files referenced by @@import and removing comments.
+    </li>
+</ul>  
+
+
+
+@section scripts
+{
+
+    <script data-main="/netpack/built.js" src="/lib/require.js"></script>
+
+    @*<script type="text/javascript" asp-src-include="/netpack/built.js"></script>*@
+
+    @*<script type="text/javascript" src="/netpack/ts/Greeter.js"></script>
+        <script type="text/javascript" src="/netpack/ts/Another.js"></script>*@
+
+}
+
+

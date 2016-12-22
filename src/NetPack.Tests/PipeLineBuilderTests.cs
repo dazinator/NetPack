@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NetPack.File;
 using NetPack.Pipeline;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using System.Linq;
 using Xunit;
 

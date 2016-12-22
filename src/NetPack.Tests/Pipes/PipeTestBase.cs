@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NetPack.File;
 using NetPack.Pipeline;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;

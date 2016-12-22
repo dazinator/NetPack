@@ -8,6 +8,11 @@ module.exports = function (callback, request) {
     var options = request.options;
     options.files = request.files;
 
+    if (options.modules !== undefined && options.modules !== null && options.modules.length === 0)
+    {
+        options.modules = null;
+    }
+
     function hasFile(path) {
         for (var i = 0; i < options.files.length; i++) {
             if (options.files[i].path == path) return true;

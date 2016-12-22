@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using NetPack.File;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using NetPack.Requirements;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 

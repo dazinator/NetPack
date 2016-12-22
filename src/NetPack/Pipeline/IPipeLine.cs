@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using Microsoft.Extensions.FileProviders;
 
 namespace NetPack.Pipeline

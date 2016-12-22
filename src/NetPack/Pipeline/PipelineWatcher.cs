@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 
 namespace NetPack.Pipeline
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetPack.Pipes
+namespace NetPack.RequireJs
 {
 
     public class RequireJsOptimiseException : Exception

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NetPack.Extensions;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 
 namespace NetPack.Utils
 {

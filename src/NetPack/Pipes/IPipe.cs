@@ -6,7 +6,7 @@ using Microsoft.Extensions.FileProviders;
 using NetPack.File;
 using NetPack.Pipeline;
 
-namespace NetPack.Pipes
+namespace NetPack.RequireJs
 {
     public interface IPipe
     {

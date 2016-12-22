@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using NetPack.Requirements;
 using System;
 
