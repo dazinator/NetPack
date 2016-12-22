@@ -1,24 +1,36 @@
 # NetPack
 
+| Branch  | Build Status | NuGet |
+| ------------- | ------------- | ----- |
+| Master  |[![Build master](https://ci.appveyor.com/api/projects/status/2ri02762ca2dicfp/branch/master?svg=true)](https://ci.appveyor.com/project/dazinator/netpack/branch/master) | [![NuGet](https://img.shields.io/nuget/v/netpack.svg)](https://www.nuget.org/packages/netpack/) |
+| Develop | [![Build develop](https://ci.appveyor.com/api/projects/status/2ri02762ca2dicfp?svg=true)](https://ci.appveyor.com/project/dazinator/netpack/branch/develop)  | [![NuGet](https://img.shields.io/nuget/vpre/netpack.svg)](https://www.nuget.org/packages/netpack/) |
+
+
 ### What problem does it solve?
 
-When developing an ASP.NET Core application, you often have content files in your project like:-
+NetPack is a very easy to use library, that performs file processing for your asp.net core application at runtime. 
+NetPack will watch your files, and re-process them when they change.
+NetPack currently has processors for:
 
-- Typescript
-- Javascript
-- Css
-- Sass
-- Less
+- [x] Typescript Compilation
+- [x] Combining multiple Javascript files into a single file, with optional source map.
+- [ ] Css minification
+- [ ] Css bundling (based on @import)
+- [ ] Javascript minficatiion
+- [x] rjs optimisation. (Optimises your AMD javascript files, into bundles, using the rjs optimiser.)
+- [ ] [SystemJS Production workflows](https://github.com/systemjs/systemjs/blob/master/docs/production-workflows.md)
 
-`NetPack` allows you to:
+`NetPack` is easy. 
 
-1. Define your pre-processing requirements using a C# fluent API.
-2. Pre-process any files that are visible to your ASP.NET Core application (via an IFileProvider), at runtime.
-2. Can `Watch` for changes to any of those files, and re-processes the pipeline when files change. This enables you to edit a source file (e.g Typescript) whilst your application is running, and then refresh your browser and see the updated javascript file from the pipeline.
-3. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
+1. Use C# fluent API to setup your file pre-processing needs in `startup.cs`
+2. Pre-process any files that are accessbile to your ASP.NET Core application at runtime.
+3 `Watch` for changes to any of those files, and re-processes when they change. This enables you to edit a source file (e.g Typescript) whilst your application is running, and then refresh your browser and see the updated javascript file from the pipeline.
+4. Works with the `IFileProvider` abtsraction - so files to be processed by a pipeline do not have to live on the physical disk
    (can be embedded files etc)
 
-`NetPack` performs all pre-processing in memory, and it then it allows the outputs (the processed files - also still in memory) to be served up by your ASP.NET Core application by integrating with the `StaticFiles` middleware.
+`NetPack` performs all pre-processing in memory. It allows generated files to be served up to the browser by integrating it's own InMemory FileProvider with your applications IHostingEnvironment.WebRootFileProvider.
+
+All generated files, are held in memory, and accessible by your applications IHotingEnvironment.WebRootFileProvider. This means all of the standard asp.net mvc TagHelpers will resolve any generated scripts that NetPack produces..
 
 # NetPack is different from Gulp / WebPack / Grunt etc etc
 
@@ -40,117 +52,56 @@ Let me show you a startup.cs file, and then i'll break it down..
 
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
             {
-                app.UseContentPipeLine(pipelineBuilder =>
-                {
-                    return pipelineBuilder
-                        .WithInput((inputBuilder) 
-                                     => inputBuilder
-                                        .Include("wwwroot/somefile.ts")
-                                        .Include("wwwroot/someOtherfile.ts"))
-                        .DefinePipeline()
-                            .AddTypeScriptPipe(tsConfig =>
-                                     {
-                                         tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                                         tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                                         tsConfig.NoImplicitAny = true;
-                                         tsConfig.RemoveComments = true;
-                                         tsConfig.SourceMap = true;
-                                     })
-                           //.AddPipe(someOtherPipe) can add more pipes like minification, bundling etc.
-                        .BuildPipeLine();
-                })
-                .UsePipelineOutputAsStaticFiles(); // makes the files output from the pipepline visible to static files middleware
-            }
+            
+             app.UseStaticFiles();
+             
+             app.UseFileProcessing(a =>
+             {
+                a.WithHostingEnvironmentWebrootProvider()
+                    // Simple processor, that compiles typescript files.
+                    .AddTypeScriptPipe(input =>
+                    {
+                        input.Include("ts/*.ts");
+                   }, options =>
+                    {
+                        // options.InlineSourceMap = true;
+                        options.InlineSources = true;
+                        // configure various typescript compilation options here..
+                        // options.InlineSourceMap = true;
+                        //  options.Module = ModuleKind.Amd;
+                    })
+                    // Another processor that combines multiple js files into a bundle file.
+                    .AddJsCombinePipe(input =>
+                    {
+                        input.Include("ts/*.js");
+                    }, () => "bundle.js")
+                    .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
+                    .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
+             });
+
+             app.UseMvc();
         }
 
 
 ```
 
-So, straight off, you can tell this is a proper ASP.NET Core library because we call `services.AddNetPack()` to register the NetPack services with the DI system :-)
 
-Next, we (fluently?) configure a `Pipeline` for our assets. Intellisense every step of the way baby!
-Configuring a pipeline consists of:
+NetPack comes with a number of diffrent `Pipe`s out of the box that you can use for common tasks. For example, the `TypeScriptCompilePipe` will compile any typescript files (.ts) that pass through it, and will do so using the options you specify. There are all the standard options such as to remove comments etc etc. For each `.ts` file it will the output a `.js` file, as well as the sourcemap if sourcemaps are enabled. 
 
-1. Specifying the files you want to be processed by this pipeline.  
-2. Defining the `Pipe`'s in the pipeline, these are the things that actually process the files and produce new outputs.
-
-Each `Pipe` in the pipeline takes some inputs, and "does something" to them, and produces some outputs. 
-The outputs of one pipe are provided as the inputs for the next pipe.
-The outputs from the final pipe in the pipeline, are visible to the `StaticFiles` middleware, and therefore can be served up to the browser. 
-
-Note: You can create multiple independent pipelines if you wish. Just make multiple calls to  `app.UseContentPipeLine()` for each pipeline you want to define.
-                
-So we start by defining the inputs for the pipeline:
-
-```
-
-                       app.UseContentPipeLine(pipelineBuilder =>
-                {
-                    return pipelineBuilder
-                        .WithInput((inputBuilder) 
-                                     => inputBuilder
-                                        .Include("wwwroot/somefile.ts")
-                                        .Include("wwwroot/someOtherfile.ts"))
-
-```
-
-By default, these paths are resolved to actual file content, using the `IHostingEnvironment.ContentFileProvider`, however you can use an override to specify another `IFileProvider` to use if you wish.
-
-Here we have now specified the files that we want to be input into our pipeline for processing. Simples so far. 
-In this case we have specified some typescript files only.
-
-Next we define the `Pipe`'s in the pipeline, in the order we want them to process in. We can keep adding more pipes by using the `.AddPipe(IPipe)` method, or helpful extension methods such as `.AddTypeScriptPipe(options)`.
-
-```csharp
-// shortened for brevity.
-           .DefinePipeline()
-             .AddTypeScriptPipe()
-             .AddPipe(new SomeOtherPipe())
-             .AddPipe(new AndAnotherPipe())
-             .BuildPipeLine();
-```
-
-NetPack comes with a number of diffrent `Pipe`s out of the box that you can use for common tasks. For example, the `TypeScriptCompilePipe` will compile any typescript files (.ts) that pass through it, and will do so using the options you specify. There are all the standard options such as to remove comments etc etc. For each `.ts` file it will the output a `.js` file. It does not output the original `.ts` file meaning that all .ts files will stop progressing through the pipeline at this pipe. If an input file is not a `.ts` file, then it is ignored and allowed it to flow through the pipe untouched.
-
-Lastly, we call `.UsePipelineOutputAsStaticFiles();` which hooks up the outputs of the Pipeline to the aspnetcore `StaticFiles` middleware, allowing your application to serve up the `outputs` of our pipeline to the browser. 
+Call `.UseBaseRequestPath("netpack")` means that all of the generated outputs that NetPack produces will be served with a base request path of "netpack". So the request path to `bundle.js` in the browser becomes `/netpack/bundle.js` 
 
 We can now do this on our page:
 
 ```
- <script type="text/javascript" src="/wwwroot/somefile.js")"></script>
+ <script type="text/javascript" src="/netpack/bundle.js")"></script>
 ```
 
-The outputs of a pipeline are not actually written to disk. If you look for `/wwwroot/somefile.js` on disk, you wont see it! They are held in memory for better performance.
+The outputs of a pipeline are not actually written to disk. If you look for a `/netpack/bundle.js` on disk, you wont see it! They are held in memory for better performance.
 
-Lastly, if we want our pipeline to automatically re-process the input files, when an input file is changed (to produce updated outputs), we can just add a `WatchInputForChanges()` call like this:
+Lastly, by calling `Watch()` we ensure that when any of the inputs to a processor changes, it will automaitcally re-process.  
 
-```
 
- app.UseContentPipeLine(pipelineBuilder =>
-                {
-                    return pipelineBuilder
-                        //.AddPipe(someOtherPipe)
-                        .WithInput((inputBuilder) 
-                                     => inputBuilder
-                                        .Include("wwwroot/somefile.ts")
-                                        .Include("wwwroot/someOtherfile.ts"))
-                                        .WatchInputForChanges()
-                        .DefinePipeline()
-                            .AddTypeScriptPipe(tsConfig =>
-                                     {
-                                         tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                                         tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
-                                         tsConfig.NoImplicitAny = true;
-                                         tsConfig.RemoveComments = true;
-                                         tsConfig.SourceMap = true;
-                                     })
-                        .BuildPipeLine();
-                })
-                .UsePipelineOutputAsStaticFiles();
-
-```
-
-Now whenever we edit `wwwroot/somefile.ts` or `wwwroot/someOtherfile.ts` with our application running, the pipeline will automatically re-run agains the up to date inputs. This will effectively spit out a new `wwwroot/somefile.js` and `wwwroot/someOtherfile.js` file in memory, and when we refresh the browser thats referencing those files, we see the change.
+Now whenever we edit `ts/somefile.ts` or `ts/someOtherfile.ts` with our application running, netpack will automatically process the files to produce js files. This will effectively spit out a new `ts/somefile.js` and `ts/someOtherfile.js` file in memory. This will then trigger the `Combine` processor to run, which will spit out a new `bundle.js` file, which is served on `netpack/bundle.js`. So when we refresh the browser, we will see the changes.
 
 
 
