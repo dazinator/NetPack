@@ -1,9 +1,17 @@
 ﻿define("ModuleA", ["require", "exports"], function (require, exports) {
     "use strict";
 
-    function bar() {
-        alert("hi");
+    var self = this;
+    self.addModuleToList = function (listId, moduleName) {
+
+        var ul = document.getElementById(listId);
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(moduleName + " Loaded.. "));
+        ul.appendChild(li);      
     };
 
-    console.log("hi from module a");
+    self.addModuleToList("modules", "ModuleA");
+
+    return self;
+
 });

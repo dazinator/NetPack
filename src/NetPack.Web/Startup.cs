@@ -81,16 +81,18 @@ namespace NetPack.Web
                      // Add a processor that takes all AMD javascript files and optimises them using rjs optimiser.
                      .AddRequireJsOptimisePipe(input =>
                      {
-                         input.Include("amd/*.js");
+                         input.Include("amd/*.js")
+                         .Include("js/requireConfig.js");
                      }, options =>
                      {
                          options.GenerateSourceMaps = true;
                          options.Optimizer = Optimisers.none;
-                         options.BaseUrl = ".";
-                       //  options.AppDir = "amd";
-                         options.Name = "amd/SomePage"; // The name of the AMD module to optimise.
+                         options.BaseUrl = "amd";
+                        // options.
+                         //  options.AppDir = "amd";
+                         options.Name = "SomePage"; // The name of the AMD module to optimise.
                          options.Out = "built.js"; // The name of the output file.
-                         
+
                          // Here we list the module names
                          //options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
                          //options.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
