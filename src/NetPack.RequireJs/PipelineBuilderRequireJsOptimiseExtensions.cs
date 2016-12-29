@@ -18,7 +18,7 @@ namespace NetPack
         public static IPipelineBuilder AddRequireJsOptimisePipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<RequireJsOptimisationPipeOptions> configureOptions = null)
         {
 
-            var appServices = builder.ApplicationBuilder.ApplicationServices;
+            var appServices = builder.ServiceProvider;
             var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
 
             // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.

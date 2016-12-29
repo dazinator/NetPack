@@ -133,6 +133,7 @@ namespace NetPack.Web.Tests
             {
 
                 var mockFileProvider = new InMemoryFileProvider();
+
                 mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentOne, "somefile.ts"));
                 mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
 
@@ -193,8 +194,19 @@ namespace NetPack.Web.Tests
 
                         await a.Response.WriteAsync("done");
                     }
+
+                    if (a.Request.Path.Value.Contains("netpack/ts/somefile.js"))
+                    {
+                        var file = env.WebRootFileProvider.GetFileInfo("/netpack/ts/somefile.js");
+                        
+                       // await SendFileResponseExtensions.SendFileAsync(a.Response, file);
+                    }
                 });
+
+               
             }
+
+
         }
 
     }

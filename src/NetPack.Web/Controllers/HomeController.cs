@@ -44,7 +44,13 @@ namespace NetPack.Web.Controllers
         {
 
             return View();
-        }        
+        }
+
+        public IActionResult RequireJsOptimisedTagHelper()
+        {
+
+            return View();
+        }
 
         public IActionResult Error()
         {

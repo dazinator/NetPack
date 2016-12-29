@@ -15,7 +15,7 @@
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
-    </environment>  
+    </environment>
     <style>
       body {
           padding-top: 150px;
@@ -39,6 +39,8 @@
                     <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFiles" class="navbar-brand">Multiple Typescript Files</a>
                     <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFilesCombinedToSingleJsFile" class="navbar-brand">Multiple Typescript Files Combined To Single Js File</a>
                     <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimised" class="navbar-brand">A RequireJs optimised file based on AMD.</a>
+                    <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimisedTagHelper" class="navbar-brand">A RequireJs Optimise TagHelper.</a>
+
                     @*<li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>*@
                 </ul>
             </div>
@@ -56,7 +58,7 @@
     <environment names="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-       
+
     </environment>
     <environment names="Staging,Production">
         <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
@@ -69,7 +71,7 @@
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
-  
+
     @RenderSection("scripts", required: false)
 </body>
 </html>

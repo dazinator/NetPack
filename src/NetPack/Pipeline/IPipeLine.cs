@@ -52,5 +52,7 @@ namespace NetPack.Pipeline
         // bool IsFlushing { get; }
         void Initialise();
         IEnumerable<PipeConfiguration> GetDirtyPipes();
+
+      //  string Name { get; set; }
     }
 }

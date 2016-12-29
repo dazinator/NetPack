@@ -31,6 +31,18 @@ namespace NetPack
             services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
             services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
             services.AddTransient<IDirectory, InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
+            services.AddTransient<IPipelineConfigurationBuilder>((sp) =>
+            {
+
+
+                var sourcesDirectory = sp.GetService<IDirectory>();
+                var builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
+                return builder;
+
+                //return new NetPackApplicationBuilder(appBuilder, pipeline);
+            });
+
+
 
             return services;
         }
@@ -45,37 +57,13 @@ namespace NetPack
                     "Could not find a required netpack service. Have you called services.AddNetPack() in your startup class?");
             }
 
-            var sourcesDirectory = appBuilder.ApplicationServices.GetService<IDirectory>();
-            var builder = new PipelineConfigurationBuilder(appBuilder, sourcesDirectory);
+            var services = appBuilder.ApplicationServices;
+            var sourcesDirectory = services.GetService<IDirectory>();
+            var builder = new PipelineConfigurationBuilder(services, sourcesDirectory);
             processorBuilder(builder);
 
             var pipeline = builder.BuildPipeLine();
-            pipeLineManager.AddPipeLine(pipeline);
-
-            var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
-            if (builder.WachInput)
-            {
-                pipeLineWatcher.WatchPipeline(pipeline);
-            }
-
-            var outputFileProvider = pipeline.WebrootFileProvider;
-            if (!string.IsNullOrWhiteSpace(pipeline.BaseRequestPath))
-            {
-                outputFileProvider = new RequestPathFileProvider(pipeline.BaseRequestPath, outputFileProvider);
-            }
-
-            var hostingEnv = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
-            if (hostingEnv.WebRootFileProvider == null || hostingEnv.WebRootFileProvider is NullFileProvider)
-            {
-                hostingEnv.WebRootFileProvider = outputFileProvider;
-            }
-            else
-            {
-                var composite = new CompositeFileProvider(hostingEnv.WebRootFileProvider, outputFileProvider);
-                hostingEnv.WebRootFileProvider = composite;
-            }
-
-            pipeline.Initialise();
+            pipeLineManager.AddPipeLine(builder.Name, pipeline, builder.WachInput);
 
             return new NetPackApplicationBuilder(appBuilder, pipeline);
         }

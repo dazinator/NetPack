@@ -8,7 +8,7 @@ namespace NetPack.Pipeline
     public interface IPipelineBuilder
     {
 
-        IApplicationBuilder ApplicationBuilder { get; set; }
+        IServiceProvider ServiceProvider { get; set; }
 
         IPipelineBuilder Watch();
 

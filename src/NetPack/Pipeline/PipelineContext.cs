@@ -113,6 +113,11 @@ namespace NetPack.Pipeline
             // grab the input files from the file provider.
             PreviousInputFiles = InputFiles;
             InputFiles = input;
+            //foreach (var item in this.SourcesOutput.Root)
+            //{
+            //    item.Delete();
+            //   // this.SourcesOutput.GetItem(item)
+            //}
 
         }
 

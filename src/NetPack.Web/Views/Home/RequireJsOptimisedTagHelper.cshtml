@@ -14,20 +14,22 @@
     <li>
         Optimizes CSS by inlining CSS files referenced by @@import and removing comments.
     </li>
-</ul>  
+</ul>
 <p>Modules loaded from optimised file:</p>
-<ul id="modules">
-   
-</ul> 
+<ul id="modules"></ul>
 
 
 
 @section scripts
 {
-      
-  
+
+
     <script data-main="/netpack/built.js" src="/lib/require.js"></script>
-   
+    <require-js-optimise in="amd/*.js"
+                         main="SomePage"
+                         out-name="built.js"
+                         out-path="/netpack">
+    </require-js-optimise>
     @*<script type="text/javascript" asp-src-include="/netpack/built.js"></script>*@
 
     @*<script type="text/javascript" src="/netpack/ts/Greeter.js"></script>

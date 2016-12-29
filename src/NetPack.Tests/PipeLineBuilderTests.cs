@@ -51,7 +51,7 @@ namespace NetPack.Tests
             var mockAnotherPipe = new Mock<IPipe>();
             mockAnotherPipe.SetupAllProperties();
 
-            var sut = (IPipelineConfigurationBuilder)new PipelineConfigurationBuilder(app, new InMemoryDirectory());
+            var sut = (IPipelineConfigurationBuilder)new PipelineConfigurationBuilder(serviceProvider, new InMemoryDirectory());
 
             var pipeLine = sut.WithFileProvider(fileProvider)
                 .AddPipe(input =>

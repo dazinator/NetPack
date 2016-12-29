@@ -7,7 +7,7 @@ namespace NetPack.Pipeline
 {
     public interface IPipelineConfigurationBuilder
     {
-        IApplicationBuilder ApplicationBuilder { get; set; }
+       // IApplicationBuilder ApplicationBuilder { get; set; }
 
         // IPipelineInputOptionsBuilder Take(PipelineInput sources);
         IPipelineBuilder WithHostingEnvironmentWebrootProvider();

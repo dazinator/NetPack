@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using NetPack.File;
 using NetPack.RequireJs;
 using NetPack.Requirements;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
@@ -12,44 +10,22 @@ using Dazinator.AspNet.Extensions.FileProviders.Directory;
 namespace NetPack.Pipeline
 {
 
-    public class PipeConfiguration
-    {
-
-        public IPipe Pipe { get; set; }
-        public PipelineInput Input { get; set; }
-        public DateTime LastProcessedEndTime { get; set; } = DateTime.MinValue.ToUniversalTime();
-        public DateTime LastProcessStartTime { get; set; } = DateTime.MinValue.ToUniversalTime();
-        public bool IsProcessing { get; set; }
-
-        /// <summary>
-        /// Returns true if the pipe has updated inputs that need to be processed.
-        /// </summary>
-        /// <returns></returns>
-        internal bool IsDirty()
-        {
-            var isDirty = (Input.LastChanged > LastProcessStartTime);
-            isDirty = isDirty && Input.LastChanged <= LastProcessedEndTime;
-            isDirty = isDirty || Input.LastChanged > LastProcessedEndTime;
-
-            return isDirty;
-        }
-    }
-
     public class PipelineConfigurationBuilder : IPipelineConfigurationBuilder, IPipelineBuilder
     {
 
-        public PipelineConfigurationBuilder(IApplicationBuilder appBuilder, IDirectory sourcesOutputDirectory)
+        public PipelineConfigurationBuilder(IServiceProvider serviceProvider, IDirectory sourcesOutputDirectory)
         {
-            ApplicationBuilder = appBuilder;
+            ServiceProvider = serviceProvider;
             Pipes = new List<PipeConfiguration>();
             Requirements = new List<IRequirement>();
             SourcesOutputDirectory = sourcesOutputDirectory;
+            Name = Guid.NewGuid().ToString();
             //FileProvider = fileProvider ?? GetHostingEnvironmentContentFileProvider();
         }
 
         #region  IPipelineConfigurationBuilder
 
-        public IApplicationBuilder ApplicationBuilder { get; set; }
+        public IServiceProvider ServiceProvider { get; set; }
 
         public IPipelineBuilder WithHostingEnvironmentWebrootProvider()
         {
@@ -79,12 +55,9 @@ namespace NetPack.Pipeline
 
         public string BaseRequestPath { get; set; }
 
+        public string Name { get; set; }
+
         public IDirectory SourcesOutputDirectory { get; }
-
-
-        // public IDirectory Directory { get; set; }
-
-        //public IFileProvider FileProvider { get; set; }
 
         public List<IRequirement> Requirements { get; set; }
 
@@ -100,7 +73,7 @@ namespace NetPack.Pipeline
 
         public IFileProvider GetHostingEnvironmentContentFileProvider()
         {
-            var hostingEnv = ApplicationBuilder.ApplicationServices.GetRequiredService<IHostingEnvironment>();
+            var hostingEnv = ServiceProvider.GetRequiredService<IHostingEnvironment>();
             var fileProvider = hostingEnv.ContentRootFileProvider;
             if (fileProvider == null)
             {
@@ -111,7 +84,7 @@ namespace NetPack.Pipeline
 
         public IFileProvider GetHostingEnvironmentWebRootFileProvider()
         {
-            var hostingEnv = ApplicationBuilder.ApplicationServices.GetRequiredService<IHostingEnvironment>();
+            var hostingEnv = ServiceProvider.GetRequiredService<IHostingEnvironment>();
             var fileProvider = hostingEnv.WebRootFileProvider;
             if (fileProvider == null)
             {
@@ -122,19 +95,11 @@ namespace NetPack.Pipeline
 
         public bool WachInput { get; protected set; }
 
-        // public string WebRootPath { get; set; }
-
         public IPipelineBuilder Watch()
         {
             this.WachInput = true;
             return this;
         }
-
-        //public IPipelineInputOptionsBuilder FromWebRoot(string webrootPath)
-        //{
-        //    WebRootPath = webrootPath;
-        //    return this;
-        //}
 
         public IPipeLine BuildPipeLine()
         {

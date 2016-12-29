@@ -65,47 +65,51 @@ namespace NetPack.Typescript
                 return;
             }
 
-            // read script from embedded resource and use string as temp file:
-            Assembly assy = this.GetType().GetAssemblyFromType();
-            var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
-            var scriptContent = script.ReadAllContent();
-
-
-            using (var nodeScript = new StringAsTempFile(scriptContent))
+            try
             {
+                // read script from embedded resource and use string as temp file:
+                Assembly assy = this.GetType().GetAssemblyFromType();
+                var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+                var scriptContent = script.ReadAllContent();
 
-                var result = await _nodeServices.InvokeAsync<TypeScriptCompileResult>(nodeScript.FileName, requestDto);
 
-                if (result.Errors != null && result.Errors.Any())
+                using (var nodeScript = new StringAsTempFile(scriptContent))
                 {
-                    // Throwing an exception will halt further processing of the pipeline.
-                    var typescriptCompilationException = new TypeScriptCompileException("Could not compile typescript due to compilation errors.", result.Errors);
-                    throw typescriptCompilationException;
-                }
 
-                foreach (var output in result.Sources)
-                {
-                    var subPathInfo = SubPathInfo.Parse(output.Key);
-                    //var compiledTs = output.Value;
-                    // fix source mapping url declaration
-                    var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                    context.AddOutput(subPathInfo.Directory, outputFileInfo);
-                }
+                    var result = await _nodeServices.InvokeAsync<TypeScriptCompileResult>(nodeScript.FileName, requestDto);
 
-                // also, if source maps are enabled, but source is now inlined in the source map, then the 
-                // source fill should be made available to be served up to the browser.              
-                if (_options.SourceMap && !_options.InlineSources)
-                {
-                    foreach (var inputFileInfo in context.InputFiles)
+                    if (result.Errors != null && result.Errors.Any())
                     {
-                        //  context.AllowServe(inputFileInfo);
-                        if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
+                        // Throwing an exception will halt further processing of the pipeline.
+                        var typescriptCompilationException = new TypeScriptCompileException("Could not compile typescript due to compilation errors.", result.Errors);
+                        throw typescriptCompilationException;
+                    }
+
+                    foreach (var output in result.Sources)
+                    {
+                        var subPathInfo = SubPathInfo.Parse(output.Key);
+                        //var compiledTs = output.Value;
+                        // fix source mapping url declaration
+                        var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+                        context.AddOutput(subPathInfo.Directory, outputFileInfo);
+                    }
+
+                    // also, if source maps are enabled, but source is now inlined in the source map, then the 
+                    // source fill should be made available to be served up to the browser.              
+                    if (_options.SourceMap && !_options.InlineSources)
+                    {
+                        foreach (var inputFileInfo in context.InputFiles)
                         {
+                            //  context.AllowServe(inputFileInfo);
+                            //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
+                            //{
                             context.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
-                        }
-                        else
-                        {
+                            // }
+                            // else
+                            // {
                             // source file is already being served.
+                            //    }
+
                         }
 
                     }
@@ -113,19 +117,25 @@ namespace NetPack.Typescript
                 }
 
             }
+            catch (System.Exception)
+            {
+
+                throw;
+            }
+
 
         }
 
 
 
-       
 
-       
 
-       
+
+
+
     }
 
-   
+
 
 
 }
