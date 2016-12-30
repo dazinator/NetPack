@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using NetPack.File;
-using System.Linq;
-using Microsoft.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Http;
 

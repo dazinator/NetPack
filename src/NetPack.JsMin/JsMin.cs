@@ -1,8 +1,56 @@
-﻿using System;
+﻿using DotNet.SourceMaps;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+
+
+/* Over the years i've fixed various bugs that have come along, I've written unit
+ * tests to show that they are solved... hopefully not causing more bugs along the
+ * way. I haven't seen any other C based implementations of this with these fixes,
+ * though there is a python implementation which is still actively developed...
+ * though looks a whole lot different.
+ * Much of this has now been refactored, slightly more readable but still just as crazy.
+ * - Shannon Deminick
+ */
+
+/* Grabbed this from Shannon Deminick's "Smidge" project, with an effort to get it producing a sourcemap using
+ * my DotNet.SourceMaps library.
+ *  - Darrell Tunnell
+*/
+
+/* Originally written in 'C', this code has been converted to the C# language.
+ * The author's copyright message is reproduced below.
+ * All modifications from the original to C# are placed in the public domain.
+ */
+
+/* jsmin.c
+   2007-05-22
+
+Copyright (c) 2002 Douglas Crockford  (www.crockford.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+The Software shall be used for Good, not Evil.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 namespace NetPack.JsMin
 {
@@ -19,6 +67,7 @@ namespace NetPack.JsMin
         private int _theY = Eof;
         private int _retStatement = -1;
         private bool _start = false;
+        private SourceMapBuilder _sourceMapBuilder;
 
 
         private JsMinOptions _options;
@@ -26,19 +75,21 @@ namespace NetPack.JsMin
         public JsMin(JsMinOptions options)
         {
             _options = options;
+            //  _sourceMapBuilder = new SourceMapBuilder();
         }
 
+        public SourceMap SourceMap { get; set; }
 
-        public async Task<string> ProcessAsync(Stream inputStream, CancellationToken cancelationToken)
+        public async Task ProcessAsync(Stream inputStream, StringBuilder output, SourceMapBuilder sourceMapBuilder, CancellationToken cancelationToken)
         {
 
-            var sb = new StringBuilder();
+            _sourceMapBuilder = sourceMapBuilder;
 
             // var contents = item.FileInfo.CreateReadStream
             using (_sr = new StreamReader(inputStream))
             {
 
-                using (_sw = new StringWriter(sb))
+                using (_sw = new StringWriter(output))
                 {
 
                     await ExecuteJsMin();
@@ -48,9 +99,7 @@ namespace NetPack.JsMin
 
 
             //ensure there's a semicolon
-            sb.Append(";");
-            var result = sb.ToString();
-            return result;
+            output.Append(";");
 
         }
 
@@ -575,6 +624,7 @@ namespace NetPack.JsMin
             if (c == Eof)
             {
                 c = _sr.Read();
+                _sourceMapBuilder.AdvanceSourceColumnPosition();
             }
             if (c >= ' ' || c == '\n' || c == Eof)
             {

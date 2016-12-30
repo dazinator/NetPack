@@ -3,88 +3,133 @@ using System.Threading;
 using System.Threading.Tasks;
 using NetPack.Pipeline;
 using Dazinator.AspNet.Extensions.FileProviders;
+using DotNet.SourceMaps;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace NetPack.JsMin
 {
 
-    /* Over the years i've fixed various bugs that have come along, I've written unit
-     * tests to show that they are solved... hopefully not causing more bugs along the
-     * way. I haven't seen any other C based implementations of this with these fixes,
-     * though there is a python implementation which is still actively developed...
-     * though looks a whole lot different.
-     * Much of this has now been refactored, slightly more readable but still just as crazy.
-     * - Shannon Deminick
-     */
 
-    /* Originally written in 'C', this code has been converted to the C# language.
-     * The author's copyright message is reproduced below.
-     * All modifications from the original to C# are placed in the public domain.
-     */
 
-    /* jsmin.c
-       2007-05-22
-
-    Copyright (c) 2002 Douglas Crockford  (www.crockford.com)
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy of
-    this software and associated documentation files (the "Software"), to deal in
-    the Software without restriction, including without limitation the rights to
-    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-    of the Software, and to permit persons to whom the Software is furnished to do
-    so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    The Software shall be used for Good, not Evil.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-    */
-
-    namespace NetPack.JsMin
+    public class JsMinifierPipe : IPipe
     {
 
-        public class JsMinifierPipe : IPipe
+        private JsMinOptions _options;
+
+        public JsMinifierPipe(JsMinOptions options)
         {
+            _options = options;
 
-            private JsMinOptions _options;
+        }
 
-            public JsMinifierPipe(JsMinOptions options)
+        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        {
+            var jsMin = new JsMin(_options);
+            foreach (var item in context.InputFiles)
             {
-                _options = options;
-            }
 
-            public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
-            {
-                var jsMin = new JsMin(_options);
-                foreach (var item in context.InputFiles)
+                string outPutFileName = GetOutputFileName(item);
+                var mapBuilder = GetSourceMapBuilder(_options, outPutFileName, context, item);
+                
+                var stream = item.FileInfo.CreateReadStream();
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                var output = new StringBuilder((int)stream.Length); // minified file shouldnt be longer than the original
+                await jsMin.ProcessAsync(stream, output, mapBuilder, cancelationToken);
+
+                if (mapBuilder != null)
                 {
-                    var stream = item.FileInfo.CreateReadStream();
-                    var minifiedContents = await jsMin.ProcessAsync(stream, cancelationToken);
+                    var sourceMap = mapBuilder.Build();
+                    string jsonSourceMap = GetJson(sourceMap);
 
-                    var name = item.FileInfo.Name;
-                    if (name.EndsWith(".js"))
+                    // either inline the source map, or output it as a seperate file.
+                    output.AppendLine();
+                    string sourceMappingURL;
+                    if (_options.InlineSourceMap)
                     {
-                        name = item.FileInfo.Name.Substring(name.IndexOf(".js")) + ".min.js";
+                        //@ sourceMappingURL=data:application/json;charset=utf-8;base64,jadhadwkfa                      
+                        var base64EncodedSourceMap = Convert.ToBase64String(Encoding.UTF8.GetBytes(jsonSourceMap));
+                        sourceMappingURL = $"//# sourceMappingURL=data:application/json;charset=utf-8;base64,{base64EncodedSourceMap}";
+                      
                     }
                     else
                     {
-                        name = name + "min.js";
+                        // seperate file.
+                        var mapFileName = outPutFileName + ".map";
+                        context.AddOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
+                        sourceMappingURL = $"//# sourceMappingURL={mapFileName.ToString()}";                      
                     }
 
-                    var outputFileName = $"{item.Directory}/{name}";
-                    context.AddOutput(item.Directory, new StringFileInfo(minifiedContents, name));
-
+                    output.Append(sourceMappingURL);
                 }
+
+                context.AddOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));               
 
             }
 
         }
+
+        private string GetJson(SourceMap sourceMap)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+            var json = JsonConvert.SerializeObject(sourceMap, settings);
+            return json;
+        }
+
+        private SourceMapBuilder GetSourceMapBuilder(JsMinOptions options, string outputFileName, IPipelineContext context, FileWithDirectory item)
+        {
+            if (!options.EnableSourceMaps)
+            {
+                return null;
+            }
+
+            var mapBuilder = new SourceMapBuilder();
+            mapBuilder.WithOutputFile(outputFileName);
+
+            if (_options.InlineSources)
+            {
+                mapBuilder.WithSource(item.FileInfo.ReadAllContent(), true);
+            }
+            else
+            {
+                // make sure the source file can be served up to the browser.
+                context.AddSourceOutput(item.Directory, item.FileInfo);
+
+
+                // Not sure if its necessary to create a relative path from min or map file to the source file:
+                //  var relativePathToSourceFile = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, sourceFileSubPath);
+                // For now, just referencing source file by name, as its assumed the source file fill be along side the miniied file, so 
+                // a relative path thats just the source file name should hopefully be resolved ok.
+                mapBuilder.WithSource(item.FileInfo.Name);
+            }
+
+
+            return mapBuilder;
+
+
+        }
+
+
+
+        private string GetOutputFileName(FileWithDirectory item)
+        {
+            var name = item.FileInfo.Name;
+            if (name.EndsWith(".js"))
+            {
+                name = item.FileInfo.Name.Substring(0, name.Length - 3) + ".min.js";
+            }
+            else
+            {
+                name = name + "min.js";
+            }
+
+            return name;
+        }
     }
 }
+
