@@ -44,7 +44,12 @@ namespace NetPack.Tests.Pipes
             //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
             PipelineContext = new PipelineContext(provider, _sourcesdirectory);
-            PipelineContext.SetInput(files);
+            var input = new PipelineInput();
+            foreach (var item in files)
+            {
+                input.AddInclude(item.FileSubPath);
+            }
+            PipelineContext.SetInput(input);
             Sut = pipeFactory();
             await Sut.ProcessAsync(PipelineContext, CancellationToken.None);
         }

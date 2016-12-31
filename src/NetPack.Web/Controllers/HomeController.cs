@@ -52,6 +52,12 @@ namespace NetPack.Web.Controllers
             return View();
         }
 
+        public IActionResult JsMin()
+        {
+
+            return View();
+        }
+
         public IActionResult Error()
         {
             return View();

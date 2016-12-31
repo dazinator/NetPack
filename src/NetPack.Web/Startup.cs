@@ -88,7 +88,7 @@ namespace NetPack.Web
                          options.GenerateSourceMaps = true;
                          options.Optimizer = Optimisers.none;
                          options.BaseUrl = "amd";
-                        // options.
+                         // options.
                          //  options.AppDir = "amd";
                          options.Name = "SomePage"; // The name of the AMD module to optimise.
                          options.Out = "built.js"; // The name of the output file.
@@ -98,7 +98,17 @@ namespace NetPack.Web
                          //options.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
                          //  options.Modules.Add(new ModuleInfo() { Name = "SomePage" });
                      })
+                     .AddJsMinPipe(input =>
+                     {
+                         input.Include("js/*.js");
+                     }, options =>
+                     {
 
+                         options.EnableSourceMaps = true;
+                         options.InlineSourceMap = false;
+                         options.InlineSources = false;
+                     }
+                     )
                     .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
             });

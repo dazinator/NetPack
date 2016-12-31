@@ -13,6 +13,8 @@ namespace NetPack.JsMin
 
 
 
+
+
     public class JsMinifierPipe : IPipe
     {
 

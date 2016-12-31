@@ -29,12 +29,23 @@ namespace NetPack.Pipeline
 
         public PathString BaseRequestPath { get; }
 
-        public void AddOutput(string directory, IFileInfo file)
+        /// <summary>
+        /// Adds the generated file as an output of the pipeline.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="file"></param>
+        /// <param name="excludeFromInput">Whether to add the output ile to the exclude list of this pipelines input. True by default, prevents the pipeline from processing a file which it has generated.</param>
+        public void AddOutput(string directory, IFileInfo file, bool excludeFromInput = true)
         {
+            if (excludeFromInput)
+            {
+                //to-do - check for concurrency?
+                Input.AddExclude($"{directory}/{file.Name}");
+            }
             ProcessedOutput.AddOrUpdateFile(directory, file);
             // return new FileWithDirectory(directory, file);
             //  Output.AddFile(directory, info);
-        }       
+        }
 
         public PathString GetRequestPath(string directory, IFileInfo fileInfo)
         {
@@ -95,24 +106,31 @@ namespace NetPack.Pipeline
 
         public FileWithDirectory[] InputFiles { get; set; }
 
-        public FileWithDirectory[] ExcludeFiles { get; set; }
+        public PipelineInput Input { get; set; }
+
+        public bool HasChanges { get; private set; }
 
         public void SetInput(PipelineInput input)
         {
+            Input = input;
             SetInput(FileProvider.GetFiles(input));
             // ExcludeFiles = FileProvider.GetFiles(input.e)
         }
 
-        public void SetInput(FileWithDirectory[] input)
+        private void SetInput(FileWithDirectory[] input)
         {
             // grab the input files from the file provider.
             PreviousInputFiles = InputFiles;
             InputFiles = input;
-            //foreach (var item in this.SourcesOutput.Root)
-            //{
-            //    item.Delete();
-            //   // this.SourcesOutput.GetItem(item)
-            //}
+            HasChanges = false;
+            foreach (var item in InputFiles)
+            {
+                if (IsDifferentFromLastTime(item))
+                {
+                    HasChanges = true;
+                    break;
+                }
+            }
 
         }
 

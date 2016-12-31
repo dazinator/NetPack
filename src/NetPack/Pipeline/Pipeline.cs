@@ -36,7 +36,7 @@ namespace NetPack.Pipeline
         public Pipeline(IFileProvider environmentFileProvider,
             List<PipeConfiguration> pipes,
             List<IRequirement> requirements,
-            IDirectory sourcesOutputDirectory,          
+            IDirectory sourcesOutputDirectory,
             string baseRequestPath = null,
             IDirectory directory = null)
         {
@@ -53,7 +53,7 @@ namespace NetPack.Pipeline
             InputAndOutputFileProvider = new CompositeFileProvider(EnvironmentFileProvider, ProcessedOutputFileProvider);
             WebrootFileProvider = new CompositeFileProvider(ProcessedOutputFileProvider, SourcesFileProvider);
             Context = new PipelineContext(InputAndOutputFileProvider, SourcesOutputDirectory, ProcessedOutputDirectory, BaseRequestPath);
-           // Name = Guid.NewGuid().ToString();
+            // Name = Guid.NewGuid().ToString();
         }
 
         protected PipelineContext Context { get; set; }
@@ -178,11 +178,13 @@ namespace NetPack.Pipeline
                     try
                     {
                         pipe.LastProcessStartTime = DateTime.UtcNow;
-                        pipe.IsProcessing = true;
                         var input = pipe.Input;
                         Context.SetInput(input);
-                        await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(Context, ct), cancellationToken);
-                        pipe.LastProcessedEndTime = DateTime.UtcNow;
+                        if (Context.HasChanges)
+                        {                           
+                            pipe.IsProcessing = true;
+                            await policy.ExecuteAsync(ct => pipe.Pipe.ProcessAsync(Context, ct), cancellationToken);                           
+                        }                       
                     }
                     catch (Exception e)
                     {
@@ -191,6 +193,7 @@ namespace NetPack.Pipeline
                     }
                     finally
                     {
+                        pipe.LastProcessedEndTime = DateTime.UtcNow;
                         pipe.IsProcessing = false;
                     }
 
@@ -243,7 +246,7 @@ namespace NetPack.Pipeline
 
         public bool HasFlushed { get; set; }
 
-      //  public string Name { get; set; }
+        //  public string Name { get; set; }
 
 
         //public IEnumerable<IChangeToken> WatchInputs()
@@ -270,7 +273,7 @@ namespace NetPack.Pipeline
         //}
 
         // override object.Equals
-      
+
     }
 
 

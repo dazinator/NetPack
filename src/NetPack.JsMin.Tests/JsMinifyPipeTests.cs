@@ -27,6 +27,13 @@ namespace NetPack.JsMin.Tests
             ThenTheProcessedOutputDirectoryFile("SomeFolder/somefile.min.js", Assert.NotNull);
             ThenTheProcessedOutputDirectoryFile("SomeFolder/somefile.min.js.map", Assert.NotNull);
 
+            ThenTheProcessedOutputDirectoryFile("SomeFolder/somefile.min.js.map", (file) =>
+            {
+                var contents = file.ReadAllContent();
+
+            }
+            );
+
         }
 
 

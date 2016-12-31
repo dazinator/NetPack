@@ -16,7 +16,7 @@
     "ReflectionBridge": "0.0.11",
     "Dazinator.AspNet.Extensions.FileProviders": "1.2.0",
     "NetPack": "1.0.0-*",
-    "DotNet.SourceMaps": "0.1.0"
+    "DotNet.SourceMaps": "0.2.0"
   },
   "frameworks": {
     "netstandard1.6": {

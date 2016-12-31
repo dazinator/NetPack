@@ -607,8 +607,9 @@ namespace NetPack.JsMin
         /// <returns></returns>
         private int Peek()
         {
-            _theLookahead = Get();
-            return _theLookahead;
+            // _theLookahead = 
+            return _sr.Peek();
+            //return _theLookahead;
         }
 
         /// <summary>
@@ -619,35 +620,53 @@ namespace NetPack.JsMin
         /// <returns></returns>
         private int Get(bool replaceCr = true)
         {
-            int c = _theLookahead;
-            _theLookahead = Eof;
-            if (c == Eof)
+            //  int c = _theLookahead;
+            //  _theLookahead = Eof;
+            //if (c == Eof)
+            //{
+            int c = _sr.Read();
+            _sourceMapBuilder.AdvanceSourceColumnPosition();
+            if (c == '\n' && Peek() != '\r')
             {
-                c = _sr.Read();
-                _sourceMapBuilder.AdvanceSourceColumnPosition();
+                _sourceMapBuilder.AdvanceSourceLineNumber();
+                //     }
             }
+            else if (c == '\r')
+            {
+                _sourceMapBuilder.AdvanceSourceLineNumber();
+                if (replaceCr)
+                {
+                    return '\n';
+                }
+                else
+                {
+                    return c;
+                }
+            }
+
             if (c >= ' ' || c == '\n' || c == Eof)
             {
                 return c;
             }
-            if (c == '\r' && !replaceCr)
-            {
-                return c;
-            }
-            if (c == '\r' && replaceCr)
-            {
-                return '\n';
-            }
+
             if (c == '\u2028' || c == '\u2029')
             {
                 return '\n';
             }
+
             return ' ';
         }
 
         private Task Put(int c)
         {
-            return _sw.WriteAsync((char)c);
+            var result = _sw.WriteAsync((char)c);
+            _sourceMapBuilder.AddMapping();
+            _sourceMapBuilder.AdvanceOutputColumnPosition();        
+            if(c == '\n')
+            {
+                _sourceMapBuilder.AdvanceOutputLineNumber();
+            }              
+            return result;
         }
 
         /// <summary>
