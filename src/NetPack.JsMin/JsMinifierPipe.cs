@@ -39,6 +39,8 @@ namespace NetPack.JsMin
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
 
                 var output = new StringBuilder((int)stream.Length); // minified file shouldnt be longer than the original
+             //   mapBuilder.CurrentSourceFileContext.AdvanceColumnPosition(-1);
+
                 await jsMin.ProcessAsync(stream, output, mapBuilder, cancelationToken);
 
                 if (mapBuilder != null)

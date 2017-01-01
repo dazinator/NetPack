@@ -57,6 +57,10 @@ namespace NetPack.JsMin
 
     public class JsMin
     {
+
+        private int _readCount = -1;
+        private int _readLineCount = 0;
+
         private const int Eof = -1;
         private StreamReader _sr;
         private TextWriter _sw;
@@ -625,15 +629,22 @@ namespace NetPack.JsMin
             //if (c == Eof)
             //{
             int c = _sr.Read();
-            _sourceMapBuilder.AdvanceSourceColumnPosition();
-            if (c == '\n' && Peek() != '\r')
+            _readCount = _readCount + 1;
+
+            if (c == '\n')
             {
-                _sourceMapBuilder.AdvanceSourceLineNumber();
+                _readLineCount = _readLineCount + 1;
+                return c;
                 //     }
+            }
+            else if (c == '\r' && Peek() == '\n')
+            {
+                c = Get(replaceCr);
+                return c;
             }
             else if (c == '\r')
             {
-                _sourceMapBuilder.AdvanceSourceLineNumber();
+                _readLineCount = _readLineCount + 1;
                 if (replaceCr)
                 {
                     return '\n';
@@ -644,7 +655,7 @@ namespace NetPack.JsMin
                 }
             }
 
-            if (c >= ' ' || c == '\n' || c == Eof)
+            if (c >= ' ' || c == Eof)
             {
                 return c;
             }
@@ -660,13 +671,40 @@ namespace NetPack.JsMin
         private Task Put(int c)
         {
             var result = _sw.WriteAsync((char)c);
-            _sourceMapBuilder.AddMapping();
-            _sourceMapBuilder.AdvanceOutputColumnPosition();        
-            if(c == '\n')
+            Map(c);
+            return result;
+        }
+
+        private void Map(int c)
+        {
+            if (c == '\r')
+            {
+                _sourceMapBuilder.AdvanceOutputColumnPosition(1);
+                return;
+                // _sourceMapBuilder.AdvanceOutputLineNumber();
+            }
+
+            if (c != '\n')
+            {
+                _sourceMapBuilder.AddMapping();
+            }
+
+            _sourceMapBuilder.AdvanceSourceColumnPosition(_readCount);
+            if (_readLineCount > 0)
+            {
+                _sourceMapBuilder.AdvanceSourceLineNumber(_readLineCount);
+                _sourceMapBuilder.AdvanceSourceColumnPosition(-1);
+                _readLineCount = 0;
+            }
+            _sourceMapBuilder.AdvanceOutputColumnPosition(1);
+            _readCount = 0;
+
+            if (c == '\n')
             {
                 _sourceMapBuilder.AdvanceOutputLineNumber();
-            }              
-            return result;
+            }
+
+
         }
 
         /// <summary>
