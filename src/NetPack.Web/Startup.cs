@@ -101,14 +101,7 @@ namespace NetPack.Web
                      .AddJsMinPipe(input =>
                      {
                          input.Include("js/*.js");
-                     }, options =>
-                     {
-
-                         options.EnableSourceMaps = true;
-                         options.InlineSourceMap = false;
-                         options.InlineSources = false;
-                     }
-                     )
+                     })
                     .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
             });

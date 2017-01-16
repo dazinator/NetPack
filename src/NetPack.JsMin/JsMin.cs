@@ -625,15 +625,27 @@ namespace NetPack.JsMin
             //if (c == Eof)
             //{
             int c = _sr.Read();
-            _sourceMapBuilder.AdvanceSourceColumnPosition();
+            if (_sourceMapBuilder != null)
+            {
+                _sourceMapBuilder.AdvanceSourceColumnPosition();
+            }
+
             if (c == '\n' && Peek() != '\r')
             {
-                _sourceMapBuilder.AdvanceSourceLineNumber();
+                if (_sourceMapBuilder != null)
+                {
+                    _sourceMapBuilder.AdvanceSourceLineNumber();
+                }
+
                 //     }
             }
             else if (c == '\r')
             {
-                _sourceMapBuilder.AdvanceSourceLineNumber();
+                if (_sourceMapBuilder != null)
+                {
+                    _sourceMapBuilder.AdvanceSourceLineNumber();
+                }
+
                 if (replaceCr)
                 {
                     return '\n';
@@ -660,12 +672,20 @@ namespace NetPack.JsMin
         private Task Put(int c)
         {
             var result = _sw.WriteAsync((char)c);
-            _sourceMapBuilder.AddMapping();
-            _sourceMapBuilder.AdvanceOutputColumnPosition();        
-            if(c == '\n')
+            if (_sourceMapBuilder != null)
             {
-                _sourceMapBuilder.AdvanceOutputLineNumber();
-            }              
+                _sourceMapBuilder.AddMapping();
+                _sourceMapBuilder.AdvanceOutputColumnPosition();
+            }
+
+            if (c == '\n')
+            {
+                if (_sourceMapBuilder != null)
+                {
+                    _sourceMapBuilder.AdvanceOutputLineNumber();
+                }
+
+            }
             return result;
         }
 
