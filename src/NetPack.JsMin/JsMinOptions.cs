@@ -6,7 +6,7 @@
 
         public JsMinOptions()
         {
-            EnableSourceMaps = true;
+            EnableSourceMaps = false;
             InlineSourceMap = false;
             InlineSources = false;
             OutputFilePath = null;

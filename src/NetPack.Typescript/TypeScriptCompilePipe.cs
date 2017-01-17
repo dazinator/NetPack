@@ -87,15 +87,13 @@ namespace NetPack.Typescript
 
                     foreach (var output in result.Sources)
                     {
-                        var subPathInfo = SubPathInfo.Parse(output.Key);
-                        //var compiledTs = output.Value;
-                        // fix source mapping url declaration
+                        var subPathInfo = SubPathInfo.Parse(output.Key);                       
                         var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
                         context.AddOutput(subPathInfo.Directory, outputFileInfo);
                     }
 
-                    // also, if source maps are enabled, but source is now inlined in the source map, then the 
-                    // source fill should be made available to be served up to the browser.              
+                    // also, if source maps are enabled, but source is not inlined in the source map, then the 
+                    // source file needs to be output so it can be served up to the browser.              
                     if (_options.SourceMap && !_options.InlineSources)
                     {
                         foreach (var inputFileInfo in context.InputFiles)
@@ -126,12 +124,7 @@ namespace NetPack.Typescript
 
         }
 
-
-
-
-
-
-
+        
 
     }
 
