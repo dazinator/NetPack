@@ -107,46 +107,6 @@ namespace NetPack.Typescript.Tests
                     
             });
 
-            //   app.Run(async (context) =>
-            // {
-            //var nodeServices = context.RequestServices.GetService<INodeServices>();
-            //var nodeJsRequirement = context.RequestServices.GetService<NodeJsRequirement>();
-            //var embeddedResourceProvider = context.RequestServices.GetService<IEmbeddedResourceProvider>();
-
-            //var pipe = new TypeScriptCompilePipe(nodeServices, embeddedResourceProvider);
-
-
-            //// inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "moduleB.js"));
-
-            //// When source maps are encountered, the processor need to ensure thats source files being processed (such as typescript files etc)
-            //// can be served up to the browser. The following directory is where such source files will be added by the processor, so we can
-            //// check after processing that it has added the correct source files.
-            //IDirectory sourcesOutputDirectory = new InMemoryDirectory();
-
-            //var pipelineContext = new PipelineContext(inputFileProvider, sourcesOutputDirectory);
-            //var input = new PipelineInput();
-            //input.AddInclude("wwwroot/*.ts");
-            //pipelineContext.SetInput(input);
-            //  var pipelineContext = new PipelineContext();
-            //  pipelineContext.InputFiles.Add(new SourceFile(new StringFileInfo(TsContentOne, "somefile.ts"), "wwwroot"));
-
-            //await pipe.ProcessAsync(pipelineContext, CancellationToken.None);
-
-            //var builder = new StringBuilder();
-
-            //foreach (var output in pipelineContext.ProcessedOutput.GetFolder("wwwroot"))
-            //{
-            //    using (var reader = new StreamReader(output.FileInfo.CreateReadStream()))
-            //    {
-            //        builder.AppendLine("File Name: " + output.Path.ToString());
-            //        builder.Append(reader.ReadToEnd());
-            //    }
-            //}
-
-            //await context.Response.WriteAsync(builder.ToString());
-
-            //   });
-
         }
         public void ConfigureServices(IServiceCollection services)
         {

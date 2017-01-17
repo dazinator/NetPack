@@ -19,7 +19,7 @@ namespace NetPack
         {
 
             var appServices = builder.ServiceProvider;
-            var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
+            var nodeServices = (INetPackNodeServices)appServices.GetRequiredService(typeof(INetPackNodeServices));
 
             // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.
             var nodeJsRequirement = new NodeJsRequirement();

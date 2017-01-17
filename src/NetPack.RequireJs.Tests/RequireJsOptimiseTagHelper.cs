@@ -56,12 +56,7 @@ namespace NetPack.RequireJs
 
         private IPipeLine EnsurePipeline()
         {
-            // var appServices = builder.ApplicationBuilder.ApplicationServices;
-            //var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
-
-            // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.
-
-
+           
             var pipeBuilder = Builder.WithHostingEnvironmentWebrootProvider()
              .AddRequireJsOptimisePipe(input =>
              {

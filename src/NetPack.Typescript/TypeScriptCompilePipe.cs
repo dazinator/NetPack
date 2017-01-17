@@ -13,16 +13,16 @@ namespace NetPack.Typescript
 {
     public class TypeScriptCompilePipe : IPipe
     {
-        private INodeServices _nodeServices;
+        private INetPackNodeServices _nodeServices;
         private TypeScriptPipeOptions _options;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
 
-        public TypeScriptCompilePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
+        public TypeScriptCompilePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
         {
 
         }
 
-        public TypeScriptCompilePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, TypeScriptPipeOptions options)
+        public TypeScriptCompilePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, TypeScriptPipeOptions options)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;

@@ -22,7 +22,19 @@ namespace NetPack
         public static IServiceCollection AddNetPack(this IServiceCollection services)
         {
             // Enable Node Services
-            services.AddNodeServices(new NodeServicesOptions() { HostingModel = NodeHostingModel.Socket });
+            services.AddNodeServices((options) =>
+            {
+                options.
+                HostingModel = NodeHostingModel.Socket;
+            });
+
+
+            services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
+            {
+                var options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
+                var nodeServices = NodeServicesFactory.CreateNodeServices(options);
+                return new NetPackNodeServices(nodeServices);
+            });
 
             services.AddSingleton(new NodeJsRequirement());
             services.AddSingleton<IRequirement>(new NodeJsRequirement());

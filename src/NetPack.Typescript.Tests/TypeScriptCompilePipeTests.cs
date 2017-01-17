@@ -20,7 +20,7 @@ namespace NetPack.Typescript.Tests
         {
 
             // arrange
-            var mockNodeInstance = new Moq.Mock<INodeServices>();
+            var mockNodeInstance = new Moq.Mock<INetPackNodeServices>();
             mockNodeInstance.Setup(a => a.InvokeAsync<TypeScriptCompileResult>(It.IsAny<string>(), It.IsAny<TypescriptCompileRequestDto>()))
                                          .ReturnsAsync(new TypeScriptCompileResult()
                                          {
