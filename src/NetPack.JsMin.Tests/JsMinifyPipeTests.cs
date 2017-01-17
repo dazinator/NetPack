@@ -19,6 +19,7 @@ namespace NetPack.JsMin.Tests
             await WhenFilesProcessedByPipe(() =>
             {
                 var options = new JsMinOptions();
+                options.EnableSourceMaps = true;
                 return new JsMinifierPipe(options);
             }, jsFile);
 

@@ -679,29 +679,48 @@ namespace NetPack.JsMin
         {
             if (c == '\r')
             {
-                _sourceMapBuilder.AdvanceOutputColumnPosition(1);
+                if (_sourceMapBuilder != null)
+                {
+                    _sourceMapBuilder.AdvanceOutputColumnPosition(1);
+                }
                 return;
                 // _sourceMapBuilder.AdvanceOutputLineNumber();
             }
 
             if (c != '\n')
             {
-                _sourceMapBuilder.AddMapping();
+                if (_sourceMapBuilder != null)
+                {
+                    _sourceMapBuilder.AddMapping();
+                }
             }
 
-            _sourceMapBuilder.AdvanceSourceColumnPosition(_readCount);
+            if (_sourceMapBuilder != null)
+            {
+                _sourceMapBuilder.AdvanceSourceColumnPosition(_readCount);
+            }
             if (_readLineCount > 0)
             {
-                _sourceMapBuilder.AdvanceSourceLineNumber(_readLineCount);
-                _sourceMapBuilder.AdvanceSourceColumnPosition(-1);
+                if (_sourceMapBuilder != null)
+                {
+                    _sourceMapBuilder.AdvanceSourceLineNumber(_readLineCount);
+                    _sourceMapBuilder.AdvanceSourceColumnPosition(-1);
+                }
                 _readLineCount = 0;
             }
-            _sourceMapBuilder.AdvanceOutputColumnPosition(1);
+            if (_sourceMapBuilder != null)
+            {
+                _sourceMapBuilder.AdvanceOutputColumnPosition(1);
+            }
             _readCount = 0;
 
             if (c == '\n')
             {
-                _sourceMapBuilder.AdvanceOutputLineNumber();
+                if (_sourceMapBuilder != null)
+                {
+                    _sourceMapBuilder.AdvanceOutputLineNumber();
+                }
+
             }
 
 
