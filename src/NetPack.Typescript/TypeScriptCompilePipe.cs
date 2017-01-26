@@ -17,12 +17,15 @@ namespace NetPack.Typescript
         private TypeScriptPipeOptions _options;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
 
-        public TypeScriptCompilePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
+        public TypeScriptCompilePipe(INetPackNodeServices nodeServices, 
+            IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
         {
 
         }
 
-        public TypeScriptCompilePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, TypeScriptPipeOptions options)
+        public TypeScriptCompilePipe(INetPackNodeServices nodeServices, 
+            IEmbeddedResourceProvider embeddedResourceProvider, 
+            TypeScriptPipeOptions options)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -42,8 +45,12 @@ namespace NetPack.Typescript
                 //if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
                 //{
                 // var inputFileInfo = inputFile.FileInfo;
-                var contents = inputFileInfo.FileInfo.ReadAllContent();
-                requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
+                if (context.IsDifferentFromLastTime(inputFileInfo))
+                {
+                    var contents = inputFileInfo.FileInfo.ReadAllContent();
+                    requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
+                }
+               
 
                 //// tsFiles.Add(inputFile);
                 //// allow ts files to flow through pipeline if sourcemaps enabled, as this means we want the original
@@ -60,10 +67,10 @@ namespace NetPack.Typescript
                 //}
             }
 
-            if (!requestDto.Files.Any())
-            {
-                return;
-            }
+            //if (!requestDto.Files.Any())
+            //{
+            //    return;
+            //}
 
             try
             {
@@ -76,7 +83,7 @@ namespace NetPack.Typescript
                 using (var nodeScript = new StringAsTempFile(scriptContent))
                 {
 
-                    var result = await _nodeServices.InvokeAsync<TypeScriptCompileResult>(nodeScript.FileName, requestDto);
+                    var result = await _nodeServices.InvokeExportAsync<TypeScriptCompileResult>(nodeScript.FileName, "build", requestDto);
 
                     if (result.Errors != null && result.Errors.Any())
                     {
@@ -115,7 +122,7 @@ namespace NetPack.Typescript
                 }
 
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
 
                 throw;
