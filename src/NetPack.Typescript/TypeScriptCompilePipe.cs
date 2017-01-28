@@ -101,7 +101,7 @@ namespace NetPack.Typescript
 
                     // also, if source maps are enabled, but source is not inlined in the source map, then the 
                     // source file needs to be output so it can be served up to the browser.              
-                    if (_options.SourceMap && !_options.InlineSources)
+                    if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
                     {
                         foreach (var inputFileInfo in context.InputFiles)
                         {

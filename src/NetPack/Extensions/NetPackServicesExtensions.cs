@@ -32,6 +32,7 @@ namespace NetPack
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {
                 var options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
+               
                 var nodeServices = NodeServicesFactory.CreateNodeServices(options);
                 return new NetPackNodeServices(nodeServices);
             });

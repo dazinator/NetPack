@@ -10,8 +10,8 @@ namespace NetPack.Typescript
         {
             SourceMap = true;
             NoImplicitAny = true;
-            Module = ModuleKind.Amd;
-            Target = ScriptTarget.Es6;
+            Module = ModuleKind.AMD;
+            Target = ScriptTarget.ES6;
             InlineSourceMap = false;
         }
 
@@ -128,7 +128,7 @@ namespace NetPack.Typescript
         /// <summary>
         /// Support JSX in .tsx files: "React" or "Preserve". See JSX.
         /// </summary>
-        public bool? Jsx { get; set; }
+        public JsxEmit? Jsx { get; set; }
 
         /// <summary>
         /// Specify the JSX factory function to use when targeting react JSX emit, e.g. React.createElement or h.
@@ -407,13 +407,18 @@ namespace NetPack.Typescript
 
     public enum ScriptTarget
     {
-        Es5,
-        Es6
+        ES3 = 0,
+        ES5 = 1,
+        ES6 = 2,
+        Latest = 2,
     }
     public enum ModuleKind
     {
-        CommonJs,
-        Amd
+        None = 0,
+        CommonJS = 1,
+        AMD = 2,
+        UMD = 3,
+        System = 4,
     }
 
     public enum NewLineKind
@@ -426,5 +431,12 @@ namespace NetPack.Typescript
     {
         Classic = 1,
         NodeJs = 2,
+    }
+    
+    public enum JsxEmit
+    {
+        None = 0,
+        Preserve = 1,
+        React = 2,
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace NetPack.Typescript
 {
@@ -7,5 +8,7 @@ namespace NetPack.Typescript
         public Dictionary<string, string> Sources { get; set; }
         public TypescriptCompileError[] Errors { get; set; }
         public string Message { get; set; }
+
+        public JObject Echo { get; set; }
     }
 }

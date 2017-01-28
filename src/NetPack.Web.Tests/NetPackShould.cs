@@ -150,8 +150,8 @@ namespace NetPack.Web.Tests
                                  .Include("ts/someOtherfile.ts");
                         }, tsConfig =>
                         {
-                            tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                            tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                            tsConfig.Target = ScriptTarget.ES5;
+                            tsConfig.Module = ModuleKind.AMD;
                             tsConfig.NoImplicitAny = true;
                             tsConfig.RemoveComments = false;
                             // important: we are not removing comments because we test for a modification that involves a comment being added!

@@ -18,30 +18,15 @@ module.exports = {
         }
        
         var options = requestDto.options;
-
-        var args = '--module ' + options.module + ' -t ' + options.target;
-        if (options.sourceMap) {
-            args = args + ' --sourceMap';
-        } else {
-            if (options.inlineSourceMap) {
-                args = args + ' --inlineSourceMap';
+        for (var optionsProp in options) {
+            if (options.hasOwnProperty(optionsProp)) {
+                if (options[optionsProp] === null) {
+                    delete options[optionsProp];
+                }
             }
         }
-        if (options.outFile) {
-            args = args + ' --outFile' + options.outFile;
-        }
-        if (options.baseUrl) {
-            args = args + ' --baseUrl' + options.baseUrl;
-        }
-        if (options.noImplicitAny) {
-            args = args + ' --noImplicitAny';
-        }
-        if (options.removeComments) {
-            args = args + ' --removeComments';
-        }
-        if (options.inlineSources) {
-            args = args + ' --inlineSources';
-        }
+
+        requestDto.options = options;
         
         var compileErrors = [];
         var errorHandler = function (err) {
@@ -50,7 +35,8 @@ module.exports = {
         var sut = new compilerhost["default"]();
 
         // Act
-        var result = sut.compileStrings(typescriptFiles, args, null, errorHandler);
+        var result = sut.compileStrings(typescriptFiles, options, errorHandler);
+        result.Echo = requestDto;
 
         callback(null, result);
 
