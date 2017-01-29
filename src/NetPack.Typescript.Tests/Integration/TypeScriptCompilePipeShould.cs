@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.TestHost;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
+using System;
+using Microsoft.AspNetCore.Http;
 
 namespace NetPack.Typescript.Tests
 {
@@ -58,6 +61,28 @@ namespace NetPack.Typescript.Tests
 
         }
 
+
+        [Fact]
+        public async void Send_Files_Incrementally_For_Build()
+        {
+
+            // Act
+            // ge tthe current combined output file.
+            var responseString = await GetResponseString("/netpack/combined.js");
+            Assert.False(string.IsNullOrWhiteSpace(responseString));
+
+            // change foo.ts, should result in an updated combined.js file being output -
+            // but also - only foo.ts should be sent over to node as it was the only file that changes.
+            await GetResponseString("/", "change=incremental/foo.ts");
+
+            await Task.Delay(new TimeSpan(0, 0, 5));
+
+            var updatedOutputFile = await GetResponseString("/netpack/combined.js");
+            Assert.NotEqual(responseString, updatedOutputFile);
+          
+
+        }
+
     }
 
     public class Startup
@@ -78,6 +103,43 @@ namespace NetPack.Typescript.Tests
 
         document.body.innerHTML = greeter.greet();";
 
+
+        public const string TsContentFoo = @"
+
+        export class Foo
+        {
+    constructor(public greeting: string) { }
+    greet()
+            {
+                return ""<h1>"" + this.greeting + ""</h1>"";
+            }
+        };
+
+        var foo = new Foo(""Hello, world!"");
+
+        document.body.innerHTML = foo.greet();";
+
+
+        public const string TsContentBar = @"
+
+         ///<reference path=""./foo.ts"" />
+
+        import {Foo} from ""./foo"";
+        class Bar
+        {
+    constructor(public greeting: string) { }
+    greet()
+            {
+                return ""<h1>"" + this.greeting + ""</h1>"";
+            }
+        };
+
+        var foo = new Foo(""Hi Foo"");
+        document.body.innerHTML = foo.greet();
+
+        var bar = new Bar(""Hello, world!"");
+        document.body.innerHTML = bar.greet();";
+
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
 
@@ -85,6 +147,8 @@ namespace NetPack.Typescript.Tests
 
             var inputFileProvider = new InMemoryFileProvider();
             inputFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
+            inputFileProvider.Directory.AddFile("incremental", new StringFileInfo(TsContentFoo, "foo.ts"));
+            inputFileProvider.Directory.AddFile("incremental", new StringFileInfo(TsContentBar, "bar.ts"));
 
             app.UseFileProcessing(a =>
             {
@@ -95,8 +159,21 @@ namespace NetPack.Typescript.Tests
                         input.Include("wwwroot/*.ts");
                     }, options =>
                     {
-                        // configure various typescript compilation options here..
+                        // configure various typescript compilation options here
+                        options.Module = ModuleKind.AMD;
                         options.SourceMap = true;
+                        // options.InlineSourceMap = true;
+                        //  options.Module = ModuleKind.Amd;
+                    })
+                    .AddTypeScriptPipe(input =>
+                    {
+                        input.Include("incremental/*.ts");
+                    }, options =>
+                    {
+                        // configure various typescript compilation options here
+                        options.Module = ModuleKind.AMD;
+                        options.SourceMap = true;
+                        options.OutFile = "combined.js";
                         // options.InlineSourceMap = true;
                         //  options.Module = ModuleKind.Amd;
                     })
@@ -104,13 +181,46 @@ namespace NetPack.Typescript.Tests
 
                     // allows the files produced from processing to be resolved via the environemtns webroot file provider..
                     .Watch(); // Input files are watched, and when changes occur, pipeline will automatically trigger necessary processing.
-                    
+
+            });
+
+            app.Run(async (a) =>
+            {
+                var changeFileKey = "Change";
+                if (a.Request.Query.ContainsKey(changeFileKey))
+                {
+                    StringValues values;
+                    if (a.Request.Query.TryGetValue(changeFileKey, out values))
+                    {
+                        foreach (var value in values)
+                        {
+                            var subPath = SubPathInfo.Parse(value);
+
+                            var existingFile = inputFileProvider.GetFileInfo(value);
+                            var existingFileContents = existingFile.ReadAllContent();
+                            var modifiedFileContents = existingFileContents + Environment.NewLine +
+                                                       "// modified on " + DateTime.UtcNow;
+
+                            var retrievedFolder = inputFileProvider.Directory.GetFolder(subPath.Directory);
+
+                            var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
+
+                            //  var fileToBeUpdated = mockFileProvider.Directory.GetFile(subPath.ToString());
+                            retrievedFolder.UpdateFile(modifiedFile);
+                            //  fileToBeUpdated.Update(modifiedFile);
+
+                        }
+                    }
+
+                    await a.Response.WriteAsync("done");
+                }
+
+
             });
 
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            
             services.AddNetPack();
         }
     }

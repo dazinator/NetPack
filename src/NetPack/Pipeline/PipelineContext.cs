@@ -37,11 +37,11 @@ namespace NetPack.Pipeline
         /// <param name="excludeFromInput">Whether to add the output ile to the exclude list of this pipelines input. True by default, prevents the pipeline from processing a file which it has generated.</param>
         public void AddOutput(string directory, IFileInfo file, bool excludeFromInput = true)
         {
-            if (excludeFromInput)
-            {
-                //to-do - check for concurrency?
-                Input.AddExclude($"{directory}/{file.Name}");
-            }
+            //if (excludeFromInput)
+            //{
+            //    //to-do - check for concurrency?
+            //    Input.AddExclude($"{directory}/{file.Name}");
+            //}
             ProcessedOutput.AddOrUpdateFile(directory, file);
             // return new FileWithDirectory(directory, file);
             //  Output.AddFile(directory, info);

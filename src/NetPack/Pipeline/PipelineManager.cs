@@ -37,10 +37,6 @@ namespace NetPack.Pipeline
         private void SetupPipeline(IPipeLine pipeline, bool watch)
         {
             //  var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
-            if (watch)
-            {
-                Watcher.WatchPipeline(pipeline);
-            }
 
             var outputFileProvider = pipeline.WebrootFileProvider;
             if (!string.IsNullOrWhiteSpace(pipeline.BaseRequestPath))
@@ -60,6 +56,13 @@ namespace NetPack.Pipeline
             }
 
             pipeline.Initialise();
+
+            if (watch)
+            {
+                Watcher.WatchPipeline(pipeline);
+            }
+
+
         }
 
         IPipeLine GetPipeline(string name)

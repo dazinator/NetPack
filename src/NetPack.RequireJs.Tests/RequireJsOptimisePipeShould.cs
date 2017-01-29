@@ -92,7 +92,7 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
              });
 
             var pipeline = fileProcessingBuilder.Pipeline;
-            pipeline.Initialise();
+           // pipeline.Initialise();
 
             app.Run(async (context) =>
             {
