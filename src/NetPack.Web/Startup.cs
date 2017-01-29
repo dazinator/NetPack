@@ -31,39 +31,11 @@ namespace NetPack.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddNetPack();
-            services.AddMvc();
-
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
-        {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
-            if (env.IsDevelopment())
+            services.AddNetPack((setup) =>
             {
-                app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
-
-            app.UseStaticFiles();
-
-            if (!env.IsProduction())
-            {
-                // add another pipeline that takes outputs from previous pipeline and bundles them
-
-
-            }
-
-            app.UseFileProcessing(a =>
-            {
-                a.WithHostingEnvironmentWebrootProvider()
+                setup.AddFileProcessing(pipelineBuilder =>
+                {
+                    pipelineBuilder.WithHostingEnvironmentWebrootProvider()
                     // Simple processor, that compiles typescript files.
                     .AddTypeScriptPipe(input =>
                     {
@@ -104,7 +76,31 @@ namespace NetPack.Web
                      })
                     .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
+
+                });
             });
+            services.AddMvc();
+
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseBrowserLink();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
+
+            app.UseFileProcessing();
+            app.UseStaticFiles();
 
             app.UseMvc(routes =>
              {

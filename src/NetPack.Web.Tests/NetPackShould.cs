@@ -126,24 +126,18 @@ namespace NetPack.Web.Tests
             public void ConfigureServices(IServiceCollection services)
             {
 
-                services.AddNetPack();
-            }
-
-            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-            {
-
                 var mockFileProvider = new InMemoryFileProvider();
 
                 mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentOne, "somefile.ts"));
                 mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
 
-                // env.WebRootFileProvider = mockFileProvider;
-                //   env.WebRootFileProvider = 
+                InMemoryFileProvider = mockFileProvider;
 
-
-                app.UseFileProcessing(pipelineBuilder =>
+                services.AddNetPack((setup) =>
                 {
-                    pipelineBuilder.WithFileProvider(mockFileProvider)
+                    setup.AddFileProcessing(pipelineBuilder =>
+                    {
+                        pipelineBuilder.WithFileProvider(mockFileProvider)
                         .AddTypeScriptPipe(input =>
                         {
                             input.Include("ts/somefile.ts")
@@ -160,7 +154,24 @@ namespace NetPack.Web.Tests
                         )
                         .UseBaseRequestPath("netpack")
                         .Watch();
+
+
+                    });
                 });
+            }
+
+            public InMemoryFileProvider InMemoryFileProvider { get; set; }
+
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            {
+
+               
+
+                // env.WebRootFileProvider = mockFileProvider;
+                //   env.WebRootFileProvider = 
+
+
+                app.UseFileProcessing();
 
                 app.UseStaticFiles();
 
@@ -176,12 +187,12 @@ namespace NetPack.Web.Tests
                             {
                                 var subPath = SubPathInfo.Parse(value);
 
-                                var existingFile = mockFileProvider.GetFileInfo(value);
+                                var existingFile = InMemoryFileProvider.GetFileInfo(value);
                                 var existingFileContents = existingFile.ReadAllContent();
                                 var modifiedFileContents = existingFileContents + Environment.NewLine +
                                                            "// modified on " + DateTime.UtcNow;
 
-                                var retrievedFolder = mockFileProvider.Directory.GetFolder(subPath.Directory);
+                                var retrievedFolder = InMemoryFileProvider.Directory.GetFolder(subPath.Directory);
 
                                 var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
 

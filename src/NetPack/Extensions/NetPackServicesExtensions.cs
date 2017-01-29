@@ -3,7 +3,6 @@ using System;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -12,6 +11,7 @@ using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
+using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -19,20 +19,55 @@ namespace NetPack
 {
     public static class NetPackServicesExtensions
     {
-        public static IServiceCollection AddNetPack(this IServiceCollection services)
+
+        private class PipelineSetup
+        {
+            public IPipeLine Pipeline { get; set; }
+
+        }
+
+        public class FileProcessingOptions
+        {
+            private readonly IServiceCollection _services;
+            public FileProcessingOptions(IServiceCollection services)
+            {
+                _services = services;
+            }
+
+            public FileProcessingOptions AddFileProcessing(Action<IPipelineConfigurationBuilder> processorBuilder)
+            {
+                _services.AddTransient<PipelineSetup>((sp) =>
+                {
+
+                    var sourcesDirectory = sp.GetService<IDirectory>();
+                    var builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
+
+                    //var builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
+                    processorBuilder(builder);
+                    var pipeline = builder.BuildPipeLine();
+                    var pipeLineManager = sp.GetService<PipelineManager>();
+                    pipeLineManager.AddPipeLine(builder.Name, pipeline, builder.WachInput);
+                    return new PipelineSetup() { Pipeline = pipeline };
+                });
+
+                return this;
+            }
+
+        }
+
+        public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions)
         {
             // Enable Node Services
             services.AddNodeServices((options) =>
             {
-                options.
-                HostingModel = NodeHostingModel.Socket;
+                options.HostingModel = NodeHostingModel.Socket;
             });
 
 
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {
                 var options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
-               
+
                 var nodeServices = NodeServicesFactory.CreateNodeServices(options);
                 return new NetPackNodeServices(nodeServices);
             });
@@ -44,24 +79,22 @@ namespace NetPack
             services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
             services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
             services.AddTransient<IDirectory, InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
-            services.AddTransient<IPipelineConfigurationBuilder>((sp) =>
+
+            if (configureOptions != null)
             {
-
-
-                var sourcesDirectory = sp.GetService<IDirectory>();
-                var builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
-                return builder;
-
-                //return new NetPackApplicationBuilder(appBuilder, pipeline);
-            });
-
-
+                var opts = new FileProcessingOptions(services);
+                configureOptions(opts);
+            }
 
             return services;
         }
 
-        public static INetPackApplicationBuilder UseFileProcessing(this IApplicationBuilder appBuilder,
-            Action<IPipelineConfigurationBuilder> processorBuilder)
+        /// <summary>
+        /// Causes all file processing pipelines to be initialised, and adds middleware for delaying a http request for a generated file that is in the process of being re-generated.
+        /// </summary>
+        /// <param name="appBuilder"></param>
+        /// <returns></returns>
+        public static IApplicationBuilder UseFileProcessing(this IApplicationBuilder appBuilder)
         {
             var pipeLineManager = appBuilder.ApplicationServices.GetService<PipelineManager>();
             if (pipeLineManager == null)
@@ -70,15 +103,16 @@ namespace NetPack
                     "Could not find a required netpack service. Have you called services.AddNetPack() in your startup class?");
             }
 
-            var services = appBuilder.ApplicationServices;
-            var sourcesDirectory = services.GetService<IDirectory>();
-            var builder = new PipelineConfigurationBuilder(services, sourcesDirectory);
-            processorBuilder(builder);
+            // Triggers all pipeline to be initialised and registered with pipeline manager.
+            var initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();
 
-            var pipeline = builder.BuildPipeLine();
-            pipeLineManager.AddPipeLine(builder.Name, pipeline, builder.WachInput);
+            appBuilder.UseMiddleware<RequestHaltingMiddleware>();
 
-            return new NetPackApplicationBuilder(appBuilder, pipeline);
+            return appBuilder;
+
+            // return new NetPackApplicationBuilder(appBuilder, pipeline);
         }
     }
+
+ 
 }

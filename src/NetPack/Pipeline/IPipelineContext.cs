@@ -4,6 +4,7 @@ using NetPack.File;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
 namespace NetPack.Pipeline
 {
@@ -12,10 +13,18 @@ namespace NetPack.Pipeline
 
         PathString BaseRequestPath { get; }
 
-        void AddOutput(string directory, IFileInfo info, bool excludeFromInput = true);
+        void AddGeneratedOutput(string directory, IFileInfo info);
 
-        IDirectory ProcessedOutput { get; set; }
+        void AddSourceOutput(string directory, IFileInfo file);
 
+        /// <summary>
+        /// A directory where generated files are added.
+        /// </summary>
+        IDirectory GeneratedOutput { get; set; }
+
+        /// <summary>
+        /// A directory where source files that need to be served up should be added.
+        /// </summary>
         IDirectory SourcesOutput { get; }
 
         IFileProvider FileProvider { get; set; }
@@ -23,33 +32,19 @@ namespace NetPack.Pipeline
         //  PathString GetRequestPath(PathString path);
         PathString GetRequestPath(string directory, IFileInfo fileInfo);
 
-        /// <summary>
-        /// Returns the previous files that were processed.
-        /// </summary>
-        FileWithDirectory[] PreviousInputFiles { get; set; }
+        PipeContext PipeContext { get; }
 
-        /// <summary>
-        /// Returns the version of the file that was processed last time.
-        /// </summary>
-        /// <param name="fileWithDirectory"></param>
-        /// <returns></returns>
-        FileWithDirectory GetPreviousVersionOfFile(FileWithDirectory fileWithDirectory);
+        ///// <summary>
+        ///// Returns whether the file is different from the version that was processed last time.
+        ///// </summary>
+        ///// <param name="fileWithDirectory"></param>
+        ///// <returns></returns>
+        //bool IsDifferentFromLastTime(FileWithDirectory fileWithDirectory);
 
-        /// <summary>
-        /// Returns whether the file is different from the version that was processed last time.
-        /// </summary>
-        /// <param name="fileWithDirectory"></param>
-        /// <returns></returns>
-        bool IsDifferentFromLastTime(FileWithDirectory fileWithDirectory);
 
-        /// <summary>
-        /// Returns all the files that are detected as inputs for processing.
-        /// </summary>
-        FileWithDirectory[] InputFiles { get; set; }
 
-        void AddSourceOutput(string directory, IFileInfo file);
 
-       
+
 
         //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
 

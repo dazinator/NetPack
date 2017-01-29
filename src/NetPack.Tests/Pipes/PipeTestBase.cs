@@ -10,6 +10,7 @@ using NetPack.RequireJs;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
+using Polly;
 
 namespace NetPack.Tests.Pipes
 {
@@ -49,14 +50,15 @@ namespace NetPack.Tests.Pipes
             {
                 input.AddInclude(item.FileSubPath);
             }
-            PipelineContext.SetInput(input);
             Sut = pipeFactory();
-            await Sut.ProcessAsync(PipelineContext, CancellationToken.None);
+            var pipeContext = new PipeContext(input, Sut);
+            await PipelineContext.Apply(pipeContext, CancellationToken.None);
+           
         }
 
         protected IFileInfo ThenTheProcessedOutputDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var outputFile = PipelineContext.ProcessedOutput.GetFile(filePath);
+            var outputFile = PipelineContext.GeneratedOutput.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(outputFile?.FileInfo);

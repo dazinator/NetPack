@@ -17,7 +17,7 @@ namespace NetPack.Pipeline
     {
         public string Input { get; set; }
         public IPipeLine Pipeline { get; set; }
-        public PipeConfiguration PipeConfig { get; set; }
+        public PipeContext PipeConfig { get; set; }
     }
 
     public class PipelineWatcher : IPipelineWatcher
@@ -80,7 +80,7 @@ namespace NetPack.Pipeline
             IChangeToken changeToken;
             changeToken = _activeChangeTokens.GetOrAdd(state.Input, (key) =>
             {
-                var token = state.Pipeline.InputAndOutputFileProvider.Watch(key);
+                var token = state.Pipeline.InputAndGeneratedFileProvider.Watch(key);
                 return token;
             });
 
@@ -104,15 +104,6 @@ namespace NetPack.Pipeline
             {
 
                 var pipeLines = _pipelines.ToArray();
-
-                // IEnumerable<PipeConfiguration> dirtyPipeLiness = pipeLines.Select(p => p.GetDirtyPipes());
-                //foreach (var pipe in pipeLines)
-                //{
-                //    if(pipe.GetDirtyPipes())
-                //    {
-
-                //    }
-                //}
 
 
                 var dirtyPipeLines = pipeLines.Select(p =>

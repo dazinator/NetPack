@@ -39,11 +39,13 @@ namespace NetPack.RequireJs
             var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
             var scriptContent = script.ReadAllContent();
 
+            var pipeContext = context.PipeContext;
+
             using (var nodeScript = new StringAsTempFile(scriptContent))
             {
                 var optimiseRequest = new RequireJsOptimiseRequestDto();
-
-                foreach (var file in context.InputFiles)
+                
+                foreach (var file in pipeContext.InputFiles)
                 {
                     var fileContent = file.FileInfo.ReadAllContent();
                     //  var dir = file.Directory;
@@ -66,7 +68,7 @@ namespace NetPack.RequireJs
                     {
                         var filePath = file.Path.Replace('\\', '/');
                         var subPathInfo = SubPathInfo.Parse(filePath);
-                        context.AddOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
+                        context.AddGeneratedOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
                     }
 
                     //if (!string.IsNullOrWhiteSpace(result.Error))

@@ -8,7 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using System;
+using System.Runtime.InteropServices.ComTypes;
 using Microsoft.AspNetCore.Http;
+using NetPack.Pipeline;
 
 namespace NetPack.Typescript.Tests
 {
@@ -75,11 +77,11 @@ namespace NetPack.Typescript.Tests
             // but also - only foo.ts should be sent over to node as it was the only file that changes.
             await GetResponseString("/", "change=incremental/foo.ts");
 
-            await Task.Delay(new TimeSpan(0, 0, 5));
+            await Task.Delay(new TimeSpan(0, 0, 4));
 
             var updatedOutputFile = await GetResponseString("/netpack/combined.js");
             Assert.NotEqual(responseString, updatedOutputFile);
-          
+
 
         }
 
@@ -142,48 +144,9 @@ namespace NetPack.Typescript.Tests
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
+            app.UseFileProcessing();
             app.UseStaticFiles(new StaticFileOptions() { });
-
-            var inputFileProvider = new InMemoryFileProvider();
-            inputFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
-            inputFileProvider.Directory.AddFile("incremental", new StringFileInfo(TsContentFoo, "foo.ts"));
-            inputFileProvider.Directory.AddFile("incremental", new StringFileInfo(TsContentBar, "bar.ts"));
-
-            app.UseFileProcessing(a =>
-            {
-                a.WithFileProvider(inputFileProvider)
-                    // Simple processor, that compiles typescript files.
-                    .AddTypeScriptPipe(input =>
-                    {
-                        input.Include("wwwroot/*.ts");
-                    }, options =>
-                    {
-                        // configure various typescript compilation options here
-                        options.Module = ModuleKind.AMD;
-                        options.SourceMap = true;
-                        // options.InlineSourceMap = true;
-                        //  options.Module = ModuleKind.Amd;
-                    })
-                    .AddTypeScriptPipe(input =>
-                    {
-                        input.Include("incremental/*.ts");
-                    }, options =>
-                    {
-                        // configure various typescript compilation options here
-                        options.Module = ModuleKind.AMD;
-                        options.SourceMap = true;
-                        options.OutFile = "combined.js";
-                        // options.InlineSourceMap = true;
-                        //  options.Module = ModuleKind.Amd;
-                    })
-                    .UseBaseRequestPath("netpack")
-
-                    // allows the files produced from processing to be resolved via the environemtns webroot file provider..
-                    .Watch(); // Input files are watched, and when changes occur, pipeline will automatically trigger necessary processing.
-
-            });
-
+          
             app.Run(async (a) =>
             {
                 var changeFileKey = "Change";
@@ -196,18 +159,14 @@ namespace NetPack.Typescript.Tests
                         {
                             var subPath = SubPathInfo.Parse(value);
 
-                            var existingFile = inputFileProvider.GetFileInfo(value);
+                            var existingFile = InMemoryFileProvider.GetFileInfo(value);
                             var existingFileContents = existingFile.ReadAllContent();
                             var modifiedFileContents = existingFileContents + Environment.NewLine +
                                                        "// modified on " + DateTime.UtcNow;
 
-                            var retrievedFolder = inputFileProvider.Directory.GetFolder(subPath.Directory);
-
+                            var retrievedFolder = InMemoryFileProvider.Directory.GetFolder(subPath.Directory);
                             var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
-
-                            //  var fileToBeUpdated = mockFileProvider.Directory.GetFile(subPath.ToString());
                             retrievedFolder.UpdateFile(modifiedFile);
-                            //  fileToBeUpdated.Update(modifiedFile);
 
                         }
                     }
@@ -219,9 +178,55 @@ namespace NetPack.Typescript.Tests
             });
 
         }
+
+        public InMemoryFileProvider InMemoryFileProvider { get; set; }
+
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddNetPack();
+
+            var inputFileProvider = new InMemoryFileProvider();
+            inputFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(TsContentOne, "somefile.ts"));
+            inputFileProvider.Directory.AddFile("incremental", new StringFileInfo(TsContentFoo, "foo.ts"));
+            inputFileProvider.Directory.AddFile("incremental", new StringFileInfo(TsContentBar, "bar.ts"));
+            InMemoryFileProvider = inputFileProvider;
+
+            services.AddNetPack((setup) =>
+            {
+                setup.AddFileProcessing(a =>
+                {
+                    a.WithFileProvider(inputFileProvider)
+                  // Simple processor, that compiles typescript files.
+                  .AddTypeScriptPipe(input =>
+                  {
+                      input.Include("wwwroot/*.ts");
+                  }, options =>
+                  {
+                      // configure various typescript compilation options here
+                      options.Module = ModuleKind.AMD;
+                      options.SourceMap = true;
+                      // options.InlineSourceMap = true;
+                      //  options.Module = ModuleKind.Amd;
+                  })
+                  .AddTypeScriptPipe(input =>
+                  {
+                      input.Include("incremental/*.ts");
+                  }, options =>
+                  {
+                      // configure various typescript compilation options here
+                      options.Module = ModuleKind.AMD;
+                      options.SourceMap = true;
+                      options.OutFile = "combined.js";
+                      // options.InlineSourceMap = true;
+                      //  options.Module = ModuleKind.Amd;
+                  })
+                  .UseBaseRequestPath("netpack")
+
+                  // allows the files produced from processing to be resolved via the environemtns webroot file provider..
+                  .Watch(); // Input files are watched, and when changes occur, pipeline will automatically trigger necessary processing.
+
+                });
+
+            });
         }
     }
 }

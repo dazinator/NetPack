@@ -16,7 +16,7 @@ namespace NetPack.Pipeline
         public PipelineConfigurationBuilder(IServiceProvider serviceProvider, IDirectory sourcesOutputDirectory)
         {
             ServiceProvider = serviceProvider;
-            Pipes = new List<PipeConfiguration>();
+            Pipes = new List<PipeContext>();
             Requirements = new List<IRequirement>();
             SourcesOutputDirectory = sourcesOutputDirectory;
             Name = Guid.NewGuid().ToString();
@@ -61,13 +61,13 @@ namespace NetPack.Pipeline
 
         public List<IRequirement> Requirements { get; set; }
 
-        public List<PipeConfiguration> Pipes { get; set; }
+        public List<PipeContext> Pipes { get; set; }
 
         public IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe)
         {
             var builder = new PipelineInputBuilder();
             inputBuilder(builder);
-            Pipes.Add(new PipeConfiguration() { Input = builder.Input, Pipe = pipe });
+            Pipes.Add(new PipeContext(builder.Input, pipe));
             return this;
         }
 

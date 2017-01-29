@@ -44,15 +44,16 @@ namespace NetPack.JsCombine
             {
                 outputSubPath = _options.OutputFilePath;
             }
+            var pipeContext = context.PipeContext;
 
-            foreach (var item in context.InputFiles)
+            foreach (var item in pipeContext.InputFiles)
             {
 
                 if (item.FileSubPath == outputSubPath)
                 {
                     continue;
                 }
-                if (context.IsDifferentFromLastTime(item))
+                if (pipeContext.IsDifferentFromLastTime(item))
                 {
                     hasChanges = true;
                 }
@@ -65,14 +66,14 @@ namespace NetPack.JsCombine
 
             bool hasSourceMappingDirectives = false;
             var combiner = new ScriptCombiner();
-            var scriptInfos = new List<CombinedScriptInfo>(context.InputFiles.Length);
+            var scriptInfos = new List<CombinedScriptInfo>(pipeContext.InputFiles.Length);
 
             var ms = new MemoryStream();
 
             int totalLineCount = 0;
             var encoding = Encoding.UTF8;
 
-            foreach (var fileWithDirectory in context.InputFiles)
+            foreach (var fileWithDirectory in pipeContext.InputFiles)
             {
                 var fileInfo = fileWithDirectory.FileInfo;
                 if (fileInfo.Exists && !fileInfo.IsDirectory)
@@ -111,7 +112,7 @@ namespace NetPack.JsCombine
                 var indexMapFile = BuildIndexMap(ms, scriptInfos, outputFilePath, context);
 
                 // Output the new map file in the pipeline.
-                context.AddOutput(outputFilePath.Directory, indexMapFile);
+                context.AddGeneratedOutput(outputFilePath.Directory, indexMapFile);
 
                 // sourcemapping url is resolved relative to the source ifle
                 var mapServePath = $"{indexMapFile.Name}"; // context.GetRequestPath(outputFilePath.Directory, indexMapFile);
@@ -136,7 +137,7 @@ namespace NetPack.JsCombine
             ms.Position = 0;
             var bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
             // Output the new combines file.
-            context.AddOutput(outputFilePath.Directory, bundleJsFile);
+            context.AddGeneratedOutput(outputFilePath.Directory, bundleJsFile);
         }
 
         //private bool IsCssFile(SourceFile sourceFile)
@@ -217,9 +218,7 @@ namespace NetPack.JsCombine
                     JObject sourceMapObject = null;
                     var sourceMapFileContents = sourceMapFile.ReadAllContent();
                     sourceMapObject = JObject.Parse(sourceMapFileContents);
-
-
-
+                    
 
                     AdjustSourceMapPathsRelativeToSiteRoot(sourceMapObject, combinedFilePath.Directory, script, context);
 

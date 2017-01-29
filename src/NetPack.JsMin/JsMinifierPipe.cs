@@ -29,7 +29,7 @@ namespace NetPack.JsMin
         public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
             var jsMin = new JsMin(_options);
-            foreach (var item in context.InputFiles)
+            foreach (var item in context.PipeContext.InputFiles)
             {
 
                 string outPutFileName = GetOutputFileName(item);
@@ -62,14 +62,14 @@ namespace NetPack.JsMin
                     {
                         // seperate file.
                         var mapFileName = outPutFileName + ".map";
-                        context.AddOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
+                        context.AddGeneratedOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
                         sourceMappingURL = $"//# sourceMappingURL={mapFileName.ToString()}";                      
                     }
 
                     output.Append(sourceMappingURL);
                 }
 
-                context.AddOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));               
+                context.AddGeneratedOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));               
 
             }
 

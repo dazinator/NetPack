@@ -14,8 +14,9 @@ namespace NetPack.RequireJs
     {
         public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
+            var pipeContext = context.PipeContext;
             // Need to run uglify on any .js, .css, .html, or .htm files passed through the pipeline.
-            foreach (var inputFile in context.InputFiles)
+            foreach (var inputFile in pipeContext.InputFiles)
             {
                 // only interested in typescript files.
                 var inputFileInfo = inputFile.FileInfo;

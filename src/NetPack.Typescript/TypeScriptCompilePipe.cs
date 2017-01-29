@@ -50,9 +50,11 @@ namespace NetPack.Typescript
             var requestDto = new TypescriptCompileRequestDto();
             requestDto.Options = _options;
 
-            foreach (var inputFileInfo in context.InputFiles)
+            var pipeContext = context.PipeContext;
+
+            foreach (var inputFileInfo in pipeContext.InputFiles)
             {
-                if (context.IsDifferentFromLastTime(inputFileInfo))
+                if (pipeContext.IsDifferentFromLastTime(inputFileInfo))
                 {
                     var contents = inputFileInfo.FileInfo.ReadAllContent();
                     requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
@@ -88,14 +90,14 @@ namespace NetPack.Typescript
                 {
                     var subPathInfo = SubPathInfo.Parse(output.Key);
                     var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                    context.AddOutput(subPathInfo.Directory, outputFileInfo);
+                    context.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
                 }
 
                 // also, if source maps are enabled, but source is not inlined in the source map, then the 
                 // source file needs to be output so it can be served up to the browser.              
                 if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
                 {
-                    foreach (var inputFileInfo in context.InputFiles)
+                    foreach (var inputFileInfo in pipeContext.InputFiles)
                     {
                         //  context.AllowServe(inputFileInfo);
                         //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
