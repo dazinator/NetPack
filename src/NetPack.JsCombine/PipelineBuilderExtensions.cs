@@ -1,5 +1,5 @@
 ﻿using System;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using NetPack.Pipeline;
 using NetPack.JsCombine;
 

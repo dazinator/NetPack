@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
 using NetPack.Pipeline;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 
 namespace NetPack.JsCombine
 {

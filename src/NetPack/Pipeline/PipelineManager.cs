@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders.Composite;
 using Microsoft.Extensions.Options;
+using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Pipeline
 {
@@ -15,45 +16,61 @@ namespace NetPack.Pipeline
     {
 
         private readonly IHostingEnvironment _hostingEnv;
-      //  private readonly IOptions<StaticFileOptions>  _staticFilesOptions;
-      
-        public PipelineManager(IHostingEnvironment env)
+
+        public PipelineManager(IHostingEnvironment env, IPipelineWatcher watcher)
         {
             _hostingEnv = env;
-            PipeLines = new List<IPipeLine>();
-            //_staticFilesOptions = options;
-
-// wrap the static files file provider with one that resolve netpack pipeline outputs.
-           // var existingStaticFilesProvider = options.Value.FileProvider ?? _hostingEnv.WebRootFileProvider;
-
-// give a content directory, and a webroot directory like so:
-//c:\\somepath\\somedir
-//c:\\somepath\\somedir\\webroot\\static\\
-
-// we have input files specified with a path relative to the content directory like this:
-
-//webroot/static/somefile.ts
-
-
+            Watcher = watcher;
+            PipeLines = new Dictionary<string, IPipeLine>();
         }
 
-       /// public List<IPipeLine> PipeLines { get; set; }
+        public IPipelineWatcher Watcher { get; set; }
 
-        public List<IPipeLine> PipeLines { get; set; }
+        public Dictionary<string, IPipeLine> PipeLines { get; set; }
 
-        public void AddPipeLine(IPipeLine pipeline)
+        public void AddPipeLine(string key, IPipeLine pipeline, bool watch)
         {
-            PipeLines.Add(pipeline);
+            PipeLines.Add(key, pipeline);
+            SetupPipeline(pipeline, watch);
         }
 
-        public void InitialisePipes()
+        private void SetupPipeline(IPipeLine pipeline, bool watch)
         {
-            foreach (var pipeline in PipeLines)
+            //  var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
+
+            var outputFileProvider = pipeline.WebrootFileProvider;
+            if (!string.IsNullOrWhiteSpace(pipeline.BaseRequestPath))
             {
-                pipeline.Initialise();
+                outputFileProvider = new RequestPathFileProvider(pipeline.BaseRequestPath, outputFileProvider);
             }
+
+
+            if (_hostingEnv.WebRootFileProvider == null || _hostingEnv.WebRootFileProvider is NullFileProvider)
+            {
+                _hostingEnv.WebRootFileProvider = outputFileProvider;
+            }
+            else
+            {
+                var composite = new CompositeFileProvider(_hostingEnv.WebRootFileProvider, outputFileProvider);
+                _hostingEnv.WebRootFileProvider = composite;
+            }
+
+            pipeline.Initialise();
+
+            if (watch)
+            {
+                Watcher.WatchPipeline(pipeline);
+            }
+
+
         }
 
-        
+        IPipeLine GetPipeline(string name)
+        {
+            return PipeLines[name];
+            // var pipeline = 
+        }
+
+
     }
 }

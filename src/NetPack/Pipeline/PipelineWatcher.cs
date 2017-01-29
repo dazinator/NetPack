@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 
 namespace NetPack.Pipeline
 {
@@ -135,21 +135,37 @@ namespace NetPack.Pipeline
                     }
 
                     _logger.LogInformation("Processing changed pipes..");
-                    await Task.WhenAll(_tasks);
+                    try
+                    {
+                        await Task.WhenAll(_tasks);
 
-                    // processing pipes may have lead to other pipes becoming dirty, so check again and process those new pipes straight away if so
-                    dirtyPipeLines = pipeLines.Select(p =>
-                       new
-                       {
-                           DirtyPipes = p.GetDirtyPipes(),
-                           Pipeline = p
-                       }).Where(a => a.DirtyPipes.Any());
-                    hasWork = dirtyPipeLines.Any();
+                        _logger.LogInformation("Processing changed pipes completed @ {0}", DateTime.UtcNow);
+
+                        // processing pipes may have lead to other pipes becoming dirty, so check again and process those new pipes straight away if so
+                        dirtyPipeLines = pipeLines.Select(p =>
+                           new
+                           {
+                               DirtyPipes = p.GetDirtyPipes(),
+                               Pipeline = p
+                           }).Where(a => a.DirtyPipes.Any());
+                        hasWork = dirtyPipeLines.Any();
+                    }
+                    catch (Exception ex)
+                    {
+                        // should log..
+                        // for now exit while so that we try again.
+                        _logger.LogError(new EventId(0), ex, "Netpack watcher was unable to process files.");
+                        break;
+                       // throw;
+                    }
+                   
                 }
-
+               
                 // check again in x seconds.
                 await Task.Delay(TimeSpan.FromSeconds(2), _tokenSource.Token);
             }
+
+            _logger.LogWarning("Watching has exited @ {0}", DateTime.UtcNow);
 
         }
     }

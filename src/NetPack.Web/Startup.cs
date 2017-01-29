@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetPack;
+using NetPack.RequireJs;
 
 namespace NetPack.Web
 {
@@ -69,17 +70,38 @@ namespace NetPack.Web
                         input.Include("ts/*.ts");
                     }, options =>
                     {
-                        // options.InlineSourceMap = true;
                         options.InlineSources = true;
-                        // configure various typescript compilation options here..
-                        // options.InlineSourceMap = true;
-                        //  options.Module = ModuleKind.Amd;
                     })
                     // Another processor that combines multiple js files into a bundle file.
                     .AddJsCombinePipe(input =>
                     {
                         input.Include("ts/*.js");
                     }, () => "bundle.js")
+
+                     // Add a processor that takes all AMD javascript files and optimises them using rjs optimiser.
+                     .AddRequireJsOptimisePipe(input =>
+                     {
+                         input.Include("amd/*.js")
+                         .Include("js/requireConfig.js");
+                     }, options =>
+                     {
+                         options.GenerateSourceMaps = true;
+                         options.Optimizer = Optimisers.none;
+                         options.BaseUrl = "amd";
+                         // options.
+                         //  options.AppDir = "amd";
+                         options.Name = "SomePage"; // The name of the AMD module to optimise.
+                         options.Out = "built.js"; // The name of the output file.
+
+                         // Here we list the module names
+                         //options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
+                         //options.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
+                         //  options.Modules.Add(new ModuleInfo() { Name = "SomePage" });
+                     })
+                     .AddJsMinPipe(input =>
+                     {
+                         input.Include("js/*.js");
+                     })
                     .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
             });

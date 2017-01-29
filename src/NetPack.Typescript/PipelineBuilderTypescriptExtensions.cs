@@ -15,8 +15,8 @@ namespace NetPack
 
         public static IPipelineBuilder AddTypeScriptPipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<TypeScriptPipeOptions> configureOptions = null)
         {
-            var appServices = builder.ApplicationBuilder.ApplicationServices;
-            var nodeServices = (INodeServices)appServices.GetRequiredService(typeof(INodeServices));
+            var appServices = builder.ServiceProvider;
+            var nodeServices = (INetPackNodeServices)appServices.GetRequiredService(typeof(INetPackNodeServices));
 
             // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.
             var nodeJsRequirement = new NodeJsRequirement();
@@ -25,12 +25,8 @@ namespace NetPack
             var typescriptPackageRequriement = new NpmModuleRequirement("typescript", true);
             builder.IncludeRequirement(typescriptPackageRequriement);
 
-            var typescriptSimplePackageRequirement = new NpmModuleRequirement("netpack-typescript-compiler", true, "0.0.4");
+            var typescriptSimplePackageRequirement = new NpmModuleRequirement("netpack-typescript-compiler", true, "0.0.6");
             builder.IncludeRequirement(typescriptSimplePackageRequirement);
-
-            //var nodeJsRequirement = (NodeJsRequirement)appServices.GetRequiredService(typeof(NodeJsRequirement));
-
-            //  var nodeServices = builder.ApplicationBuilder.ApplicationServices.GetService(typeof(INodeServices), nodeJsRequirement)
 
             var embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));
 

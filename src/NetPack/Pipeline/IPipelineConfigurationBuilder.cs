@@ -1,13 +1,13 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.FileProviders;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 
 namespace NetPack.Pipeline
 {
     public interface IPipelineConfigurationBuilder
     {
-        IApplicationBuilder ApplicationBuilder { get; set; }
+       // IApplicationBuilder ApplicationBuilder { get; set; }
 
         // IPipelineInputOptionsBuilder Take(PipelineInput sources);
         IPipelineBuilder WithHostingEnvironmentWebrootProvider();

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipeline;
 
-namespace NetPack.Pipes
+namespace NetPack.RequireJs
 {
     public class UglifyMinifyJsPipe : IPipe
     {

@@ -12,7 +12,7 @@ namespace NetPack.Pipeline
 
         PathString BaseRequestPath { get; }
 
-        void AddOutput(string directory, IFileInfo info);
+        void AddOutput(string directory, IFileInfo info, bool excludeFromInput = true);
 
         IDirectory ProcessedOutput { get; set; }
 
@@ -48,6 +48,8 @@ namespace NetPack.Pipeline
         FileWithDirectory[] InputFiles { get; set; }
 
         void AddSourceOutput(string directory, IFileInfo file);
+
+       
 
         //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
 

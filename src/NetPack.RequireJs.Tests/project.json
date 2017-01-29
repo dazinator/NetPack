@@ -9,11 +9,12 @@
     "Microsoft.Extensions.FileProviders.Composite": "1.0.0",
     "Microsoft.Extensions.FileProviders.Embedded": "1.0.0",
     "Moq": "4.2.1510.2205",
-    "Microsoft.AspNetCore.NodeServices": "1.0.0-beta-000007",
+    "Microsoft.AspNetCore.NodeServices": "1.0.0-beta-000021",
     "Microsoft.AspNetCore.TestHost": "1.0.0",
     "Microsoft.AspNetCore.StaticFiles": "1.0.0",
     "NetPack.RequireJs": "1.0.0-*",
-    "NetPack.Tests": "1.0.0-*"
+    "NetPack.Tests": "1.0.0-*",
+    "Microsoft.AspNetCore.Razor.Runtime": "1.0.0"
   },
   "buildOptions": {
     

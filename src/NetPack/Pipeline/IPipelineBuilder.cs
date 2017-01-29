@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using NetPack.Requirements;
 using System;
 
@@ -8,7 +8,7 @@ namespace NetPack.Pipeline
     public interface IPipelineBuilder
     {
 
-        IApplicationBuilder ApplicationBuilder { get; set; }
+        IServiceProvider ServiceProvider { get; set; }
 
         IPipelineBuilder Watch();
 

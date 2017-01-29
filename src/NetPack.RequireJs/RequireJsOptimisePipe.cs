@@ -7,21 +7,25 @@ using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.Pipeline;
 using NetPack.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
-namespace NetPack.Pipes
+namespace NetPack.RequireJs
 {
     public class RequireJsOptimisePipe : IPipe
     {
-        private INodeServices _nodeServices;
+        private INetPackNodeServices _nodeServices;
         private RequireJsOptimisationPipeOptions _options;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
+        private ILogger<RequireJsOptimisePipe> _logger;
 
-        public RequireJsOptimisePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new RequireJsOptimisationPipeOptions())
+        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger) : this(nodeServices, embeddedResourceProvider, logger, new RequireJsOptimisationPipeOptions())
         {
 
         }
 
-        public RequireJsOptimisePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, RequireJsOptimisationPipeOptions options)
+        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger, RequireJsOptimisationPipeOptions options)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -64,7 +68,7 @@ namespace NetPack.Pipes
                         var subPathInfo = SubPathInfo.Parse(filePath);
                         context.AddOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
                     }
-               
+
                     //if (!string.IsNullOrWhiteSpace(result.Error))
                     //{
                     //    throw new RequireJsOptimiseException(result.Error);
@@ -72,6 +76,12 @@ namespace NetPack.Pipes
                 }
                 catch (Exception e)
                 {
+
+                    var jsonRequest = Newtonsoft.Json.JsonConvert.SerializeObject(optimiseRequest, new JsonSerializerSettings()
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    });
+
                     throw;
                 }
 

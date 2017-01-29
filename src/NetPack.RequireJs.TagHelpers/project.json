@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0-*",
+
+  "buildOptions": {
+    "embed": {
+      "include": "Embedded"
+    },
+    "define": []
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.6.0",
+    "Microsoft.AspNetCore.Razor.Runtime": "1.0.0",
+    "Microsoft.Extensions.Options": "1.0.0",
+    "NetPack.RequireJs": "1.0.0-*",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0"
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": "dnxcore50",
+      "buildOptions": { "define": [ "NETSTANDARD" ] }
+    },
+    "net452": {
+
+    }
+  }
+}

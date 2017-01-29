@@ -1,8 +1,9 @@
+using System;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.Pipeline;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using NetPack.Utils;
 using System.Linq;
 using System.Reflection;
@@ -11,23 +12,38 @@ using System.Threading.Tasks;
 
 namespace NetPack.Typescript
 {
-    public class TypeScriptCompilePipe : IPipe
+    public class TypeScriptCompilePipe : IPipe, IDisposable
     {
-        private INodeServices _nodeServices;
+        private INetPackNodeServices _nodeServices;
         private TypeScriptPipeOptions _options;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
+        private Lazy<StringAsTempFile> _script = null;
 
-        public TypeScriptCompilePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
+
+        public TypeScriptCompilePipe(INetPackNodeServices nodeServices,
+            IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
         {
 
         }
 
-        public TypeScriptCompilePipe(INodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, TypeScriptPipeOptions options)
+        public TypeScriptCompilePipe(INetPackNodeServices nodeServices,
+            IEmbeddedResourceProvider embeddedResourceProvider,
+            TypeScriptPipeOptions options)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
             _options = options;
+            _script = new Lazy<StringAsTempFile>(() =>
+            {
+                Assembly assy = this.GetType().GetAssemblyFromType();
+                var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+                var scriptContent = script.ReadAllContent();
+                return new StringAsTempFile(scriptContent);
+            });
         }
+
+
+
 
         public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
         {
@@ -36,28 +52,13 @@ namespace NetPack.Typescript
 
             foreach (var inputFileInfo in context.InputFiles)
             {
-                //var inputFileInfo = inputFile.FileInfo;
+                if (context.IsDifferentFromLastTime(inputFileInfo))
+                {
+                    var contents = inputFileInfo.FileInfo.ReadAllContent();
+                    requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
+                }
 
-                // var ext = System.IO.Path.GetExtension(inputFileInfo.Name);
-                //if (!string.IsNullOrEmpty(ext) && ext.ToLowerInvariant() == ".ts")
-                //{
-                // var inputFileInfo = inputFile.FileInfo;
-                var contents = inputFileInfo.FileInfo.ReadAllContent();
-                requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
-
-                //// tsFiles.Add(inputFile);
-                //// allow ts files to flow through pipeline if sourcemaps enabled, as this means we want the original
-                //// typescript files to be able to be served up.
-                //if (_options.SourceMap || _options.InlineSourceMap)
-                //{
-                //    context.AddOutput(inputFile);
-                //}
-                //}
-                //else
-                //{
-                //    // allow file to flow through pipeline untouched as we aren't interested in doing anything to non.ts files.
-                //    context.AddOutput(inputFile);
-                //}
+                requestDto.Inputs.Add(inputFileInfo.FileSubPath);
             }
 
             if (!requestDto.Files.Any())
@@ -65,16 +66,16 @@ namespace NetPack.Typescript
                 return;
             }
 
-            // read script from embedded resource and use string as temp file:
-            Assembly assy = this.GetType().GetAssemblyFromType();
-            var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
-            var scriptContent = script.ReadAllContent();
-
-
-            using (var nodeScript = new StringAsTempFile(scriptContent))
+            try
             {
+                // read script from embedded resource and use string as temp file:
+                // Assembly assy = this.GetType().GetAssemblyFromType();
+                // var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+                // var scriptContent = script.ReadAllContent();
 
-                var result = await _nodeServices.InvokeAsync<TypeScriptCompileResult>(nodeScript.FileName, requestDto);
+
+                var nodeScript = _script.Value;
+                var result = await _nodeServices.InvokeExportAsync<TypeScriptCompileResult>(nodeScript.FileName, "build", requestDto);
 
                 if (result.Errors != null && result.Errors.Any())
                 {
@@ -86,46 +87,49 @@ namespace NetPack.Typescript
                 foreach (var output in result.Sources)
                 {
                     var subPathInfo = SubPathInfo.Parse(output.Key);
-                    //var compiledTs = output.Value;
-                    // fix source mapping url declaration
                     var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
                     context.AddOutput(subPathInfo.Directory, outputFileInfo);
                 }
 
-                // also, if source maps are enabled, but source is now inlined in the source map, then the 
-                // source fill should be made available to be served up to the browser.              
-                if (_options.SourceMap && !_options.InlineSources)
+                // also, if source maps are enabled, but source is not inlined in the source map, then the 
+                // source file needs to be output so it can be served up to the browser.              
+                if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
                 {
                     foreach (var inputFileInfo in context.InputFiles)
                     {
                         //  context.AllowServe(inputFileInfo);
-                        if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
-                        {
-                            context.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
-                        }
-                        else
-                        {
-                            // source file is already being served.
-                        }
+                        //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
+                        //{
+                        context.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
+                        // }
+                        // else
+                        // {
+                        // source file is already being served.
+                        //    }
 
                     }
 
                 }
 
             }
+            catch (System.Exception e)
+            {
+
+                throw;
+            }
 
         }
 
-
-
-       
-
-       
-
-       
+        public void Dispose()
+        {
+            if (_script.IsValueCreated)
+            {
+                _script.Value.Dispose();
+            }
+        }
     }
 
-   
+
 
 
 }

@@ -133,6 +133,7 @@ namespace NetPack.Web.Tests
             {
 
                 var mockFileProvider = new InMemoryFileProvider();
+
                 mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentOne, "somefile.ts"));
                 mockFileProvider.Directory.AddFile("ts", new StringFileInfo(TsContentTwo, "someOtherfile.ts"));
 
@@ -149,8 +150,8 @@ namespace NetPack.Web.Tests
                                  .Include("ts/someOtherfile.ts");
                         }, tsConfig =>
                         {
-                            tsConfig.Target = TypeScriptPipeOptions.ScriptTarget.Es5;
-                            tsConfig.Module = TypeScriptPipeOptions.ModuleKind.CommonJs;
+                            tsConfig.Target = ScriptTarget.ES5;
+                            tsConfig.Module = ModuleKind.AMD;
                             tsConfig.NoImplicitAny = true;
                             tsConfig.RemoveComments = false;
                             // important: we are not removing comments because we test for a modification that involves a comment being added!
@@ -193,8 +194,19 @@ namespace NetPack.Web.Tests
 
                         await a.Response.WriteAsync("done");
                     }
+
+                    if (a.Request.Path.Value.Contains("netpack/ts/somefile.js"))
+                    {
+                        var file = env.WebRootFileProvider.GetFileInfo("/netpack/ts/somefile.js");
+                        
+                       // await SendFileResponseExtensions.SendFileAsync(a.Response, file);
+                    }
                 });
+
+               
             }
+
+
         }
 
     }

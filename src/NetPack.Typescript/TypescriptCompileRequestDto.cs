@@ -8,8 +8,10 @@ namespace NetPack.Typescript
         {
             Files = new Dictionary<string, string>();
             Options = new TypeScriptPipeOptions();
+            Inputs = new List<string>();
         }
         public Dictionary<string, string> Files { get; set; }
+        public List<string> Inputs { get; set; }
         public TypeScriptPipeOptions Options { get; set; }
 
     }

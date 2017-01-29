@@ -1,4 +1,4 @@
-﻿namespace NetPack.Pipes
+﻿namespace NetPack.RequireJs
 {
 
     public class NodeInMemoryFile

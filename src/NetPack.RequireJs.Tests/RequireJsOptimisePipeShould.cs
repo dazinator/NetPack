@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
-using NetPack.Pipes;
+using NetPack.RequireJs;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Microsoft.AspNetCore.Http;
@@ -92,7 +92,7 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
              });
 
             var pipeline = fileProcessingBuilder.Pipeline;
-            pipeline.Initialise();
+           // pipeline.Initialise();
 
             app.Run(async (context) =>
             {

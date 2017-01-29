@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NetPack.Pipes
+namespace NetPack.RequireJs
 {
     public class RequireJsOptimisationPipeOptions
     {
@@ -8,6 +8,7 @@ namespace NetPack.Pipes
         public RequireJsOptimisationPipeOptions()
         {
             Modules = new List<ModuleInfo>();
+            Optimizer = Optimisers.uglify2;
         }
 
         /// <summary>
@@ -99,7 +100,29 @@ namespace NetPack.Pipes
         /// in the minified files.
         /// - "none": no minification will be done.
         /// </summary>
-        public Optimisers Optimize { get; set; }
+        public Optimisers Optimizer
+        {
+            set
+            {
+                switch (value)
+                {
+                    case Optimisers.uglify:
+                        Optimize = "uglify";
+                        break;
+                    case Optimisers.uglify2:
+                        Optimize = "uglify2";
+                        break;
+                    case Optimisers.none:
+                        Optimize = "none";
+                        break;
+
+                }
+
+            }
+        }
+
+        public string Optimize { get; private set; }
+
 
         public string Out { get; set; }
 
@@ -254,6 +277,12 @@ namespace NetPack.Pipes
         /// of the built file for use during the runtime execution of the built code.
         /// </summary>
         public string InsertRequire { get; set; }
+
+        /// <summary>
+        /// When performing single file optimisation, this is the name of the AMD module to optimise.
+        /// </summary>
+        public string Name { get; set; }
+
 
         //        var RequireJsOptions = (function() {
         //    function RequireJsOptions()

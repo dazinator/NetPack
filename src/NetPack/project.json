@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "NETStandard.Library": "1.6.0",
-    "Microsoft.AspNetCore.NodeServices": "1.0.0-beta-000007",
+    "Microsoft.AspNetCore.NodeServices": "1.0.0-beta-000021",
     "Microsoft.Extensions.FileProviders.Composite": "1.0.0",
     "Microsoft.Extensions.FileProviders.Embedded": "1.0.0",
     "Microsoft.Extensions.Options": "1.0.0",
