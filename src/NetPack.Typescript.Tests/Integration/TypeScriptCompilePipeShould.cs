@@ -122,7 +122,7 @@ namespace NetPack.Typescript.Tests
 
         public const string TsContentBar = @"
 
-         ///<reference path=""./foo.ts\"" />
+         ///<reference path=""./foo.ts"" />
 
         import {Foo} from ""./foo"";
         class Bar
