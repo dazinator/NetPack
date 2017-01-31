@@ -54,7 +54,8 @@ namespace NetPack.Tests
             // now that the lock is disposed, the request task should complete
             await waitTask;
             Assert.Equal(true, waitTask.IsCompleted);
-            Assert.Equal(false, waitTask.IsFaulted);        
+            Assert.Equal(false, waitTask.IsFaulted);
+            Assert.False(FileRequestServices.HasLock("/wwwwroot/somefile.js"));
 
         }
 

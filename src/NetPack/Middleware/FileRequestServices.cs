@@ -19,16 +19,19 @@ namespace NetPack
         /// <returns></returns>
         public static Task WhenFileNotLocked(string subPath, TimeSpan timeout, CancellationToken cancellationToken)
         {
+            ConcurrentDictionary<Guid, FileRequestLock> existingLocks;
+            _busyFiles.TryGetValue(subPath, out existingLocks);
+            if (existingLocks == null || existingLocks.Count == 0)
+            {
+                return Task.FromResult<bool>(true);
+            };
+
+            var locks = existingLocks.Values;
+
             return Task.Factory.StartNew(() =>
             // return new Task(() =>
             {
-                ConcurrentDictionary<Guid, FileRequestLock> existingLocks;
-                _busyFiles.TryGetValue(subPath, out existingLocks);
-                if (existingLocks == null || existingLocks.Count == 0)
-                {
-                    return;
-                };
-                var locks = existingLocks.Values;
+              
                 foreach (var item in locks)
                 {
                     item.Event.Wait(timeout, cancellationToken);
@@ -138,6 +141,26 @@ namespace NetPack
             #endregion
 
 
+        }
+
+        public static bool HasLocks()
+        {
+            foreach (var item in _busyFiles.Values)
+            {
+                if(!item.IsEmpty)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool HasLock(string subPath)
+        {
+            ConcurrentDictionary<Guid, FileRequestLock> existingLocks;
+            _busyFiles.TryGetValue(subPath, out existingLocks);
+            return !(existingLocks == null || existingLocks.Count == 0);           
         }
 
     }

@@ -84,7 +84,7 @@ namespace NetPack.Tests
             contents = await response.Content.ReadAsStringAsync();
             Assert.NotNull(contents);
             Assert.Equal("changed! processed!", contents);
-
+            Assert.False(FileRequestServices.HasLocks());
 
         }
 
