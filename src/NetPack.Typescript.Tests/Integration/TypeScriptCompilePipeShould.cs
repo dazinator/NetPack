@@ -77,7 +77,7 @@ namespace NetPack.Typescript.Tests
             // but also - only foo.ts should be sent over to node as it was the only file that changes.
             await GetResponseString("/", "change=incremental/foo.ts");
 
-            await Task.Delay(new TimeSpan(0, 0, 4));
+            await Task.Delay(new TimeSpan(0, 0, 3));
 
             var updatedOutputFile = await GetResponseString("/netpack/combined.js");
             Assert.NotEqual(responseString, updatedOutputFile);

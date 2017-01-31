@@ -26,15 +26,13 @@ namespace NetPack
                 return Task.FromResult<bool>(true);
             };
 
-            var locks = existingLocks.Values;
-
             return Task.Factory.StartNew(() =>
             // return new Task(() =>
             {
-              
-                foreach (var item in locks)
+
+                foreach (var item in existingLocks)
                 {
-                    item.Event.Wait(timeout, cancellationToken);
+                    item.Value.Event.Wait(timeout, cancellationToken);
                     // once its been signalled, remove the lock.                    
                 }
 
@@ -49,7 +47,28 @@ namespace NetPack
         /// </summary>
         /// <param name="subPath"></param>
         /// <returns></returns>
-        public static IDisposable CreateFileRequestLock(string subPath)
+        public static IDisposable BlockFilePaths(params string[] subPaths)
+        {
+            if (subPaths == null)
+            {
+                throw new ArgumentNullException(nameof(subPaths));
+            }
+
+            List<IDisposable> disposables = new List<IDisposable>(subPaths.Length);
+            foreach (var item in subPaths)
+            {
+                disposables.Add(BlockFilePath(item));
+            }
+            var compositeDisposable = new CompositeDisposable(disposables);
+            return compositeDisposable;
+        }
+
+        /// <summary>
+        /// Creates a lock that blocks a file from being served until the lock is disposed. Enforced by middleware.
+        /// </summary>
+        /// <param name="subPath"></param>
+        /// <returns></returns>
+        public static IDisposable BlockFilePath(string subPath)
         {
             if (string.IsNullOrWhiteSpace(subPath))
             {
@@ -147,7 +166,7 @@ namespace NetPack
         {
             foreach (var item in _busyFiles.Values)
             {
-                if(!item.IsEmpty)
+                if (!item.IsEmpty)
                 {
                     return true;
                 }
@@ -160,7 +179,7 @@ namespace NetPack
         {
             ConcurrentDictionary<Guid, FileRequestLock> existingLocks;
             _busyFiles.TryGetValue(subPath, out existingLocks);
-            return !(existingLocks == null || existingLocks.Count == 0);           
+            return !(existingLocks == null || existingLocks.Count == 0);
         }
 
     }

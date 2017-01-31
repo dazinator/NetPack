@@ -43,7 +43,7 @@ namespace NetPack.Tests
                                 {
                                     // block requests for the file we are generating, until we have finished generating it.
                                     var generatedFilePath = "wwwroot/foo.js";
-                                    using (FileRequestServices.CreateFileRequestLock(generatedFilePath))
+                                    using (FileRequestServices.BlockFilePath(generatedFilePath))
                                     {
                                         // simulate some work
                                         if (!skipDelay)

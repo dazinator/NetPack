@@ -1,8 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using NetPack.Pipeline;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -23,7 +19,7 @@ namespace NetPack.Tests
             ManualResetEvent manualResetEvent = new ManualResetEvent(false);
             Task waitTask = null;
 
-            using (var requestLock = FileRequestServices.CreateFileRequestLock("/wwwwroot/somefile.js"))
+            using (var requestLock = FileRequestServices.BlockFilePath("/wwwwroot/somefile.js"))
             {
 
                 // start a backgorund thread that waits for the lock to become free.

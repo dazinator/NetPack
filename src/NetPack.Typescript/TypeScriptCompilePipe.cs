@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace NetPack.Typescript
 {
@@ -51,11 +52,23 @@ namespace NetPack.Typescript
             requestDto.Options = _options;
 
             var pipeContext = context.PipeContext;
+            var requestLocks = new List<IDisposable>();
+
+            bool isSingleOutput = !string.IsNullOrWhiteSpace(_options.OutFile);
+            if (isSingleOutput)
+            {
+                requestLocks.Add(FileRequestServices.BlockFilePath(_options.OutFile));
+            }
 
             foreach (var inputFileInfo in pipeContext.InputFiles)
             {
                 if (pipeContext.IsDifferentFromLastTime(inputFileInfo))
                 {
+                    if (!isSingleOutput)
+                    {
+                        requestLocks.Add(FileRequestServices.BlockFilePath(inputFileInfo.FileSubPath));
+                    }
+
                     var contents = inputFileInfo.FileInfo.ReadAllContent();
                     requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
                 }
@@ -74,45 +87,46 @@ namespace NetPack.Typescript
                 // Assembly assy = this.GetType().GetAssemblyFromType();
                 // var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
                 // var scriptContent = script.ReadAllContent();
-
-
-                var nodeScript = _script.Value;
-                var result = await _nodeServices.InvokeExportAsync<TypeScriptCompileResult>(nodeScript.FileName, "build", requestDto);
-
-                if (result.Errors != null && result.Errors.Any())
+                using (new CompositeDisposable(requestLocks))
                 {
-                    // Throwing an exception will halt further processing of the pipeline.
-                    var typescriptCompilationException = new TypeScriptCompileException("Could not compile typescript due to compilation errors.", result.Errors);
-                    throw typescriptCompilationException;
-                }
 
-                foreach (var output in result.Sources)
-                {
-                    var subPathInfo = SubPathInfo.Parse(output.Key);
-                    var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                    context.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
-                }
+                    var nodeScript = _script.Value;
+                    var result = await _nodeServices.InvokeExportAsync<TypeScriptCompileResult>(nodeScript.FileName, "build", requestDto);
 
-                // also, if source maps are enabled, but source is not inlined in the source map, then the 
-                // source file needs to be output so it can be served up to the browser.              
-                if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
-                {
-                    foreach (var inputFileInfo in pipeContext.InputFiles)
+                    if (result.Errors != null && result.Errors.Any())
                     {
-                        //  context.AllowServe(inputFileInfo);
-                        //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
-                        //{
-                        context.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
-                        // }
-                        // else
-                        // {
-                        // source file is already being served.
-                        //    }
-
+                        // Throwing an exception will halt further processing of the pipeline.
+                        var typescriptCompilationException = new TypeScriptCompileException("Could not compile typescript due to compilation errors.", result.Errors);
+                        throw typescriptCompilationException;
                     }
 
-                }
+                    foreach (var output in result.Sources)
+                    {
+                        var subPathInfo = SubPathInfo.Parse(output.Key);
+                        var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+                        context.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
+                    }
 
+                    // also, if source maps are enabled, but source is not inlined in the source map, then the 
+                    // source file needs to be output so it can be served up to the browser.              
+                    if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
+                    {
+                        foreach (var inputFileInfo in pipeContext.InputFiles)
+                        {
+                            //  context.AllowServe(inputFileInfo);
+                            //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
+                            //{
+                            context.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
+                            // }
+                            // else
+                            // {
+                            // source file is already being served.
+                            //    }
+
+                        }
+
+                    }
+                }
             }
             catch (System.Exception e)
             {
