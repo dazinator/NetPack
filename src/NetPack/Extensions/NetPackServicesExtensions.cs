@@ -12,6 +12,7 @@ using NetPack.Requirements;
 using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -90,11 +91,12 @@ namespace NetPack
         }
 
         /// <summary>
-        /// Causes all file processing pipelines to be initialised, and adds middleware for delaying a http request for a generated file that is in the process of being re-generated.
+        /// Initialises all file processing, and also adds middleware for delaying a http request for a file that is in still in the process of being generated.
         /// </summary>
         /// <param name="appBuilder"></param>
+        /// <param name="requestTimeout">The maximum amount of time a request should be delayed when waiting for a file in the process of being generated, before timing out.mIf null then default of 1 minute is used.</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseFileProcessing(this IApplicationBuilder appBuilder)
+        public static IApplicationBuilder UseFileProcessing(this IApplicationBuilder appBuilder, TimeSpan? requestTimeout = null)
         {
             var pipeLineManager = appBuilder.ApplicationServices.GetService<PipelineManager>();
             if (pipeLineManager == null)
@@ -104,9 +106,14 @@ namespace NetPack
             }
 
             // Triggers all pipeline to be initialised and registered with pipeline manager.
-            var initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();
+            var initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();            
 
-            appBuilder.UseMiddleware<RequestHaltingMiddleware>();
+            var middlewareOptions = new RequestHaltingMiddlewareOptions();
+            if (requestTimeout != null)
+            {
+                middlewareOptions.Timeout = requestTimeout.Value;
+            }
+            appBuilder.UseMiddleware<RequestHaltingMiddleware>(middlewareOptions);
 
             return appBuilder;
 
@@ -114,5 +121,5 @@ namespace NetPack
         }
     }
 
- 
+
 }

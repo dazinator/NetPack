@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using NetPack.RequireJs;
-using NetPack.Requirements;
+﻿using NetPack.Requirements;
 using System;
 
 namespace NetPack.Pipeline
@@ -12,7 +10,7 @@ namespace NetPack.Pipeline
 
         IPipelineBuilder Watch();
 
-        IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);
+        IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);      
 
         IPipelineBuilder UseBaseRequestPath(string baseRequestPath = null);
 
