@@ -48,9 +48,9 @@ namespace NetPack.Tests
                                             await Task.Delay(new TimeSpan(0, 0, 10));
                                         }
 
-                                        var inputFileContents = context.PipeContext.InputFiles[0].FileInfo.ReadAllContent();
+                                        var inputFileContents = context.InputFiles[0].FileInfo.ReadAllContent();
                                         // output the generated file
-                                        context.AddGeneratedOutput("wwwroot", new StringFileInfo(inputFileContents + " processed!", "foo.js"));
+                                        context.PipelineContext.AddGeneratedOutput("wwwroot", new StringFileInfo(inputFileContents + " processed!", "foo.js"));
                                     } // lock freed on dispose, should allow any in progress request for file to continue.
                                 }))
                                 .Watch();

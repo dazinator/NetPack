@@ -136,7 +136,6 @@ namespace NetPack.Pipeline
 
         public Action<PipeContext> OnUpdateRequestLocks { get; set; }
 
-
         private void SetInput(FileWithDirectory[] input)
         {
             // grab the input files from the file provider.
@@ -173,7 +172,8 @@ namespace NetPack.Pipeline
                     if (HasChanges)
                     {
                         IsProcessing = true;
-                        await Policy.ExecuteAsync(ct => Pipe.ProcessAsync(parentPipeline.Context, ct), token);
+                        this.PipelineContext = parentPipeline.Context;
+                        await Policy.ExecuteAsync(ct => Pipe.ProcessAsync(this, ct), token);
                     }
                 }
                 catch (Exception ex)
@@ -182,6 +182,11 @@ namespace NetPack.Pipeline
                     // for now exit while so that we try again.
                     _logger.LogError(new EventId(0), ex, "Netpack was unable to process files.");
 
+                }
+                finally
+                {
+                    LastProcessedEndTime = DateTime.UtcNow;
+                    IsProcessing = false;
                 }
             }
 
@@ -219,6 +224,8 @@ namespace NetPack.Pipeline
         }
 
         public List<string> OutputFilesForRequestLocks { get; set; }
+
+        public IPipelineContext PipelineContext { get; set; }
 
     }
 }

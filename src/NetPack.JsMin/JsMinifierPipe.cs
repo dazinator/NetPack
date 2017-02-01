@@ -26,14 +26,14 @@ namespace NetPack.JsMin
 
         }
 
-        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
             var jsMin = new JsMin(_options);
-            foreach (var item in context.PipeContext.InputFiles)
+            foreach (var item in context.InputFiles)
             {
 
                 string outPutFileName = GetOutputFileName(item);
-                var mapBuilder = GetSourceMapBuilder(_options, outPutFileName, context, item);
+                var mapBuilder = GetSourceMapBuilder(_options, outPutFileName, context.PipelineContext, item);
                 
                 var stream = item.FileInfo.CreateReadStream();
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
@@ -62,14 +62,14 @@ namespace NetPack.JsMin
                     {
                         // seperate file.
                         var mapFileName = outPutFileName + ".map";
-                        context.AddGeneratedOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
+                        context.PipelineContext.AddGeneratedOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
                         sourceMappingURL = $"//# sourceMappingURL={mapFileName.ToString()}";                      
                     }
 
                     output.Append(sourceMappingURL);
                 }
 
-                context.AddGeneratedOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));               
+                context.PipelineContext.AddGeneratedOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));               
 
             }
 

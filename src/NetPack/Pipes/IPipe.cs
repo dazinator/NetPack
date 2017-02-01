@@ -6,9 +6,7 @@ namespace NetPack
 {
     public interface IPipe
     {
-        Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken);
-
-
+        Task ProcessAsync(PipeContext context, CancellationToken cancelationToken);
     }
 
     //public interface IPipeOutput

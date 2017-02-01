@@ -91,33 +91,33 @@ namespace NetPack.Pipeline
 
         public PipeContext PipeContext { get; set; }
 
-        public async Task Apply(PipeContext pipe, CancellationToken cancellationToken)
-        {
+        //public async Task Apply(PipeContext pipe, CancellationToken cancellationToken)
+        //{
 
-            try
-            {
-                PipeContext = pipe;               
-                PipeContext.SetInputFiles(FileProvider);
-                PipeContext.LastProcessStartTime = DateTime.UtcNow;
+        //    try
+        //    {
+        //        PipeContext = pipe;               
+        //        PipeContext.SetInputFiles(FileProvider);
+        //        PipeContext.LastProcessStartTime = DateTime.UtcNow;
 
-                if (PipeContext.HasChanges)
-                {
-                    PipeContext.IsProcessing = true;
-                    await Policy.ExecuteAsync(ct => PipeContext.Pipe.ProcessAsync(this, ct), cancellationToken);
-                }
-            }
-            catch (Exception e)
-            {
-                //todo: log exception..
-                throw;
-            }
-            finally
-            {
-                PipeContext.LastProcessedEndTime = DateTime.UtcNow;
-                PipeContext.IsProcessing = false;
-            }
+        //        if (PipeContext.HasChanges)
+        //        {
+        //            PipeContext.IsProcessing = true;
+        //            await Policy.ExecuteAsync(ct => PipeContext.Pipe.ProcessAsync(this, ct), cancellationToken);
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        //todo: log exception..
+        //        throw;
+        //    }
+        //    finally
+        //    {
+        //        PipeContext.LastProcessedEndTime = DateTime.UtcNow;
+        //        PipeContext.IsProcessing = false;
+        //    }
 
-        }
+        //}
 
 
         /// <summary>

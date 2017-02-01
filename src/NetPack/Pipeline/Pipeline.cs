@@ -45,7 +45,7 @@ namespace NetPack.Pipeline
             Requirements = requirements;
             BaseRequestPath = baseRequestPath;
             //  IsWatching = watch;
-           // HasFlushed = false;
+            // HasFlushed = false;
             GeneratedOutputDirectory = directory ?? new InMemoryDirectory();
             GeneratedOutputFileProvider = new InMemoryFileProvider(GeneratedOutputDirectory);
             SourcesOutputDirectory = sourcesOutputDirectory ?? new InMemoryDirectory();
@@ -154,7 +154,7 @@ namespace NetPack.Pipeline
         {
             try
             {
-                var dirtyPipes = pipeContexts.Select(a => Context.Apply(a, cancellationToken));
+                var dirtyPipes = pipeContexts.Select(a => a.ProcessChanges(this));
                 await Task.WhenAll(dirtyPipes);
             }
             catch (Exception e)
@@ -169,8 +169,10 @@ namespace NetPack.Pipeline
 
             try
             {
-                var dirtyPipes = Pipes.Where(a => a.IsDirty()).Select(a => Context.Apply(a, cancellationToken));
-                await Task.WhenAll(dirtyPipes);
+                await ProcessPipesAsync(Pipes.Where(a => a.IsDirty()), cancellationToken);
+
+                // var dirtyPipes = Pipes.Where(a => a.IsDirty()).Select(a => Context.Apply(a, cancellationToken));
+                // await Task.WhenAll(dirtyPipes);
             }
             catch (Exception e)
             {
@@ -182,7 +184,7 @@ namespace NetPack.Pipeline
         public bool HasDirtyPipes()
         {
             return Pipes.Where(a => a.IsDirty()).Any();
-        }      
+        }
 
     }
 

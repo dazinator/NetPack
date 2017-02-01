@@ -40,12 +40,12 @@ namespace NetPack.Tests.Pipes
             _directory.AddFile(subPath.Directory, fileInfo);
             return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
         }
-        
+
         protected async Task WhenFilesProcessedByPipe(Func<IPipe> pipeFactory, params FileWithDirectory[] files)
         {
             //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
-            PipelineContext = new PipelineContext(provider, _sourcesdirectory);
+            //  PipelineContext = new PipelineContext(provider, _sourcesdirectory);
             var input = new PipelineInput();
             foreach (var item in files)
             {
@@ -53,13 +53,16 @@ namespace NetPack.Tests.Pipes
             }
             Sut = pipeFactory();
             var pipeContext = new PipeContext(input, Sut, new LoggerFactory().AddConsole().CreateLogger<PipeContext>());
-            await PipelineContext.Apply(pipeContext, CancellationToken.None);
-           
+            var pipes = new List<PipeContext>() { pipeContext };
+
+            Pipeline = new Pipeline.Pipeline(provider, pipes, null, _sourcesdirectory);
+            await Pipeline.ProcessPipesAsync(pipes, CancellationToken.None);
+
         }
 
         protected IFileInfo ThenTheProcessedOutputDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var outputFile = PipelineContext.GeneratedOutput.GetFile(filePath);
+            var outputFile = Pipeline.GeneratedOutputDirectory.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(outputFile?.FileInfo);
@@ -68,7 +71,7 @@ namespace NetPack.Tests.Pipes
 
         protected IFileInfo ThenTheSourcesDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var sourceFile = PipelineContext.SourcesOutput.GetFile(filePath);
+            var sourceFile = Pipeline.SourcesOutputDirectory.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(sourceFile?.FileInfo);
@@ -77,7 +80,7 @@ namespace NetPack.Tests.Pipes
 
         public IPipe Sut { get; set; }
 
-        public PipelineContext PipelineContext { get; set; }
+        public IPipeLine Pipeline { get; set; }
 
     }
 }

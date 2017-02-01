@@ -32,7 +32,7 @@ namespace NetPack.Pipeline
         //  PathString GetRequestPath(PathString path);
         PathString GetRequestPath(string directory, IFileInfo fileInfo);
 
-        PipeContext PipeContext { get; }
+       // PipeContext PipeContext { get; }
 
         ///// <summary>
         ///// Returns whether the file is different from the version that was processed last time.

@@ -46,12 +46,12 @@ namespace NetPack.Typescript
 
 
 
-        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
             var requestDto = new TypescriptCompileRequestDto();
             requestDto.Options = _options;
 
-            var pipeContext = context.PipeContext;
+//var pipeContext = context.PipeContext;
             var requestLocks = new List<IDisposable>();
 
             bool isSingleOutput = !string.IsNullOrWhiteSpace(_options.OutFile);
@@ -60,9 +60,9 @@ namespace NetPack.Typescript
                 requestLocks.Add(FileRequestServices.BlockFilePath(_options.OutFile));
             }
 
-            foreach (var inputFileInfo in pipeContext.InputFiles)
+            foreach (var inputFileInfo in context.InputFiles)
             {
-                if (pipeContext.IsDifferentFromLastTime(inputFileInfo))
+                if (context.IsDifferentFromLastTime(inputFileInfo))
                 {
                     if (!isSingleOutput)
                     {
@@ -104,19 +104,19 @@ namespace NetPack.Typescript
                     {
                         var subPathInfo = SubPathInfo.Parse(output.Key);
                         var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                        context.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
+                        context.PipelineContext.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
                     }
 
                     // also, if source maps are enabled, but source is not inlined in the source map, then the 
                     // source file needs to be output so it can be served up to the browser.              
                     if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
                     {
-                        foreach (var inputFileInfo in pipeContext.InputFiles)
+                        foreach (var inputFileInfo in context.InputFiles)
                         {
                             //  context.AllowServe(inputFileInfo);
                             //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
                             //{
-                            context.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
+                            context.PipelineContext.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
                             // }
                             // else
                             // {

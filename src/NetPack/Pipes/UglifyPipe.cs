@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipeline;
 
@@ -12,11 +8,11 @@ namespace NetPack.RequireJs
 {
     public class UglifyMinifyJsPipe : IPipe
     {
-        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
-            var pipeContext = context.PipeContext;
+           // var pipeContext = context.PipeContext;
             // Need to run uglify on any .js, .css, .html, or .htm files passed through the pipeline.
-            foreach (var inputFile in pipeContext.InputFiles)
+            foreach (var inputFile in context.InputFiles)
             {
                 // only interested in typescript files.
                 var inputFileInfo = inputFile.FileInfo;
@@ -44,7 +40,7 @@ namespace NetPack.RequireJs
             }
         }
         
-        private void MinifyJsFile(IPipelineContext context, IFileInfo inputFileInfo)
+        private void MinifyJsFile(PipeContext context, IFileInfo inputFileInfo)
         {
             throw new NotImplementedException();
 

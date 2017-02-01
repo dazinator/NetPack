@@ -39,15 +39,15 @@ namespace NetPack.RequireJs
         }
 
 
-        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
 
-            var pipeContext = context.PipeContext;
+           // var pipeContext = context.PipeContext;
 
 
             var optimiseRequest = new RequireJsOptimiseRequestDto();
 
-            foreach (var file in pipeContext.InputFiles)
+            foreach (var file in context.InputFiles)
             {
                 var fileContent = file.FileInfo.ReadAllContent();
                 //  var dir = file.Directory;
@@ -70,7 +70,7 @@ namespace NetPack.RequireJs
                 {
                     var filePath = file.Path.Replace('\\', '/');
                     var subPathInfo = SubPathInfo.Parse(filePath);
-                    context.AddGeneratedOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
+                    context.PipelineContext.AddGeneratedOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
                 }
 
                 //if (!string.IsNullOrWhiteSpace(result.Error))
