@@ -45,7 +45,7 @@ namespace NetPack.Pipeline
             Requirements = requirements;
             BaseRequestPath = baseRequestPath;
             //  IsWatching = watch;
-            HasFlushed = false;
+           // HasFlushed = false;
             GeneratedOutputDirectory = directory ?? new InMemoryDirectory();
             GeneratedOutputFileProvider = new InMemoryFileProvider(GeneratedOutputDirectory);
             SourcesOutputDirectory = sourcesOutputDirectory ?? new InMemoryDirectory();
@@ -58,7 +58,7 @@ namespace NetPack.Pipeline
             // Name = Guid.NewGuid().ToString();
         }
 
-        protected PipelineContext Context { get; set; }
+        public PipelineContext Context { get; set; }
 
         /// <summary>
         /// Provides access to files that need to be processed from the environment. 
@@ -128,12 +128,9 @@ namespace NetPack.Pipeline
             // Trigger the pipeline to be flushed if it hasn't already.
             // we want to block becausewe dont want the app to finish starting
             // before all assets have been processed..
-            if (!HasFlushed)
-            {
-                //todo: exception handling here.
-                ProcessAsync(CancellationToken.None).Wait(DefaultFlushTimeout);
-                // await pipeline.FlushAsync();
-            }
+            //todo: exception handling here.
+            ProcessDirtyPipesAsync(CancellationToken.None).Wait(DefaultFlushTimeout);
+
         }
 
         private void EnsureRequirements()
@@ -155,27 +152,10 @@ namespace NetPack.Pipeline
 
         public async Task ProcessPipesAsync(IEnumerable<PipeContext> pipeContexts, CancellationToken cancellationToken)
         {
-   //         var policy = Policy.Handle<IOException>()
-   //                  .WaitAndRetryAsync(new[]
-   //{
-   // TimeSpan.FromSeconds(1),
-   // TimeSpan.FromSeconds(2),
-   // TimeSpan.FromSeconds(3)
-   //}, (exception, timeSpan) =>
-   //{
-   //    // TODO: Log exception    
-   //});
-
             try
             {
-
-                foreach (var pipeContext in pipeContexts)
-                {
-                    await Context.Apply(pipeContext, cancellationToken);
-                }
-
-                FlushCount = FlushCount + 1;
-                HasFlushed = true;
+                var dirtyPipes = pipeContexts.Select(a => Context.Apply(a, cancellationToken));
+                await Task.WhenAll(dirtyPipes);
             }
             catch (Exception e)
             {
@@ -184,15 +164,25 @@ namespace NetPack.Pipeline
             }
         }
 
-        public IEnumerable<PipeContext> GetDirtyPipes()
+        public async Task ProcessDirtyPipesAsync(CancellationToken cancellationToken)
         {
-            var dirty = Pipes.Where(a => a.IsDirty());
-            return dirty;
+
+            try
+            {
+                var dirtyPipes = Pipes.Where(a => a.IsDirty()).Select(a => Context.Apply(a, cancellationToken));
+                await Task.WhenAll(dirtyPipes);
+            }
+            catch (Exception e)
+            {
+                // retry?
+                throw;
+            }
         }
 
-        public int FlushCount { get; set; }
-
-        public bool HasFlushed { get; set; }
+        public bool HasDirtyPipes()
+        {
+            return Pipes.Where(a => a.IsDirty()).Any();
+        }      
 
     }
 

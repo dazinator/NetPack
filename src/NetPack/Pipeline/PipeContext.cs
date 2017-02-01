@@ -2,6 +2,11 @@
 using NetPack.RequireJs;
 using System.Collections.Generic;
 using Microsoft.Extensions.FileProviders;
+using System.Threading;
+using Microsoft.Extensions.Logging;
+using Polly;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace NetPack.Pipeline
 {
@@ -9,17 +14,34 @@ namespace NetPack.Pipeline
     public class PipeContext
     {
 
-        public PipeContext(PipelineInput input, IPipe pipe)
+        public PipeContext(PipelineInput input, IPipe pipe, ILogger<PipeContext> logger)
         {
             Input = input;
             Pipe = pipe;
+            _logger = logger;
+
+            Policy = Policy.Handle<IOException>()
+                  .WaitAndRetryAsync(new[]
+{
+    TimeSpan.FromSeconds(1),
+    TimeSpan.FromSeconds(2),
+    TimeSpan.FromSeconds(3)
+}, (exception, timeSpan) =>
+{
+    // TODO: Log exception    
+});
         }
+
+
 
         public IPipe Pipe { get; set; }
         public PipelineInput Input { get; set; }
         public DateTime LastProcessedEndTime { get; set; } = DateTime.MinValue.ToUniversalTime();
         public DateTime LastProcessStartTime { get; set; } = DateTime.MinValue.ToUniversalTime();
         public bool IsProcessing { get; set; }
+
+        public Policy Policy { get; set; }
+
         /// <summary>
         /// Returns true if the pipe has updated inputs that need to be processed.
         /// </summary>
@@ -27,7 +49,7 @@ namespace NetPack.Pipeline
         internal bool IsDirty()
         {
             var isDirty = (Input.LastChanged > LastProcessStartTime);
-           // isDirty = isDirty && Input.LastChanged <= LastProcessedEndTime; // inputs were changed in between last processing start and end time.
+            // isDirty = isDirty && Input.LastChanged <= LastProcessedEndTime; // inputs were changed in between last processing start and end time.
             //isDirty = isDirty || Input.LastChanged > LastProcessedEndTime; // or inputs have been changed since last processing time ended.
 
             return isDirty;
@@ -84,7 +106,7 @@ namespace NetPack.Pipeline
         /// Returns all the files that are detected as inputs for processing.
         /// </summary>
         public FileWithDirectory[] InputFiles { get; set; }
-        
+
         public IEnumerable<FileWithDirectory> GetChangedInputFiles()
         {
             if (InputFiles == null)
@@ -101,7 +123,7 @@ namespace NetPack.Pipeline
                     }
                 }
             }
-           
+
         }
 
         public bool HasChanges { get; private set; }
@@ -111,6 +133,9 @@ namespace NetPack.Pipeline
             SetInput(fileProvider.GetFiles(this.Input));
             // ExcludeFiles = FileProvider.GetFiles(input.e)
         }
+
+        public Action<PipeContext> OnUpdateRequestLocks { get; set; }
+
 
         private void SetInput(FileWithDirectory[] input)
         {
@@ -129,6 +154,71 @@ namespace NetPack.Pipeline
             }
 
         }
-        
+
+        internal async Task ProcessChanges(IPipeLine parentPipeline)
+        {
+
+            if (IsDirty())
+            {
+                try
+                {
+                    var token = ResetWorkToken();
+                    _logger.LogInformation("Processing changes..");
+
+                    //todo: also populate expected generated file paths for request locking.
+                    SetInputFiles(parentPipeline.InputAndGeneratedFileProvider);
+
+                    LastProcessStartTime = DateTime.UtcNow;
+
+                    if (HasChanges)
+                    {
+                        IsProcessing = true;
+                        await Policy.ExecuteAsync(ct => Pipe.ProcessAsync(parentPipeline.Context, ct), token);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // should log..
+                    // for now exit while so that we try again.
+                    _logger.LogError(new EventId(0), ex, "Netpack was unable to process files.");
+
+                }
+            }
+
+        }
+
+        private object _lock = new object();
+        private CancellationTokenSource _tokenSource;
+        private ILogger<PipeContext> _logger;
+
+        /// <summary>
+        /// Cancels any existing cancellation token for work in progress, and returns a new cancellation token.
+        /// </summary>
+        /// <returns></returns>
+        private CancellationToken ResetWorkToken()
+        {
+            lock (_lock)
+            {
+                if (_tokenSource != null)
+                {
+                    _tokenSource.Cancel();
+                    _tokenSource.Dispose();
+                    _tokenSource = new CancellationTokenSource();
+                    return _tokenSource.Token;
+                }
+                else
+                {
+                    _tokenSource = new CancellationTokenSource();
+                    return _tokenSource.Token;
+                }
+                //    _hasWork = true;
+
+
+
+            }
+        }
+
+        public List<string> OutputFilesForRequestLocks { get; set; }
+
     }
 }

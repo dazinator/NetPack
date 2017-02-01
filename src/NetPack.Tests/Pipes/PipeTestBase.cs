@@ -11,6 +11,7 @@ using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
 using Polly;
+using Microsoft.Extensions.Logging;
 
 namespace NetPack.Tests.Pipes
 {
@@ -51,7 +52,7 @@ namespace NetPack.Tests.Pipes
                 input.AddInclude(item.FileSubPath);
             }
             Sut = pipeFactory();
-            var pipeContext = new PipeContext(input, Sut);
+            var pipeContext = new PipeContext(input, Sut, new LoggerFactory().AddConsole().CreateLogger<PipeContext>());
             await PipelineContext.Apply(pipeContext, CancellationToken.None);
            
         }

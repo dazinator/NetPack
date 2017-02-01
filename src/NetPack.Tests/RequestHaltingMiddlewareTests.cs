@@ -4,10 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using NetPack.Pipeline;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -78,7 +75,7 @@ namespace NetPack.Tests
             inMemoryFileProvider.Directory.AddOrUpdateFile("wwwroot", new StringFileInfo("changed!", "foo.ts"));
             
             // allow a small delay before we send the request, as it can be upto 2 seconds between file watching detecting the change and the fiel processing pipeline being re-extectued.
-            await Task.Delay(new TimeSpan(0, 0, 2));
+          //  await Task.Delay(new TimeSpan(0, 0, 2));
             response = await server.CreateClient().GetAsync("wwwroot/foo.js");
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             contents = await response.Content.ReadAsStringAsync();

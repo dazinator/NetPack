@@ -78,6 +78,13 @@ namespace NetPack.Pipeline
 
         public IDirectory GeneratedOutput { get; set; }
 
+        /// <summary>
+        /// Provides access too all un-processed output files only. These are basically input files that need to be seen by the brwoser, but on which
+        /// no processing occurred. For example, a processor that compiles typescript input files, and produces js output files may need to also 
+        /// ensure the orgiginal typescript files can be served up to the browser when source maps are enabled. The typescript files are the original
+        /// input files and no actual changes are being made to those files so they are placed in the UnprocessedOutputFileProvider which
+        /// get's integrated with the Environments WebRoot file provider so that the files can be resolved.
+        /// </summary>
         public IDirectory SourcesOutput { get; set; }
 
         public IFileProvider FileProvider { get; set; }
@@ -89,9 +96,9 @@ namespace NetPack.Pipeline
 
             try
             {
-                PipeContext = pipe;
-                PipeContext.LastProcessStartTime = DateTime.UtcNow;
+                PipeContext = pipe;               
                 PipeContext.SetInputFiles(FileProvider);
+                PipeContext.LastProcessStartTime = DateTime.UtcNow;
 
                 if (PipeContext.HasChanges)
                 {

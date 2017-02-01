@@ -6,6 +6,7 @@ using Microsoft.Extensions.FileProviders;
 using NetPack.RequireJs;
 using NetPack.Requirements;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
+using Microsoft.Extensions.Logging;
 
 namespace NetPack.Pipeline
 {
@@ -67,7 +68,7 @@ namespace NetPack.Pipeline
         {
             var builder = new PipelineInputBuilder();
             inputBuilder(builder);
-            Pipes.Add(new PipeContext(builder.Input, pipe));
+            Pipes.Add(new PipeContext(builder.Input, pipe, ServiceProvider.GetRequiredService<ILogger<PipeContext>>()));
             return this;
         }
 

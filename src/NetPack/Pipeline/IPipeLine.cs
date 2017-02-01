@@ -14,6 +14,8 @@ namespace NetPack.Pipeline
 
         List<PipeContext> Pipes { get; }
 
+        PipelineContext Context { get; set; }
+
         /// <summary>
         /// Processes all pipes in the pipeline.
         /// </summary>
@@ -29,6 +31,14 @@ namespace NetPack.Pipeline
         /// <returns></returns>
         Task ProcessPipesAsync(IEnumerable<PipeContext> pipes, CancellationToken none);
 
+        /// <summary>
+        /// Processes only the specified pipes.
+        /// </summary>
+        /// <param name="pipes"></param>
+        /// <param name="none"></param>
+        /// <returns></returns>
+        Task ProcessDirtyPipesAsync(CancellationToken none);
+
         IFileProvider EnvironmentFileProvider { get; set; }
 
         IFileProvider GeneratedOutputFileProvider { get; set; }
@@ -40,19 +50,12 @@ namespace NetPack.Pipeline
         IFileProvider SourcesFileProvider { get; set; }
 
         IFileProvider WebrootFileProvider { get; set; }
-
-        //PipelineOutput Flush(TimeSpan? timeout = null);
-
-        //bool IsWatching { get; }
-
-        int FlushCount { get; }
-        bool HasFlushed { get; }
+               
         string BaseRequestPath { get; set; }
-
-        // bool IsFlushing { get; }
+      
         void Initialise();
-        IEnumerable<PipeContext> GetDirtyPipes();
 
-      //  string Name { get; set; }
+        bool HasDirtyPipes();
+      
     }
 }
