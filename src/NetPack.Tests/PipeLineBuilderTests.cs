@@ -1,4 +1,5 @@
 using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -18,7 +19,12 @@ namespace NetPack.Tests
             //mockHostingEnv.SetupAllProperties();
 
             var fileProvider = new InMemoryFileProvider();
-          
+
+            // Enable Node Services
+            services.AddNodeServices((options) =>
+            {
+                options.HostingModel = NodeHostingModel.Socket;
+            });
 
         }
        
