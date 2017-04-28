@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D3B0CC01-206D-4612-94FC-3AE3A300153E}"
 EndProject
@@ -11,34 +11,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\build.cake = ..\build.cake
 		..\build.cmd = ..\build.cmd
 		..\build.ps1 = ..\build.ps1
-		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack", "NetPack\NetPack.xproj", "{E1E950BC-453D-4341-9DA8-7795CCD33194}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack", "NetPack\NetPack.csproj", "{E1E950BC-453D-4341-9DA8-7795CCD33194}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.Web", "NetPack.Web\NetPack.Web.xproj", "{9290FF29-F927-4462-AF4D-F370C4BBD875}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Web", "NetPack.Web\NetPack.Web.csproj", "{9290FF29-F927-4462-AF4D-F370C4BBD875}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.Typescript", "NetPack.Typescript\NetPack.Typescript.xproj", "{B657AD4B-15AD-4E3A-B9F4-BD7DA4D02CB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Typescript", "NetPack.Typescript\NetPack.Typescript.csproj", "{B657AD4B-15AD-4E3A-B9F4-BD7DA4D02CB1}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.Typescript.Tests", "NetPack.Typescript.Tests\NetPack.Typescript.Tests.xproj", "{DF350DA6-7C97-4DB9-A8AA-C3D4D9A29043}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Typescript.Tests", "NetPack.Typescript.Tests\NetPack.Typescript.Tests.csproj", "{DF350DA6-7C97-4DB9-A8AA-C3D4D9A29043}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.RequireJs", "NetPack.RequireJs\NetPack.RequireJs.xproj", "{BAD77F92-C1C0-4527-9944-9F1DACD9EE23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.RequireJs", "NetPack.RequireJs\NetPack.RequireJs.csproj", "{BAD77F92-C1C0-4527-9944-9F1DACD9EE23}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.RequireJs.Tests", "NetPack.RequireJs.Tests\NetPack.RequireJs.Tests.xproj", "{67B3818F-7624-4BB7-85E1-1F5831C151F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.RequireJs.Tests", "NetPack.RequireJs.Tests\NetPack.RequireJs.Tests.csproj", "{67B3818F-7624-4BB7-85E1-1F5831C151F1}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.Web.Tests", "NetPack.Web.Tests\NetPack.Web.Tests.xproj", "{D638BF9C-A74F-49B6-8CAA-9001B44B5F08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Web.Tests", "NetPack.Web.Tests\NetPack.Web.Tests.csproj", "{D638BF9C-A74F-49B6-8CAA-9001B44B5F08}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.Tests", "NetPack.Tests\NetPack.Tests.xproj", "{3C55FC57-3828-459F-9430-46955F421A51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Tests", "NetPack.Tests\NetPack.Tests.csproj", "{3C55FC57-3828-459F-9430-46955F421A51}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.JsCombine", "NetPack.JsCombine\NetPack.JsCombine.xproj", "{D9CA4DD3-48DF-4160-BF86-9A3AD10B339B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.JsCombine", "NetPack.JsCombine\NetPack.JsCombine.csproj", "{D9CA4DD3-48DF-4160-BF86-9A3AD10B339B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.JsCombine.Tests", "NetPack.JsCombine.Tests\NetPack.JsCombine.Tests.xproj", "{E9FF3F0D-4A0F-43E9-9FED-CD07F406E73C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.JsCombine.Tests", "NetPack.JsCombine.Tests\NetPack.JsCombine.Tests.csproj", "{E9FF3F0D-4A0F-43E9-9FED-CD07F406E73C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.RequireJs.TagHelpers", "NetPack.RequireJs.TagHelpers\NetPack.RequireJs.TagHelpers.xproj", "{261D76B9-9EC3-42BB-BCEE-548985415662}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.RequireJs.TagHelpers", "NetPack.RequireJs.TagHelpers\NetPack.RequireJs.TagHelpers.csproj", "{261D76B9-9EC3-42BB-BCEE-548985415662}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.JsMin", "NetPack.JsMin\NetPack.JsMin.xproj", "{CB1E2D47-0AD4-4548-8F11-A23EC97E6710}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.JsMin", "NetPack.JsMin\NetPack.JsMin.csproj", "{CB1E2D47-0AD4-4548-8F11-A23EC97E6710}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NetPack.JsMin.Tests", "NetPack.JsMin.Tests\NetPack.JsMin.Tests.xproj", "{989CED5B-9C15-4E4E-A86B-9E0C910114B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.JsMin.Tests", "NetPack.JsMin.Tests\NetPack.JsMin.Tests.csproj", "{989CED5B-9C15-4E4E-A86B-9E0C910114B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
