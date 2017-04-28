@@ -21,10 +21,11 @@ namespace NetPack.Tests
             var fileProvider = new InMemoryFileProvider();
 
             // Enable Node Services
-            services.AddNodeServices((options) =>
-            {
-                options.HostingModel = NodeHostingModel.Socket;
-            });
+            services.AddNodeServices();
+            //services.AddNodeServices((options) =>
+            //{
+            //    options.HostingModel = NodeHostingModel.Socket;
+            //});
 
         }
        
