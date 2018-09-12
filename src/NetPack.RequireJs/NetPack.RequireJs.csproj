@@ -20,10 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotNet.Glob" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.NodeServices" Version="1.0.0-beta-000021" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="1.0.2" />
     <PackageReference Include="ReflectionBridge" Version="0.0.11" />
-    <PackageReference Include="Dazinator.AspNet.Extensions.FileProviders" Version="1.2.0" />
+    <PackageReference Include="Dazinator.AspNet.Extensions.FileProviders" Version="1.4.0" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
