@@ -5,7 +5,6 @@
 #tool "nuget:?package=GitReleaseNotes&version=0.7.0"
 #addin "nuget:?package=NuGet.Core&version=2.14.0"
 #addin nuget:?package=Cake.Git
-#addin "Cake.ExtendedNuGet"
 
 
 //////////////////////////////////////////////////////////////////////
