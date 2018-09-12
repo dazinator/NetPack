@@ -1,12 +1,11 @@
 ﻿//////////////////////////////////////////////////////////////////////
 // TOOLS
 //////////////////////////////////////////////////////////////////////
-#tool "nuget:?package=GitVersion.CommandLine"
-#tool "nuget:?package=GitReleaseNotes"
+#tool "nuget:https://ci.appveyor.com/nuget/gitversion-8nigugxjftrw?package=GitVersion.CommandLine&version=4.0.0-pullrequest1269-1542"
+#tool "nuget:?package=GitReleaseNotes&version=0.7.0"
+#addin "nuget:?package=NuGet.Core&version=2.14.0"
 #addin nuget:?package=Cake.Git
 #addin "Cake.ExtendedNuGet"
-#addin "nuget:?package=NuGet.Core&version=2.8.6"
-#addin "MagicChunks"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -19,6 +18,7 @@ var configuration = Argument("configuration", "Release");
 // GLOBAL VARIABLES
 ///////////////////////////////////////////////////////////////////////////////
 var artifactsDir = "./artifacts";
+var solutionPath = "./src/NetPack.sln";
 var globalAssemblyFile = "./src/GlobalAssemblyInfo.cs";
 var repoBranchName = "master";
 var isContinuousIntegrationBuild = !BuildSystem.IsLocalBuild;
@@ -51,8 +51,8 @@ Task("__Default")
     .IsDependentOn("__SetAppVeyorBuildNumber")
    // .IsDependentOn("__Clean")
     .IsDependentOn("__Restore")
-    .IsDependentOn("__UpdateAssemblyVersionInformation")
-    .IsDependentOn("__UpdateProjectJsonVersion")
+   // .IsDependentOn("__UpdateAssemblyVersionInformation")
+   // .IsDependentOn("__UpdateProjectJsonVersion")
     .IsDependentOn("__Build")
     .IsDependentOn("__Test")    
     .IsDependentOn("__Pack")
@@ -86,77 +86,65 @@ Task("__SetAppVeyorBuildNumber")
 });
 
 Task("__Restore")
-    .Does(() => DotNetCoreRestore());
-
-Task("__UpdateAssemblyVersionInformation")
-    .WithCriteria(isContinuousIntegrationBuild)
-    .Does(() =>
+    .Does(() => 
 {
-     GitVersion(new GitVersionSettings {
-        UpdateAssemblyInfo = true,
-        UpdateAssemblyInfoFilePath = globalAssemblyFile
-    });
+	 var settings = new DotNetCoreRestoreSettings
+     {      	    
+        // ArgumentCustomization = args => args.Append("/p:PackageVersion=" + nugetVersion),
+		 DisableParallel = true
+     };
 
-    Information("AssemblyVersion -> {0}", gitVersionInfo.AssemblySemVer);
-    Information("AssemblyFileVersion -> {0}", $"{gitVersionInfo.MajorMinorPatch}.0");
-    Information("AssemblyInformationalVersion -> {0}", gitVersionInfo.InformationalVersion);
-});
+	 DotNetCoreRestore(solutionPath, settings);
+
+});	
 
 Task("__Build")
     .Does(() =>
 {
-    DotNetCoreBuild("**/project.json", new DotNetCoreBuildSettings
-    {
-        Configuration = configuration
-    });
+    DotNetCoreBuild(solutionPath, new DotNetCoreBuildSettings
+    {        
+        Configuration = configuration,
+		ArgumentCustomization = args => args.Append("--disable-parallel"),
+		// Verbosity = Cake.Common.Tools.DotNetCore.DotNetCoreVerbosity.Detailed
+    });      
 });
 
 Task("__Test")
+    .IsDependentOn("__Build")
     .Does(() =>
 {
-    GetFiles("**/*Tests/project.json")
+    GetFiles("**/*Tests/*.csproj")
         .ToList()
         .ForEach(testProjectFile => 
         {           
             var projectDir = testProjectFile.GetDirectory();
-            DotNetCoreTest(testProjectFile.ToString(), new DotNetCoreTestSettings
-            {
-                Configuration = configuration,
-                WorkingDirectory = projectDir
-            });
+			var settings = new DotNetCoreTestSettings()
+			{
+			    Configuration = configuration,
+				WorkingDirectory = projectDir,
+				Logger = $"trx;logfilename={testProjectFile.GetFilenameWithoutExtension()}.trx",
+				// ResultsDirectory = artifactsDir
+			};
+
+			DotNetCoreTest(testProjectFile.ToString(), settings);
+           
         });
 });
 
-Task("__UpdateProjectJsonVersion")
-    .WithCriteria(isContinuousIntegrationBuild)
-    .Does(() =>
-{
-        GetFiles("**/project.json")
-        .ToList()
-        .ForEach(projectToPackagePackageJson => 
-        {           
-            var projectDir = projectToPackagePackageJson.GetDirectory();
-            if(!projectDir.FullPath.Contains("Tests"))
-            {
-                Information("Updating {0} version -> {1}", projectToPackagePackageJson.FullPath, nugetVersion);
-
-                TransformConfig(projectToPackagePackageJson.FullPath, projectToPackagePackageJson.FullPath, new TransformationCollection {
-                    { "version", nugetVersion }
-                });
-            }            
-        });    
-});
 
 Task("__Pack")
     .Does(() =>
 {
+
+    var versionarg = "/p:PackageVersion=" + nugetVersion;
     var settings = new DotNetCorePackSettings
     {
         Configuration = "Release",
-        OutputDirectory = $"{artifactsDir}"        
+        OutputDirectory = $"{artifactsDir}",
+		ArgumentCustomization = args=>args.Append(versionarg)
     };
 
-     GetFiles("**/project.json")
+     GetFiles("**/*.csproj")
         .ToList()
         .ForEach(projectToPackagePackageJson => 
         {           
@@ -172,13 +160,7 @@ Task("__Pack")
 
 Task("__GenerateReleaseNotes")
     .Does(() =>
-{
-    var settings = new DotNetCorePackSettings
-    {
-        Configuration = "Release",
-        OutputDirectory = $"{artifactsDir}"        
-    };    
-            
+{             
     GitReleaseNotes($"{artifactsDir}/ReleaseNotes.md", new GitReleaseNotesSettings {
     WorkingDirectory         = ".",
     Verbose                  = true,       
