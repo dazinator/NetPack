@@ -45,13 +45,38 @@ namespace NetPack.Requirements
                 // make sure it finished executing before proceeding 
                 p.WaitForExit();
 
+                var errors = new List<string>();
+                var warnings = new List<string>();
                 // reads the error output
-                string errorMessage = p.StandardError.ReadToEnd();
-
-                // if there were errors, throw an exception
-                if (!String.IsNullOrEmpty(errorMessage))
+                while (!p.StandardError.EndOfStream)
                 {
-                    throw new NodeJsNotInstalledException(errorMessage);
+                    string line = p.StandardError.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        if (line.Contains("WARN"))
+                        {
+                            warnings.Add(line);
+                            // WARNINGS ARE OK.
+                        }
+                        else if (line.StartsWith("npm ERR! extraneous"))
+                        {
+                            warnings.Add(line);
+                        }
+                        else
+                        {
+                            errors.Add(line);
+                        }
+                    }
+                }
+
+                if (errors.Any())
+                {
+                    string errorMessage = string.Join(Environment.NewLine, errors);
+                    // if there were errors, throw an exception
+                    if (!String.IsNullOrEmpty(errorMessage))
+                    {
+                        throw new NodeJsNotInstalledException(errorMessage);
+                    }
                 }
 
                 string output = p.StandardOutput.ReadToEnd();
@@ -176,11 +201,7 @@ namespace NetPack.Requirements
                         else if (line.StartsWith("npm notice"))
                         {
                             warnings.Add(line);
-                        }
-                        else if (line.StartsWith("npm ERR! extraneous:"))
-                        {
-                            warnings.Add(line);
-                        }
+                        }                       
                         else
                         {
                             errors.Add(line);
