@@ -19,13 +19,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
-    <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Composite" Version="1.0.1" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="1.0.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit" Version="2.4.0" />   
     <PackageReference Include="Moq" Version="4.2.1510.2205" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="1.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">

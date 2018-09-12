@@ -6,8 +6,6 @@
     <AssemblyName>NetPack.Web</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>NetPack.Web</PackageId>
-    <!--<RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +28,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.0.2" />
