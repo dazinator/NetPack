@@ -172,6 +172,10 @@ namespace NetPack.Requirements
                             warnings.Add(line);
                             // WARNINGS ARE OK.
                         }
+                        else if(line.StartsWith("npm notice"))
+                        {
+                            warnings.Add(line);
+                        }
                         else
                         {
                             errors.Add(line);
