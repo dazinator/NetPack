@@ -1,13 +1,8 @@
 
 using System;
-using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using NetPack.File;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
@@ -24,8 +19,8 @@ namespace NetPack
             // Enable Node Services
             services.AddNodeServices((options) =>
             {
-                options.
-                HostingModel = NodeHostingModel.Socket;
+               // options.
+               // HostingModel = NodeHostingModel.Socket;
             });
 
 

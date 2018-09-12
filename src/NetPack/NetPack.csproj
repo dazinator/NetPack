@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="DotNet.Glob" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.NodeServices" Version="1.0.0-beta-000021" />
+    <PackageReference Include="Microsoft.AspNetCore.NodeServices" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Composite" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="1.0.2" />
