@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace NetPack.Requirements
@@ -46,14 +45,41 @@ namespace NetPack.Requirements
                 // make sure it finished executing before proceeding 
                 p.WaitForExit();
 
+                var errors = new List<string>();
+                var warnings = new List<string>();
                 // reads the error output
-                var errorMessage = p.StandardError.ReadToEnd();
+                while (!p.StandardError.EndOfStream)
+                {
+                    string line = p.StandardError.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        if (line.Contains("WARN"))
+                        {
+                            warnings.Add(line);
+                            // WARNINGS ARE OK.
+                        }
+                        else if (line.StartsWith("npm ERR! extraneous"))
+                        {
+                            warnings.Add(line);
+                        }
+                        else
+                        {
+                            errors.Add(line);
+                        }
+                    }
+                }
 
-                // if there were errors, throw an exception
-                if (!String.IsNullOrEmpty(errorMessage))
-                    throw new NodeJsNotInstalledException(errorMessage);
+                if (errors.Any())
+                {
+                    string errorMessage = string.Join(Environment.NewLine, errors);
+                    // if there were errors, throw an exception
+                    if (!String.IsNullOrEmpty(errorMessage))
+                    {
+                        throw new NodeJsNotInstalledException(errorMessage);
+                    }
+                }
 
-                var output = p.StandardOutput.ReadToEnd();
+                string output = p.StandardOutput.ReadToEnd();
                 return ParsePackagesFromStdOut(output);
 
             }
@@ -63,25 +89,25 @@ namespace NetPack.Requirements
         private Dictionary<string, List<string>> ParsePackagesFromStdOut(string output)
         {
 
-            var packages = new Dictionary<string, List<string>>();
+            Dictionary<string, List<string>> packages = new Dictionary<string, List<string>>();
 
-            var asciiEncoded = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(output));
+            string asciiEncoded = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(output));
 
-            var reader = new StringReader(asciiEncoded);
-            var line = reader.ReadLine(); // first line is environment current directory.
+            StringReader reader = new StringReader(asciiEncoded);
+            string line = reader.ReadLine(); // first line is environment current directory.
 
-            var nonAsciiChars = new char[] { '?' }; // chars that could not be ascii encoded are turned into ? so we remove them.
+            char[] nonAsciiChars = new char[] { '?' }; // chars that could not be ascii encoded are turned into ? so we remove them.
 
             while (reader.Peek() != -1)
             {
-                var packageLine = reader.ReadLine();
+                string packageLine = reader.ReadLine();
                 if (packageLine.StartsWith("?") || packageLine.StartsWith("+--"))
                 {
                     //  var lastIndex = packageLine.LastIndexOf('?');
                     //  var packageName = packageLine.Substring(lastIndex + 1);
-                    var packageNameWithVersion = packageLine.TrimStart(nonAsciiChars).Trim();
-                    packageNameWithVersion = packageNameWithVersion.TrimStart(new char[] {'+','-','-'}).Trim();
-                    
+                    string packageNameWithVersion = packageLine.TrimStart(nonAsciiChars).Trim();
+                    packageNameWithVersion = packageNameWithVersion.TrimStart(new char[] { '+', '-', '-' }).Trim();
+
                     if (packageNameWithVersion == "(empty)")
                     {
                         continue;
@@ -90,7 +116,7 @@ namespace NetPack.Requirements
                     string packageName;
                     string packageVersion;
 
-                    var indexOfVersionSeperator = packageNameWithVersion.IndexOf('@');
+                    int indexOfVersionSeperator = packageNameWithVersion.IndexOf('@');
                     if (indexOfVersionSeperator != -1)
                     {
                         packageVersion = packageNameWithVersion.Substring(indexOfVersionSeperator + 1);
@@ -107,7 +133,7 @@ namespace NetPack.Requirements
                         packages.Add(packageName, new List<string>());
                     }
 
-                    var versionsList = packages[packageName];
+                    List<string> versionsList = packages[packageName];
                     if (!versionsList.Contains(packageVersion))
                     {
                         packages[packageName].Add(packageVersion);
@@ -121,7 +147,7 @@ namespace NetPack.Requirements
 
         public virtual void Check()
         {
-            var installedPackages = GetInstalledPackages();
+            Dictionary<string, List<string>> installedPackages = GetInstalledPackages();
 
             if (!installedPackages.ContainsKey(_packageName))
             {
@@ -136,7 +162,7 @@ namespace NetPack.Requirements
             // package already installed with same name, but is it the required version? 
             if (_version != null)
             {
-                var installedPackageVersions = installedPackages[_packageName];
+                List<string> installedPackageVersions = installedPackages[_packageName];
                 if (!installedPackageVersions.Contains(_version))
                 {
                     InstallNpmPackage(_packageName, _version);
@@ -159,12 +185,12 @@ namespace NetPack.Requirements
                 p.WaitForExit();
 
                 // reads the error output
-                var errors = new List<string>();
-                var warnings = new List<string>();
+                List<string> errors = new List<string>();
+                List<string> warnings = new List<string>();
 
                 while (!p.StandardError.EndOfStream)
                 {
-                    var line = p.StandardError.ReadLine();
+                    string line = p.StandardError.ReadLine();
                     if (!string.IsNullOrWhiteSpace(line))
                     {
                         if (line.Contains("WARN"))
@@ -172,6 +198,10 @@ namespace NetPack.Requirements
                             warnings.Add(line);
                             // WARNINGS ARE OK.
                         }
+                        else if (line.StartsWith("npm notice"))
+                        {
+                            warnings.Add(line);
+                        }                       
                         else
                         {
                             errors.Add(line);
@@ -181,16 +211,18 @@ namespace NetPack.Requirements
 
                 if (errors.Any())
                 {
-                    var errorMessage = string.Join(Environment.NewLine, errors);
+                    string errorMessage = string.Join(Environment.NewLine, errors);
                     // if there were errors, throw an exception
                     if (!String.IsNullOrEmpty(errorMessage))
+                    {
                         throw new NpmPackageCouldNotBeInstalledException(errorMessage);
+                    }
                 }
 
 
-            
 
-                var output = p.StandardOutput.ReadToEnd();
+
+                string output = p.StandardOutput.ReadToEnd();
 
 
             }
@@ -204,7 +236,7 @@ namespace NetPack.Requirements
             }
             if (obj.GetType() == typeof(NpmModuleRequirement))
             {
-                var req = (NpmModuleRequirement)obj;
+                NpmModuleRequirement req = (NpmModuleRequirement)obj;
                 return req._packageName == _packageName && req._version == _version;
             }
             return false;

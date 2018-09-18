@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
 using NetPack.Pipeline;
 using NetPack.Requirements;

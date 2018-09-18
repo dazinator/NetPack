@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
-    var Another = (function () {
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var Another = /** @class */ (function () {
         function Another(another) {
             this.another = another;
         }
