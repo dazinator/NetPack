@@ -31,7 +31,7 @@ namespace NetPack.JsCombine
             _options = options;
         }
 
-        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
+        public async virtual Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
             bool hasChanges = false;
 

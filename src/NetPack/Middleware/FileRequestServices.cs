@@ -23,7 +23,7 @@ namespace NetPack
             _busyFiles.TryGetValue(subPath, out existingLocks);
             if (existingLocks == null || existingLocks.Count == 0)
             {
-                return Task.FromResult<bool>(true);
+                return Task.CompletedTask;
             };
 
             return Task.Factory.StartNew(() =>

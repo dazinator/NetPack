@@ -72,7 +72,7 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
 
-            app.UseFileProcessing();
+            app.UseNetPack();
 
            
 
@@ -109,7 +109,7 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
             services.AddNetPack((setup) =>
             {
                 var outputFolder = "built";
-                var fileProcessingBuilder = setup.AddFileProcessing(a =>
+                var fileProcessingBuilder = setup.AddPipeline(a =>
                 {
                     a.WithFileProvider(inMemoryFileProvider)
                         .AddRequireJsOptimisePipe(input =>

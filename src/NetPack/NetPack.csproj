@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6</TargetFrameworks>
     <AssemblyName>NetPack</AssemblyName>
     <PackageId>NetPack</PackageId>
     <!--<NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>-->
@@ -24,19 +24,14 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.2" />
     <PackageReference Include="NUglify" Version="1.5.2" />
     <PackageReference Include="Polly" Version="6.1.0" />
-    <PackageReference Include="ReflectionBridge" Version="0.0.11" />
     <PackageReference Include="Dazinator.AspNet.Extensions.FileProviders" Version="1.4.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.1" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>

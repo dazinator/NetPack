@@ -32,7 +32,7 @@ namespace NetPack
                 _services = services;
             }
 
-            public FileProcessingOptions AddFileProcessing(Action<IPipelineConfigurationBuilder> processorBuilder)
+            public FileProcessingOptions AddPipeline(Action<IPipelineConfigurationBuilder> processorBuilder)
             {
                 _services.AddTransient<PipelineSetup>((sp) =>
                 {
@@ -92,9 +92,11 @@ namespace NetPack
         /// Initialises all file processing, and also adds middleware for delaying a http request for a file that is in still in the process of being generated.
         /// </summary>
         /// <param name="appBuilder"></param>
-        /// <param name="requestTimeout">The maximum amount of time a request should be delayed when waiting for a file in the process of being generated, before timing out.mIf null then default of 1 minute is used.</param>
+        /// <param name="requestTimeout">The maximum amount of time a request will be delayed whilst waiting for a pipeline to process any updated inputs.
+        /// For example, if you change a file, and a pipeline needs to re-process it to produce some output, a request for the output file will be delayed until the output is up to date, or this timeout is reached.
+        /// If null then default of 1 minute is used.</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseFileProcessing(this IApplicationBuilder appBuilder, TimeSpan? requestTimeout = null)
+        public static IApplicationBuilder UseNetPack(this IApplicationBuilder appBuilder, TimeSpan? requestTimeout = null)
         {
             var pipeLineManager = appBuilder.ApplicationServices.GetService<PipelineManager>();
             if (pipeLineManager == null)

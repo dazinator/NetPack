@@ -135,7 +135,7 @@ namespace NetPack.Web.Tests
 
                 services.AddNetPack((setup) =>
                 {
-                    setup.AddFileProcessing(pipelineBuilder =>
+                    setup.AddPipeline(pipelineBuilder =>
                     {
                         pipelineBuilder.WithFileProvider(mockFileProvider)
                         .AddTypeScriptPipe(input =>
@@ -171,7 +171,7 @@ namespace NetPack.Web.Tests
                 //   env.WebRootFileProvider = 
 
 
-                app.UseFileProcessing();
+                app.UseNetPack();
 
                 app.UseStaticFiles();
 

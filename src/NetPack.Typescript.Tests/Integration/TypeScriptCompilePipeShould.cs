@@ -144,7 +144,7 @@ namespace NetPack.Typescript.Tests
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseFileProcessing();
+            app.UseNetPack();
             app.UseStaticFiles(new StaticFileOptions() { });
           
             app.Run(async (a) =>
@@ -192,7 +192,7 @@ namespace NetPack.Typescript.Tests
 
             services.AddNetPack((setup) =>
             {
-                setup.AddFileProcessing(a =>
+                setup.AddPipeline(a =>
                 {
                     a.WithFileProvider(inputFileProvider)
                   // Simple processor, that compiles typescript files.

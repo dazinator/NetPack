@@ -9,6 +9,7 @@ namespace NetPack.JsCombine.Tests
 {
     public class CombinePipeTests : PipeTestBase
     {
+      
 
         [InlineData(SourceMapMode.None, "js/red.js", "js/green.js", "js/blue.js" )]
         [InlineData(SourceMapMode.Inline,"js/red.js", "js/green.js", "js/blue.js")]
@@ -95,8 +96,7 @@ namespace NetPack.JsCombine.Tests
             }
 
         }
-
+        
     }
-
 
 }

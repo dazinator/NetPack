@@ -1,23 +1,22 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using NetPack;
 using NetPack.RequireJs;
+using System.Collections.Generic;
 
 namespace NetPack.Web
 {
     public class Startup
     {
 
-        private List<IFileProvider> _fileProviders = new List<IFileProvider>();
+        private readonly List<IFileProvider> _fileProviders = new List<IFileProvider>();
 
         public Startup(IHostingEnvironment env)
         {
-            var builder = new ConfigurationBuilder()
+            IConfigurationBuilder builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
@@ -33,10 +32,10 @@ namespace NetPack.Web
             // Add framework services.
             services.AddNetPack((setup) =>
             {
-                setup.AddFileProcessing(pipelineBuilder =>
+                setup.AddPipeline(pipelineBuilder =>
                 {
                     pipelineBuilder.WithHostingEnvironmentWebrootProvider()
-                    // Simple processor, that compiles typescript files.
+                    // Simple processor, that compiles typescript files into js files.
                     .AddTypeScriptPipe(input =>
                     {
                         input.Include("ts/*.ts");
@@ -44,22 +43,21 @@ namespace NetPack.Web
                     {
                         options.InlineSources = true;
                     })
-                    // Another processor that combines multiple js files into a bundle file.
+                    // Another processor that combines multiple js files into a single "bundle" file.
                     .AddJsCombinePipe(input =>
                     {
                         input.Include("ts/*.js");
                     }, () => "bundle.js")
-
-                     // Add a processor that takes all AMD javascript files and optimises them using rjs optimiser.
-                     .AddRequireJsOptimisePipe(input =>
-                     {
-                         input.Include("amd/*.js")
-                         .Include("js/requireConfig.js");
-                     }, options =>
-                     {
-                         options.GenerateSourceMaps = true;
-                         options.Optimizer = Optimisers.none;
-                         options.BaseUrl = "amd";
+                    // Add a require js processor that takes all AMD format javascript files and optimises them using rjs optimiser.
+                    .AddRequireJsOptimisePipe(input =>
+                    {
+                        input.Include("amd/*.js")
+                        .Include("js/requireConfig.js");
+                    }, options =>
+                    {
+                        options.GenerateSourceMaps = true;
+                        options.Optimizer = Optimisers.none;
+                        options.BaseUrl = "amd";
                          // options.
                          //  options.AppDir = "amd";
                          options.Name = "SomePage"; // The name of the AMD module to optimise.
@@ -92,14 +90,14 @@ namespace NetPack.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-               // app.UseBrowserLink();
+                // app.UseBrowserLink();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseFileProcessing();
+            app.UseNetPack();
             app.UseStaticFiles();
 
             app.UseMvc(routes =>

@@ -26,14 +26,14 @@ namespace NetPack.Tests
                 .UseContentRoot(Environment.CurrentDirectory)
                 .Configure(app =>
                 {
-                    app.UseFileProcessing();
+                    app.UseNetPack();
                     app.UseStaticFiles();
                 })
                 .ConfigureServices((services) =>
                 {
                     services.AddNetPack((setup) =>
                     {
-                        setup.AddFileProcessing(options =>
+                        setup.AddPipeline(options =>
                         {
                             options.WithFileProvider(inMemoryFileProvider)
                                 .AddPipe(inputs => inputs.Input.AddInclude("wwwroot/foo.ts"), new DelegatePipe(async (context, token) =>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <AssemblyName>NetPack.Typescript.Tests</AssemblyName>
     <PackageId>NetPack.Typescript.Tests</PackageId>
   </PropertyGroup>
@@ -13,17 +13,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit" Version="2.4.0" />   
-    <PackageReference Include="Moq" Version="4.2.1510.2205" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="1.0.2" />   
+    <PackageReference Include="Moq" Version="4.10.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="1.0.5" />   
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>

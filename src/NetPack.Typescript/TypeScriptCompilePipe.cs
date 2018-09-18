@@ -1,19 +1,18 @@
-using System;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.Pipeline;
-using NetPack.RequireJs;
 using NetPack.Utils;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace NetPack.Typescript
 {
-    public class TypeScriptCompilePipe : IPipe, IDisposable
+    public class TypeScriptCompilePipe : BasePipe, IDisposable
     {
         private INetPackNodeServices _nodeServices;
         private TypeScriptPipeOptions _options;
@@ -36,9 +35,9 @@ namespace NetPack.Typescript
             _options = options;
             _script = new Lazy<StringAsTempFile>(() =>
             {
-                Assembly assy = this.GetType().GetAssemblyFromType();
-                var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
-                var scriptContent = script.ReadAllContent();
+                Assembly assy = GetType().GetAssemblyFromType();
+                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+                string scriptContent = script.ReadAllContent();
                 return new StringAsTempFile(scriptContent);
             });
         }
@@ -46,64 +45,67 @@ namespace NetPack.Typescript
 
 
 
-        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
+        public override async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
-            var requestDto = new TypescriptCompileRequestDto();
+            TypescriptCompileRequestDto requestDto = new TypescriptCompileRequestDto();
             requestDto.Options = _options;
 
-//var pipeContext = context.PipeContext;
-            var requestLocks = new List<IDisposable>();
+            //var pipeContext = context.PipeContext;
+            // var requestLocks = new List<IDisposable>();
 
-            bool isSingleOutput = !string.IsNullOrWhiteSpace(_options.OutFile);
-            if (isSingleOutput)
+            using (IFileBlocker fileBlocker = UseFileBlocker())
             {
-                requestLocks.Add(FileRequestServices.BlockFilePath(_options.OutFile));
-            }
 
-            foreach (var inputFileInfo in context.InputFiles)
-            {
-                if (context.IsDifferentFromLastTime(inputFileInfo))
+                bool isSingleOutput = !string.IsNullOrWhiteSpace(_options.OutFile);
+
+                if (isSingleOutput)
                 {
-                    if (!isSingleOutput)
-                    {
-                        requestLocks.Add(FileRequestServices.BlockFilePath(inputFileInfo.FileSubPath));
-                    }
-
-                    var contents = inputFileInfo.FileInfo.ReadAllContent();
-                    requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
+                    fileBlocker.AddBlock(_options.OutFile);
                 }
 
-                requestDto.Inputs.Add(inputFileInfo.FileSubPath);
-            }
-
-            if (!requestDto.Files.Any())
-            {
-                return;
-            }
-
-            try
-            {
-                // read script from embedded resource and use string as temp file:
-                // Assembly assy = this.GetType().GetAssemblyFromType();
-                // var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
-                // var scriptContent = script.ReadAllContent();
-                using (new CompositeDisposable(requestLocks))
+                foreach (FileWithDirectory inputFileInfo in context.InputFiles)
                 {
+                    if (context.IsDifferentFromLastTime(inputFileInfo))
+                    {
+                        if (!isSingleOutput)
+                        {
+                            fileBlocker.AddBlock(inputFileInfo.FileSubPath);
+                        }
 
-                    var nodeScript = _script.Value;
-                    var result = await _nodeServices.InvokeExportAsync<TypeScriptCompileResult>(nodeScript.FileName, "build", requestDto);
+                        string contents = inputFileInfo.FileInfo.ReadAllContent();
+                        requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
+                    }
+
+                    requestDto.Inputs.Add(inputFileInfo.FileSubPath);
+                }
+
+                if (!requestDto.Files.Any())
+                {
+                    return;
+                }
+
+                try
+                {
+                    // read script from embedded resource and use string as temp file:
+                    // Assembly assy = this.GetType().GetAssemblyFromType();
+                    // var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+                    // var scriptContent = script.ReadAllContent();
+
+
+                    StringAsTempFile nodeScript = _script.Value;
+                    TypeScriptCompileResult result = await _nodeServices.InvokeExportAsync<TypeScriptCompileResult>(nodeScript.FileName, "build", requestDto);
 
                     if (result.Errors != null && result.Errors.Any())
                     {
                         // Throwing an exception will halt further processing of the pipeline.
-                        var typescriptCompilationException = new TypeScriptCompileException("Could not compile typescript due to compilation errors.", result.Errors);
+                        TypeScriptCompileException typescriptCompilationException = new TypeScriptCompileException("Could not compile typescript due to compilation errors.", result.Errors);
                         throw typescriptCompilationException;
                     }
 
-                    foreach (var output in result.Sources)
+                    foreach (KeyValuePair<string, string> output in result.Sources)
                     {
-                        var subPathInfo = SubPathInfo.Parse(output.Key);
-                        var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+                        SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
+                        StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
                         context.PipelineContext.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
                     }
 
@@ -111,7 +113,7 @@ namespace NetPack.Typescript
                     // source file needs to be output so it can be served up to the browser.              
                     if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
                     {
-                        foreach (var inputFileInfo in context.InputFiles)
+                        foreach (FileWithDirectory inputFileInfo in context.InputFiles)
                         {
                             //  context.AllowServe(inputFileInfo);
                             //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
@@ -126,12 +128,13 @@ namespace NetPack.Typescript
                         }
 
                     }
-                }
-            }
-            catch (System.Exception e)
-            {
 
-                throw;
+                }
+                catch (System.Exception e)
+                {
+
+                    throw;
+                }
             }
 
         }
