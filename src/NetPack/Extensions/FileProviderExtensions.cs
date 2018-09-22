@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Microsoft.Extensions.FileProviders;
-using ReflectionBridge.Extensions;
 using NetPack.Pipeline;
 using System.Collections.Generic;
 using Dazinator.AspNet.Extensions.FileProviders;

@@ -10,9 +10,11 @@ namespace NetPack.Pipeline
 {
     public interface IPipeLine
     {
-        IDirectory ProcessedOutputDirectory { get; set; }
+        IDirectory GeneratedOutputDirectory { get; set; }
 
-        List<PipeConfiguration> Pipes { get; }
+        List<PipeContext> Pipes { get; }
+
+        PipelineContext Context { get; set; }
 
         /// <summary>
         /// Processes all pipes in the pipeline.
@@ -27,32 +29,33 @@ namespace NetPack.Pipeline
         /// <param name="pipes"></param>
         /// <param name="none"></param>
         /// <returns></returns>
-        Task ProcessPipesAsync(IEnumerable<PipeConfiguration> pipes, CancellationToken none);
+        Task ProcessPipesAsync(IEnumerable<PipeContext> pipes, CancellationToken none);
+
+        /// <summary>
+        /// Processes only the specified pipes.
+        /// </summary>
+        /// <param name="pipes"></param>
+        /// <param name="none"></param>
+        /// <returns></returns>
+        Task ProcessDirtyPipesAsync(CancellationToken none);
 
         IFileProvider EnvironmentFileProvider { get; set; }
 
-        IFileProvider ProcessedOutputFileProvider { get; set; }
+        IFileProvider GeneratedOutputFileProvider { get; set; }
 
-        IFileProvider InputAndOutputFileProvider { get; set; }
+        IFileProvider InputAndGeneratedFileProvider { get; set; }
 
         IDirectory SourcesOutputDirectory { get; set; }
 
         IFileProvider SourcesFileProvider { get; set; }
 
         IFileProvider WebrootFileProvider { get; set; }
-
-        //PipelineOutput Flush(TimeSpan? timeout = null);
-
-        //bool IsWatching { get; }
-
-        int FlushCount { get; }
-        bool HasFlushed { get; }
+               
         string BaseRequestPath { get; set; }
-
-        // bool IsFlushing { get; }
+      
         void Initialise();
-        IEnumerable<PipeConfiguration> GetDirtyPipes();
 
-      //  string Name { get; set; }
+        bool HasDirtyPipes();
+      
     }
 }

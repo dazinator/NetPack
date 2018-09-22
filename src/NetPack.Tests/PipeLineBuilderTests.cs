@@ -22,7 +22,7 @@ namespace NetPack.Tests
         {
             // arrange 
             var services = new ServiceCollection();
-
+            services.AddLogging();
             //var mockHostingEnv = new Mock<IHostingEnvironment>();
             //mockHostingEnv.SetupAllProperties();
 
@@ -67,11 +67,11 @@ namespace NetPack.Tests
             
             // assert
             Assert.NotNull(pipeLine);
-            Assert.False(pipeLine.HasFlushed);
-            Assert.NotNull(pipeLine.ProcessedOutputDirectory);
+         //   Assert.False(pipeLine.HasFlushed);
+            Assert.NotNull(pipeLine.GeneratedOutputDirectory);
             Assert.NotNull(pipeLine.EnvironmentFileProvider);
-            Assert.NotNull(pipeLine.InputAndOutputFileProvider);
-            Assert.NotNull(pipeLine.ProcessedOutputFileProvider);
+            Assert.NotNull(pipeLine.InputAndGeneratedFileProvider);
+            Assert.NotNull(pipeLine.GeneratedOutputFileProvider);
             Assert.NotNull(pipeLine.SourcesOutputDirectory);
             Assert.NotNull(pipeLine.SourcesFileProvider);
 

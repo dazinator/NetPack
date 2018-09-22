@@ -1,16 +1,12 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.FileProviders;
-using NetPack.File;
 using NetPack.Pipeline;
 
 namespace NetPack
 {
     public interface IPipe
     {
-        Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken);
+        Task ProcessAsync(PipeContext context, CancellationToken cancelationToken);
     }
 
     //public interface IPipeOutput

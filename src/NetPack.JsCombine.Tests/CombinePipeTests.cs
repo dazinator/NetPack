@@ -9,9 +9,10 @@ namespace NetPack.JsCombine.Tests
 {
     public class CombinePipeTests : PipeTestBase
     {
+      
 
-        [InlineData(SourceMapMode.None, new string[] { "js/red.js", "js/green.js", "js/blue.js" })]
-        [InlineData(SourceMapMode.Inline, new string[] { "js/red.js", "js/green.js", "js/blue.js" })]
+        [InlineData(SourceMapMode.None, "js/red.js", "js/green.js", "js/blue.js" )]
+        [InlineData(SourceMapMode.Inline,"js/red.js", "js/green.js", "js/blue.js")]
         [Theory]
         public async Task Combines_Javascript_Files_With_Source_Maps(SourceMapMode sourceMapMode, params string[] jsFilePaths)
         {
@@ -95,8 +96,7 @@ namespace NetPack.JsCombine.Tests
             }
 
         }
-
+        
     }
-
 
 }
