@@ -1,10 +1,6 @@
-﻿using System;
-using Microsoft.Extensions.FileProviders;
-using NetPack.File;
-using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
 
 namespace NetPack.Pipeline
 {

@@ -20,6 +20,30 @@ namespace NetPack
             return this;
         }
 
+        public IFileBlocker AddBlocks(string[] paths)
+        {
+            foreach (var path in paths)
+            {
+                _locks.Add(FileRequestServices.BlockFilePath(path));
+            }           
+            return this;
+        }
+
+        public IFileBlocker AddBlocks(FileWithDirectory[] files)
+        {
+            foreach (var file in files)
+            {
+                _locks.Add(FileRequestServices.BlockFilePath(file.FileSubPath));
+            }
+            return this;
+        }
+
+        public IFileBlocker AddBlock(FileWithDirectory file)
+        {
+            _locks.Add(FileRequestServices.BlockFilePath(file.FileSubPath));
+            return this;
+        }
+
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -56,7 +80,9 @@ namespace NetPack
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
-        }
+        }      
+
+
         #endregion
 
     }

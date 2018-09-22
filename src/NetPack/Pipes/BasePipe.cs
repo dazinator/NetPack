@@ -5,10 +5,10 @@ namespace NetPack.Pipeline
 {
     public abstract class BasePipe : IPipe
     {
-        protected virtual IFileBlocker UseFileBlocker()
-        {
-            return new FileBlocker();
-        }
+        //protected virtual IFileBlocker UseFileBlocker()
+        //{
+        //    return new FileBlocker();
+        //}
 
         public abstract Task ProcessAsync(PipeContext context, CancellationToken cancelationToken);
 

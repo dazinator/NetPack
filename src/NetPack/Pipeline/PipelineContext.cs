@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Http;
@@ -73,7 +69,6 @@ namespace NetPack.Pipeline
             }
 
             return BaseRequestPath.Add(directory).Add("/" + fileInfo.Name);
-            //return BaseRequestPath.Add(directory).Add(fileInfo.Name);
         }
 
         public IDirectory GeneratedOutput { get; set; }
@@ -91,35 +86,6 @@ namespace NetPack.Pipeline
 
         public PipeContext PipeContext { get; set; }
 
-        //public async Task Apply(PipeContext pipe, CancellationToken cancellationToken)
-        //{
-
-        //    try
-        //    {
-        //        PipeContext = pipe;               
-        //        PipeContext.SetInputFiles(FileProvider);
-        //        PipeContext.LastProcessStartTime = DateTime.UtcNow;
-
-        //        if (PipeContext.HasChanges)
-        //        {
-        //            PipeContext.IsProcessing = true;
-        //            await Policy.ExecuteAsync(ct => PipeContext.Pipe.ProcessAsync(this, ct), cancellationToken);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        //todo: log exception..
-        //        throw;
-        //    }
-        //    finally
-        //    {
-        //        PipeContext.LastProcessedEndTime = DateTime.UtcNow;
-        //        PipeContext.IsProcessing = false;
-        //    }
-
-        //}
-
-
         /// <summary>
         /// Any file added here will be able to be served up to the browser, but will not trigger
         /// any additional processing, as it's assumed to be a source file which is not modified, and for which some generated 
@@ -130,8 +96,7 @@ namespace NetPack.Pipeline
         /// <param name="fileInfo"></param>
         public void AddSourceOutput(string directory, IFileInfo fileInfo)
         {
-            this.SourcesOutput.AddOrUpdateFile(directory, fileInfo);
-            //  throw new NotImplementedException();
+            SourcesOutput.AddOrUpdateFile(directory, fileInfo);
         }
 
         /// <summary>
@@ -139,17 +104,9 @@ namespace NetPack.Pipeline
         /// </summary>
         /// <param name="directory"></param>
         /// <param name="file"></param>
-        /// <param name="excludeFromInput">Whether to add the output ile to the exclude list of this pipelines input. True by default, prevents the pipeline from processing a file which it has generated.</param>
         public void AddGeneratedOutput(string directory, IFileInfo file)
         {
-            //if (excludeFromInput)
-            //{
-            //    //to-do - check for concurrency?
-            //    Input.AddExclude($"{directory}/{file.Name}");
-            //}
             GeneratedOutput.AddOrUpdateFile(directory, file);
-            // return new FileWithDirectory(directory, file);
-            //  Output.AddFile(directory, info);
         }
 
 
