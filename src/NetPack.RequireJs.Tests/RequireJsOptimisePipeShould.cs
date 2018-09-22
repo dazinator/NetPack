@@ -71,38 +71,24 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
         
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // Provide some in memory files, that are AMD modules to be used as input for the RequireJs Optimise Pipe
-            var inMemoryFileProvider = new InMemoryFileProvider();
-            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
-            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
 
-            var outputFolder = "built";
-            var fileProcessingBuilder = app.UseFileProcessing(a =>
-             {
-                 a.WithFileProvider(inMemoryFileProvider)
-                     .AddRequireJsOptimisePipe(input =>
-                     {
-                         input.Include("wwwroot/*.js");
-                     }, options =>
-                     {
-                         options.BaseUrl = "wwwroot";
-                         options.Dir = outputFolder;
-                         options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
-                     });
-             });
+            app.UseNetPack();
 
-            var pipeline = fileProcessingBuilder.Pipeline;
+           
+
+          //  var pipeline = fileProcessingBuilder.Pipeline;
            // pipeline.Initialise();
 
             app.Run(async (context) =>
             {
                 // Write the content of outputs files to the response for inspection.
                 var builder = new StringBuilder();
-                foreach (var outputFile in pipeline.ProcessedOutputFileProvider.GetDirectoryContents(outputFolder))
+
+                foreach (var outputFile in env.WebRootFileProvider.GetDirectoryContents("built"))
                 {
                     using (var reader = new StreamReader(outputFile.CreateReadStream()))
                     {
-                        builder.AppendLine("File: " + outputFolder + "/" + outputFile.Name);
+                        builder.AppendLine("File: " + "built" + "/" + outputFile.Name);
                         builder.Append(reader.ReadToEnd());
                         builder.AppendLine();
                     }
@@ -114,7 +100,30 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddNetPack();
+
+            // Provide some in memory files, that are AMD modules to be used as input for the RequireJs Optimise Pipe
+            var inMemoryFileProvider = new InMemoryFileProvider();
+            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
+            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
+
+            services.AddNetPack((setup) =>
+            {
+                var outputFolder = "built";
+                var fileProcessingBuilder = setup.AddPipeline(a =>
+                {
+                    a.WithFileProvider(inMemoryFileProvider)
+                        .AddRequireJsOptimisePipe(input =>
+                        {
+                            input.Include("wwwroot/*.js");
+                        }, options =>
+                        {
+                            options.BaseUrl = "wwwroot";
+                            options.Dir = outputFolder;
+                            options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
+                        });
+                });
+
+            });
         }
     }
 }

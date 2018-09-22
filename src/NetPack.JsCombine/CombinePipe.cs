@@ -1,25 +1,24 @@
+using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
+using Microsoft.Extensions.FileProviders;
+using NetPack.Pipeline;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.FileProviders;
-using Newtonsoft.Json.Linq;
-using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
-using NetPack.Pipeline;
-using NetPack.RequireJs;
 
 namespace NetPack.JsCombine
 {
-    public class JsCombinePipe : IPipe
+    public class JsCombinePipe : BasePipe
     {
 
-        private JObject _sourceMap;
+        private readonly JObject _sourceMap;
         private JsCombinePipeOptions _options;
 
-        private Dictionary<string, FileWithDirectory> _lastProcessed = new Dictionary<string, FileWithDirectory>();
+        private readonly Dictionary<string, FileWithDirectory> _lastProcessed = new Dictionary<string, FileWithDirectory>();
 
         public JsCombinePipe() : this(new JsCombinePipeOptions())
         {
@@ -31,7 +30,7 @@ namespace NetPack.JsCombine
             _options = options;
         }
 
-        public async Task ProcessAsync(IPipelineContext context, CancellationToken cancelationToken)
+        public override async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
             bool hasChanges = false;
 
@@ -45,15 +44,28 @@ namespace NetPack.JsCombine
                 outputSubPath = _options.OutputFilePath;
             }
 
-            foreach (var item in context.InputFiles)
+
+            // var mapFileName = requestLocks.Add( combinedFilePath.ToString() + ".map";
+
+
+
+
+            // var pipeContext = context.PipeContext;
+            //List<IDisposable> requestLocks = new List<IDisposable>();
+
+            foreach (FileWithDirectory item in context.InputFiles)
             {
 
                 if (item.FileSubPath == outputSubPath)
                 {
                     continue;
                 }
-                if (context.IsDifferentFromLastTime(item))
+                if (context.IsInputDifferentFromLastTime(item))
                 {
+                    // if (_options.SourceMapMode != SourceMapMode.None)
+                    // {
+                    // requestLocks.Add(FileRequestServices.BlockFilePath(item.FileSubPath));
+                    // }
                     hasChanges = true;
                 }
             }
@@ -63,26 +75,34 @@ namespace NetPack.JsCombine
                 return;
             }
 
-            bool hasSourceMappingDirectives = false;
-            var combiner = new ScriptCombiner();
-            var scriptInfos = new List<CombinedScriptInfo>(context.InputFiles.Length);
+            //  requestLocks.Add(FileRequestServices.BlockFilePath(outputSubPath));
+            string sourceMapPath = outputSubPath + ".map";
+            if (_options.SourceMapMode != SourceMapMode.None)
+            {
+                context.Blocker.AddBlock(sourceMapPath);
+            }
 
-            var ms = new MemoryStream();
+
+            bool hasSourceMappingDirectives = false;
+            ScriptCombiner combiner = new ScriptCombiner();
+            List<CombinedScriptInfo> scriptInfos = new List<CombinedScriptInfo>(context.InputFiles.Length);
+
+            MemoryStream ms = new MemoryStream();
 
             int totalLineCount = 0;
-            var encoding = Encoding.UTF8;
+            Encoding encoding = Encoding.UTF8;
 
-            foreach (var fileWithDirectory in context.InputFiles)
+            foreach (FileWithDirectory fileWithDirectory in context.InputFiles)
             {
-                var fileInfo = fileWithDirectory.FileInfo;
+                IFileInfo fileInfo = fileWithDirectory.FileInfo;
                 if (fileInfo.Exists && !fileInfo.IsDirectory)
                 {
-                    using (var sourceFileStream = fileInfo.CreateReadStream())
+                    using (Stream sourceFileStream = fileInfo.CreateReadStream())
                     {
                         // await fileStream.CopyToAsync(ms);
-                        using (var writer = new StreamWriter(ms, encoding, 1024, true))
+                        using (StreamWriter writer = new StreamWriter(ms, encoding, 1024, true))
                         {
-                            var sourceScript = await combiner.AddScript(sourceFileStream, writer);
+                            CombinedScriptInfo sourceScript = await combiner.AddScript(sourceFileStream, writer);
                             sourceScript.LineNumberOffset = totalLineCount;
                             sourceScript.FileWithDirectory = fileWithDirectory;
                             //  sourceScript.Path = fileInfo.Name;
@@ -97,7 +117,7 @@ namespace NetPack.JsCombine
             //   var outputFilep = FileWithDirectory.Parse(_options.OutputFilePath);
 
             // Now if there are source mapping url directives present, need to produce a new source map file and directive.
-            var outputFilePath = SubPathInfo.Parse(_options.OutputFilePath);
+            SubPathInfo outputFilePath = SubPathInfo.Parse(_options.OutputFilePath);
             if (hasSourceMappingDirectives && _options.SourceMapMode != SourceMapMode.None)
             {
 
@@ -108,25 +128,28 @@ namespace NetPack.JsCombine
                 //var mapFilePath = context.GetServePath(outputFilePath.ToString() + ".map");
                 //  var mapFileWithDirectory = new FileWithDirectory() { Directory = }
                 // SubPathInfo.Parse(context.BaseRequestPath + "/" + outputFilePath.ToString() + ".map");
-                var indexMapFile = BuildIndexMap(ms, scriptInfos, outputFilePath, context);
+                IFileInfo indexMapFile = BuildIndexMap(ms, scriptInfos, outputFilePath, context.PipelineContext);
 
                 // Output the new map file in the pipeline.
-                context.AddOutput(outputFilePath.Directory, indexMapFile);
+                var mapFile = new FileWithDirectory() { Directory = outputFilePath.Directory, FileInfo = indexMapFile };
+                context.AddUpdateOutputFile(mapFile);
+
+
 
                 // sourcemapping url is resolved relative to the source ifle
-                var mapServePath = $"{indexMapFile.Name}"; // context.GetRequestPath(outputFilePath.Directory, indexMapFile);
-                                                           //  var mapServePath = context.GetRequestPath(outputFilePath.Directory, indexMapFile);
-                                                           // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
-                using (var writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
+                string mapServePath = $"{indexMapFile.Name}"; // context.GetRequestPath(outputFilePath.Directory, indexMapFile);
+                                                              //  var mapServePath = context.GetRequestPath(outputFilePath.Directory, indexMapFile);
+                                                              // 4. Write a SourceMappingUrl pointing to the new map file subpath, to the end of the combined file (memory stream)
+                using (StreamWriter writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
                 {
                     writer.WriteLine();
                     await writer.WriteLineAsync($"//# sourceMappingURL={mapServePath.ToString()}");
                 }
 
                 // make sure all the source js files can be served up to the browser.
-                foreach (var item in scriptInfos)
+                foreach (CombinedScriptInfo item in scriptInfos)
                 {
-                    context.AddSourceOutput(item.FileWithDirectory.Directory, item.FileWithDirectory.FileInfo);
+                    context.AddUpdateSourceOutput(item.FileWithDirectory);
                 }
 
 
@@ -134,9 +157,10 @@ namespace NetPack.JsCombine
 
             //ensure it's reset
             ms.Position = 0;
-            var bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
+            MemoryStreamFileInfo bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
             // Output the new combines file.
-            context.AddOutput(outputFilePath.Directory, bundleJsFile);
+            context.PipelineContext.AddGeneratedOutput(outputFilePath.Directory, bundleJsFile);
+
         }
 
         //private bool IsCssFile(SourceFile sourceFile)
@@ -167,10 +191,10 @@ namespace NetPack.JsCombine
 
             // for each of the original scripts that was combined.
             // check for a source map declaration - which is a requestpath to a .map file.
-            var mapFileName = combinedFilePath.ToString() + ".map";
-            foreach (var script in scriptInfos)
+            string mapFileName = combinedFilePath.ToString() + ".map";
+            foreach (CombinedScriptInfo script in scriptInfos)
             {
-                var declaration = script.SourceMapDeclaration;
+                SourceMappingUrlDeclaration declaration = script.SourceMapDeclaration;
                 if (declaration != null)
                 {
                     JObject sectionObject = new JObject();
@@ -206,7 +230,7 @@ namespace NetPack.JsCombine
                         sourceMapFileSubPath = declaration.SourceMappingUrl;
                     }
 
-                    var sourceMapFile = context.FileProvider.GetFileInfo(sourceMapFileSubPath);
+                    IFileInfo sourceMapFile = context.FileProvider.GetFileInfo(sourceMapFileSubPath);
 
                     if (sourceMapFile == null || !sourceMapFile.Exists || sourceMapFile.IsDirectory)
                     {
@@ -215,10 +239,8 @@ namespace NetPack.JsCombine
 
                     // read the contents of the source map file, and inline it into the new source map file.
                     JObject sourceMapObject = null;
-                    var sourceMapFileContents = sourceMapFile.ReadAllContent();
+                    string sourceMapFileContents = sourceMapFile.ReadAllContent();
                     sourceMapObject = JObject.Parse(sourceMapFileContents);
-
-
 
 
                     AdjustSourceMapPathsRelativeToSiteRoot(sourceMapObject, combinedFilePath.Directory, script, context);
@@ -251,7 +273,7 @@ namespace NetPack.JsCombine
 
             indexMap["sections"] = sections;
 
-            var file = new StringFileInfo(indexMap.ToString(), mapFileName);
+            StringFileInfo file = new StringFileInfo(indexMap.ToString(), mapFileName);
             return file;
 
 
@@ -295,7 +317,7 @@ namespace NetPack.JsCombine
             // to check the referenced file is accessbile to the browser, and if it isn't then make it accessbile
             // by serving it on our own netpack path, and amendin the url path in the source map accordingly.
 
-            var sourcesContent = sourceMapObject["sourcesContent"] as JArray;
+            JArray sourcesContent = sourceMapObject["sourcesContent"] as JArray;
             if (sourcesContent != null && sourcesContent.Count > 0)
             {
                 // source file content specified inline, so no need to do anything.
@@ -303,16 +325,16 @@ namespace NetPack.JsCombine
             }
 
 
-            var sourcesArray = sourceMapObject["sources"] as JArray;
+            JArray sourcesArray = sourceMapObject["sources"] as JArray;
             if (sourcesArray != null)
             {
                 for (int i = 0; i < sourcesArray.Count; i++)
                 {
-                    var item = sourcesArray[i];
+                    JToken item = sourcesArray[i];
 
                     // look for the source file in the same directory as the script. (a map may contain multiple source files)
-                    var sourceFileSubPath = $"{script.FileWithDirectory.Directory}/{item.ToString()}";
-                    var sourceFile = context.FileProvider.GetFileInfo(sourceFileSubPath);
+                    string sourceFileSubPath = $"{script.FileWithDirectory.Directory}/{item.ToString()}";
+                    IFileInfo sourceFile = context.FileProvider.GetFileInfo(sourceFileSubPath);
                     if (!sourceFile.Exists)
                     {
                         // todo throw an exception because the sourcemap appears to be pointing to a file that doesnt exist.?
@@ -326,9 +348,9 @@ namespace NetPack.JsCombine
                     context.AddSourceOutput(script.FileWithDirectory.Directory, sourceFile);
 
                     // fix up the path to be relative to this index map file, rather than relative to the original map file.
-                    var relativePathToSourceFile = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, sourceFileSubPath);
+                    string relativePathToSourceFile = SubpathHelper.MakeRelativeSubpath(sourceMapDirectory, sourceFileSubPath);
                     sourcesArray[i] = relativePathToSourceFile.ToString();
-                
+
                 }
             }
 

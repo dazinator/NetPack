@@ -10,6 +10,8 @@ using NetPack.RequireJs;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
+using Polly;
+using Microsoft.Extensions.Logging;
 
 namespace NetPack.Tests.Pipes
 {
@@ -38,25 +40,29 @@ namespace NetPack.Tests.Pipes
             _directory.AddFile(subPath.Directory, fileInfo);
             return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
         }
-        
+
         protected async Task WhenFilesProcessedByPipe(Func<IPipe> pipeFactory, params FileWithDirectory[] files)
         {
             //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
-            PipelineContext = new PipelineContext(provider, _sourcesdirectory);
+            //  PipelineContext = new PipelineContext(provider, _sourcesdirectory);
             var input = new PipelineInput();
             foreach (var item in files)
             {
                 input.AddInclude(item.FileSubPath);
             }
-            PipelineContext.SetInput(input);
             Sut = pipeFactory();
-            await Sut.ProcessAsync(PipelineContext, CancellationToken.None);
+            var pipeContext = new PipeContext(input, Sut, new LoggerFactory().AddConsole().CreateLogger<PipeContext>());
+            var pipes = new List<PipeContext>() { pipeContext };
+
+            Pipeline = new Pipeline.Pipeline(provider, pipes, null, _sourcesdirectory);
+            await Pipeline.ProcessPipesAsync(pipes, CancellationToken.None);
+
         }
 
         protected IFileInfo ThenTheProcessedOutputDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var outputFile = PipelineContext.ProcessedOutput.GetFile(filePath);
+            var outputFile = Pipeline.GeneratedOutputDirectory.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(outputFile?.FileInfo);
@@ -65,7 +71,7 @@ namespace NetPack.Tests.Pipes
 
         protected IFileInfo ThenTheSourcesDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var sourceFile = PipelineContext.SourcesOutput.GetFile(filePath);
+            var sourceFile = Pipeline.SourcesOutputDirectory.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(sourceFile?.FileInfo);
@@ -74,7 +80,7 @@ namespace NetPack.Tests.Pipes
 
         public IPipe Sut { get; set; }
 
-        public PipelineContext PipelineContext { get; set; }
+        public IPipeLine Pipeline { get; set; }
 
     }
 }
