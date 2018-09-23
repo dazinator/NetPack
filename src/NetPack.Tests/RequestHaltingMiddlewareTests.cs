@@ -50,7 +50,8 @@ namespace NetPack.Tests
 
                                         var inputFileContents = context.InputFiles[0].FileInfo.ReadAllContent();
                                         // output the generated file
-                                        context.PipelineContext.AddGeneratedOutput("wwwroot", new StringFileInfo(inputFileContents + " processed!", "foo.js"));
+                                        context.AddUpdateOutputFile(new FileWithDirectory() { Directory = "wwwroot", FileInfo = new StringFileInfo(inputFileContents + " processed!", "foo.js") });
+                                                                                                                       
                                     } // lock freed on dispose, should allow any in progress request for file to continue.
                                 }))
                                 .Watch();

@@ -66,16 +66,14 @@ namespace NetPack.JsMin
                     {
                         // seperate file.
 
-
-                        context.PipelineContext.AddGeneratedOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
+                        context.AddUpdateOutputFile(new FileWithDirectory() { Directory = item.Directory, FileInfo = new StringFileInfo(jsonSourceMap, mapFileName) });
                         sourceMappingURL = $"//# sourceMappingURL={mapFileName.ToString()}";
                     }
 
                     output.Append(sourceMappingURL);
                 }
 
-
-                context.PipelineContext.AddGeneratedOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));
+                context.AddUpdateOutputFile(new FileWithDirectory() { Directory = item.Directory, FileInfo = new StringFileInfo(output.ToString(), outPutFileName) });
 
             }
 

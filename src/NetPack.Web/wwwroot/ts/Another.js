@@ -12,7 +12,7 @@ define(["require", "exports"], function (require, exports) {
     }());
     exports.Another = Another;
     ;
-    var another = new Another("seasons greetings!");
+    var another = new Another("seasondawdsa greetings!");
     document.body.querySelector(".message").innerHTML += another.greet();
 });
 //# sourceMappingURL=Another.js.map

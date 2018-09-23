@@ -6,12 +6,12 @@ define(["require", "exports"], function (require, exports) {
             this.greeting = greeting;
         }
         Greeter.prototype.greet = function () {
-            return " < h1 > " + this.greeting + " < /h1>";
+            return this.greeting;
         };
         return Greeter;
     }());
     ;
-    var greeter = new Greeter("Hi there!!!!");
+    var greeter = new Greeter("Hi akkddddfdkk!!!!");
     document.body.querySelector(".message").innerHTML += greeter.greet();
 });
 //# sourceMappingURL=Greeter.js.map

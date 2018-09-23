@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <AssemblyName>NetPack.Typescript</AssemblyName>
     <PackageId>NetPack.Typescript</PackageId>
   </PropertyGroup>
@@ -16,7 +16,11 @@
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup> 
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);NETSTANDARD;NODESERVICESASYNC</DefineConstants>
+  </PropertyGroup> 
 
   <ItemGroup>
     <Folder Include="Properties\" />

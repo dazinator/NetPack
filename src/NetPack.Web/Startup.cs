@@ -41,6 +41,7 @@ namespace NetPack.Web
                         input.Include("ts/*.ts");
                     }, options =>
                     {
+                        options.Module = Typescript.ModuleKind.AMD;
                         options.InlineSources = true;
                     })
                     // Another processor that combines multiple js files into a single "bundle" file.

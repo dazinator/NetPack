@@ -10,6 +10,7 @@ using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using Microsoft.AspNetCore.NodeServices.Sockets;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -58,6 +59,8 @@ namespace NetPack
             // Enable Node Services
             services.AddNodeServices((options) =>
             {
+                options.UseSocketHosting();
+               // options.NodeInstanceOutputLogger
                // options.
                // HostingModel = NodeHostingModel.Socket;
             });
@@ -68,7 +71,13 @@ namespace NetPack
                 var options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
 
                 var nodeServices = NodeServicesFactory.CreateNodeServices(options);
+#if NODESERVICESASYNC
+                 var lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
+                 return new NetPackNodeServices(nodeServices, lifetime);
+#else
                 return new NetPackNodeServices(nodeServices);
+#endif
+
             });
 
             services.AddSingleton(new NodeJsRequirement());

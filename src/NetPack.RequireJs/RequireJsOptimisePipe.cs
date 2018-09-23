@@ -34,7 +34,7 @@ namespace NetPack.RequireJs
                 Assembly assy = this.GetType().GetAssemblyFromType();
                 var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
                 var scriptContent = script.ReadAllContent();
-                return new StringAsTempFile(scriptContent);
+                return _nodeServices.CreateStringAsTempFile(scriptContent);
             });
         }
 
@@ -70,7 +70,9 @@ namespace NetPack.RequireJs
                 {
                     var filePath = file.Path.Replace('\\', '/');
                     var subPathInfo = SubPathInfo.Parse(filePath);
-                    context.PipelineContext.AddGeneratedOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
+
+                    context.AddUpdateOutputFile(new FileWithDirectory() { Directory = subPathInfo.Directory, FileInfo = new StringFileInfo(file.Contents, subPathInfo.Name) });
+                                                          
                 }
 
                 //if (!string.IsNullOrWhiteSpace(result.Error))

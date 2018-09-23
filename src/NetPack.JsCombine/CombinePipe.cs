@@ -159,7 +159,7 @@ namespace NetPack.JsCombine
             ms.Position = 0;
             MemoryStreamFileInfo bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
             // Output the new combines file.
-            context.PipelineContext.AddGeneratedOutput(outputFilePath.Directory, bundleJsFile);
+            context.AddUpdateOutputFile(new FileWithDirectory() { Directory = outputFilePath.Directory, FileInfo = bundleJsFile });
 
         }
 

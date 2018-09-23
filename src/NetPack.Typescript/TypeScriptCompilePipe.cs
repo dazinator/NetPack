@@ -39,7 +39,8 @@ namespace NetPack.Typescript
                 Assembly assy = GetType().GetAssemblyFromType();
                 Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
                 string scriptContent = script.ReadAllContent();
-                return new StringAsTempFile(scriptContent);
+
+                return _nodeServices.CreateStringAsTempFile(scriptContent);
             });
         }
 
@@ -73,7 +74,7 @@ namespace NetPack.Typescript
 
                     string contents = inputFileInfo.FileInfo.ReadAllContent();
                     requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
-                }
+                }              
 
                 requestDto.Inputs.Add(inputFileInfo.FileSubPath);
             }
@@ -105,7 +106,9 @@ namespace NetPack.Typescript
                 {
                     SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
                     StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                    context.PipelineContext.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
+
+                    context.AddUpdateOutputFile(new FileWithDirectory() { Directory = subPathInfo.Directory, FileInfo = outputFileInfo });                    
+                  
                 }
 
                 // also, if source maps are enabled, but source is not inlined in the source map, then the 
