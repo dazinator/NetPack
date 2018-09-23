@@ -68,15 +68,15 @@ namespace NetPack.Typescript
                 {
                     if (!isSingleOutput)
                     {
-                        var outFileName = Path.ChangeExtension(inputFileInfo.FileSubPath, ".js");
-                        context.Blocker.AddBlock(inputFileInfo.FileSubPath);
+                        var outFileName = Path.ChangeExtension(inputFileInfo.UrlPath, ".js");
+                        context.Blocker.AddBlock(inputFileInfo.UrlPath);
                     }
 
                     string contents = inputFileInfo.FileInfo.ReadAllContent();
-                    requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
+                    requestDto.Files.Add(inputFileInfo.UrlPath, contents);
                 }              
 
-                requestDto.Inputs.Add(inputFileInfo.FileSubPath);
+                requestDto.Inputs.Add(inputFileInfo.UrlPath);
             }
 
             if (!requestDto.Files.Any())

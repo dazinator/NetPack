@@ -6,7 +6,7 @@ namespace NetPack
     {
         IFileBlocker AddBlock(string path);
         IFileBlocker AddBlock(FileWithDirectory file);
-        IFileBlocker AddBlocks(string[] paths);
-        IFileBlocker AddBlocks(FileWithDirectory[] files);
+      //  IFileBlocker AddBlocks(string[] paths);
+       // IFileBlocker AddBlocks(FileWithDirectory[] files);
     }
 }

@@ -20,7 +20,6 @@
    
     <PackageReference Include="NUglify" Version="1.5.2" />
     <PackageReference Include="Polly" Version="6.1.0" />
-    <PackageReference Include="Dazinator.AspNet.Extensions.FileProviders" Version="1.4.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.1" />
 
     <PackageReference Include="Microsoft.Extensions.FileProviders.Composite" Version="1.0.1" />
@@ -57,6 +56,10 @@
   
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Dazinator.AspNet.Extensions.FileProviders\Dazinator.AspNet.Extensions.FileProviders.csproj" />
   </ItemGroup>
 
 </Project>

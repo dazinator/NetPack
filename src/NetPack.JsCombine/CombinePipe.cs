@@ -56,7 +56,7 @@ namespace NetPack.JsCombine
             foreach (FileWithDirectory item in context.InputFiles)
             {
 
-                if (item.FileSubPath == outputSubPath)
+                if (item.UrlPath == outputSubPath)
                 {
                     continue;
                 }

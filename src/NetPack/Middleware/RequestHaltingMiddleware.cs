@@ -5,6 +5,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading;
+using NetPack.FileLocking;
 
 namespace NetPack
 {
@@ -46,7 +47,8 @@ namespace NetPack
             if (IsValidMethod(context.Request) && !PathEndsInSlash(context.Request.Path))
             {
                 logger.LogDebug("Waiting on locked file: " + context.Request.Path);
-                await FileRequestServices.WhenFileNotLocked(context.Request.Path, _options.Timeout, context.RequestAborted);
+                await FileLocks.WaitIfLockedAsync(context.Request.Path, _options.Timeout, context.RequestAborted);
+                //await FileRequestServices.WhenFileNotLocked(context.Request.Path, _options.Timeout, context.RequestAborted);
                 logger.LogDebug("File processing finished." + context.Request.Path);
             }
 

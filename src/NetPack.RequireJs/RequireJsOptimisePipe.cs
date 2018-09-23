@@ -57,7 +57,7 @@ namespace NetPack.RequireJs
                 optimiseRequest.Files.Add(new NodeInMemoryFile()
                 {
                     Contents = fileContent,
-                    Path = file.FileSubPath.TrimStart(new char[] { '/' })
+                    Path = file.UrlPath.ToString().TrimStart(new char[] { '/' })
                 });
             }
 

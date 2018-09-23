@@ -24,7 +24,7 @@ namespace NetPack.Tests
             var results = fileProvider.GetFiles(input);
 
             Assert.Equal(1, results.Length);
-            Assert.Equal("/wwwroot/somefile.js", results[0].FileSubPath);
+            Assert.Equal("/wwwroot/somefile.js", results[0].UrlPath);
 
         }
 

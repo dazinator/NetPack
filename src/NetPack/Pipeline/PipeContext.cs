@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using NetPack.FileLocking;
 using Polly;
 using System;
 using System.Collections.Generic;
@@ -90,7 +91,7 @@ namespace NetPack.Pipeline
 
             foreach (FileWithDirectory item in PreviousInputFiles)
             {
-                if (item.FileSubPath == fileWithDirectory.FileSubPath)
+                if (item.UrlPath == fileWithDirectory.UrlPath)
                 {
                     return item;
                 }
@@ -201,7 +202,7 @@ namespace NetPack.Pipeline
 
                     SetInputFiles(parentPipeline.InputAndGeneratedFileProvider);
                     // lock previous outputs
-                    using (Blocker = new FileBlocker())
+                    using (Blocker = new FileLocker())
                     {
 
                       //  fileBlocker.AddBlocks(PreviousOutputFiles);
