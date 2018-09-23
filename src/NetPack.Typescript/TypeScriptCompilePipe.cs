@@ -120,7 +120,9 @@ namespace NetPack.Typescript
                         //  context.AllowServe(inputFileInfo);
                         //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
                         //{
-                        context.PipelineContext.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
+
+                       // inputFileInfo.Directory, inputFileInfo.FileInfo
+                        context.AddUpdateSourceOutput(inputFileInfo);
                         // }
                         // else
                         // {
