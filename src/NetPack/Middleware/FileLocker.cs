@@ -24,19 +24,28 @@ namespace NetPack.FileLocking
             _onExpired = onExpired;
         }
 
-        public IDisposable AddLock()
+        public void IncrementLockCount()
         {
             _cte.AddCount();
-            return new FileLock(this);
+            // return new FileLock(this);
         }
 
         public void RemoveLock()
         {
-            _cte.Signal();
-            if (_cte.IsSet)
+            try
             {
-                _onExpired();
+                _cte.Signal();
+                if (_cte.IsSet)
+                {
+                    _onExpired();
+                }
             }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+
         }
 
         public Task Wait(TimeSpan timeout, CancellationToken cancellationToken)
@@ -76,12 +85,16 @@ namespace NetPack.FileLocking
 
         public static IDisposable RegisterLock(PathString path)
         {
-            CompositeFileLock locker = _locks.GetOrAdd(path, (p) =>
+            CompositeFileLock locker = _locks.AddOrUpdate(path, (p) =>
              {
                  return new CompositeFileLock(() =>
                  {
                      _locks.TryRemove(path, out CompositeFileLock l);
                  });
+             }, (key, existing) =>
+             {
+                 existing.IncrementLockCount();
+                 return existing;
              });
 
             return new FileLock(locker);
@@ -122,7 +135,7 @@ namespace NetPack.FileLocking
 
         public IFileBlocker AddBlock(FileWithDirectory file)
         {
-            _locks.Add(FileLocks.RegisterLock(file.Directory));
+            _locks.Add(FileLocks.RegisterLock(file.UrlPath));
             return this;
         }
 
