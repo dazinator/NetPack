@@ -1,4 +1,4 @@
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "../ts/Another"], function (require, exports, Another_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Greeter = /** @class */ (function () {
@@ -11,7 +11,8 @@ define(["require", "exports"], function (require, exports) {
         return Greeter;
     }());
     ;
-    var greeter = new Greeter("Hi akkddddfdkk!!!!");
-    document.body.querySelector(".message").innerHTML += greeter.greet();
+    var y = new Another_1.Another("foo bare");
+    var greeter = new Greeter("Hi daz!!!!");
 });
+//document.body.querySelector(".message").innerHTML += greeter.greet();  
 //# sourceMappingURL=Greeter.js.map

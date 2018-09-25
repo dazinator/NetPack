@@ -1,4 +1,4 @@
-﻿import {Another} from "./Another";
+﻿import {Another} from "../ts/Another";
 
 class Greeter {
     constructor(public greeting: string) { }
@@ -7,5 +7,7 @@ class Greeter {
     }
 };
 
-var greeter = new Greeter("Hi akkddddfdkk!!!!");
-document.body.querySelector(".message").innerHTML += greeter.greet();  
+var y = new Another("foo bare");
+
+var greeter = new Greeter("Hi daz!!!!");
+//document.body.querySelector(".message").innerHTML += greeter.greet();  
