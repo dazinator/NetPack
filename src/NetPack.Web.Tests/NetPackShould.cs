@@ -37,7 +37,7 @@ namespace NetPack.Web.Tests
             // in our application, configured in the applications startup.cs
 
             // Act
-            var responseString = await GetResponseString("netpack/ts/somefile.js");
+            var responseString = await GetResponseString("/netpack/ts/somefile.js");
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(responseString));
@@ -152,7 +152,7 @@ namespace NetPack.Web.Tests
                             tsConfig.SourceMap = true;
                         }
                         )
-                        .UseBaseRequestPath("netpack")
+                        .UseBaseRequestPath("/netpack")
                         .Watch();
 
 

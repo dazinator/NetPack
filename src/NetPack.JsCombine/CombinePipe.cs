@@ -1,5 +1,6 @@
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipeline;
 using Newtonsoft.Json.Linq;
@@ -34,15 +35,15 @@ namespace NetPack.JsCombine
         {
             bool hasChanges = false;
 
-            string outputSubPath;
-            if (!_options.OutputFilePath.StartsWith("/"))
-            {
-                outputSubPath = "/" + _options.OutputFilePath;
-            }
-            else
-            {
-                outputSubPath = _options.OutputFilePath;
-            }
+            PathString outputSubPath = _options.OutputFilePath.ToPathString();
+            //if (!_options.OutputFilePath.StartsWith("/"))
+            //{
+            //    outputSubPath = "/" + _options.OutputFilePath;
+            //}
+            //else
+            //{
+            //    outputSubPath = _options.OutputFilePath;
+            //}
 
 
             // var mapFileName = requestLocks.Add( combinedFilePath.ToString() + ".map";
@@ -79,7 +80,7 @@ namespace NetPack.JsCombine
             string sourceMapPath = outputSubPath + ".map";
             if (_options.SourceMapMode != SourceMapMode.None)
             {
-                context.Blocker.AddBlock(sourceMapPath);
+                context.AddBlock(sourceMapPath);
             }
 
 

@@ -41,7 +41,7 @@ namespace NetPack.Tests
                                 {
                                     // block requests for the file we are generating, until we have finished generating it.
                                     var generatedFilePath = "/wwwroot/foo.js";
-                                    context.Blocker.AddBlock(generatedFilePath);
+                                    context.AddBlock(generatedFilePath);
 
                                     //using (var locker = new FileLocker().AddBlock(generatedFilePath))
                                     //{

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetPack.FileLocking;
 using Polly;
@@ -187,8 +188,13 @@ namespace NetPack.Pipeline
 
         }
 
-        public IFileBlocker Blocker { get; private set; }
+        protected IFileBlocker Blocker { get; private set; }
 
+        public void AddBlock(PathString path)
+        {
+            var outputPath = this.PipelineContext.BaseRequestPath.Add(path);
+            Blocker.AddBlock(outputPath);
+        }
 
         internal async Task ProcessChanges(IPipeLine parentPipeline)
         {

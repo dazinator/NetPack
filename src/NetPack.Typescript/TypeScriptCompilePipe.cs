@@ -1,4 +1,5 @@
 using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.Pipeline;
@@ -59,7 +60,16 @@ namespace NetPack.Typescript
 
             if (isSingleOutput)
             {
-                context.Blocker.AddBlock(_options.OutFile);
+                PathString outFilePath;               
+                if (_options.OutFile.StartsWith("/"))
+                {
+                    outFilePath = _options.OutFile;
+                }
+                else
+                {
+                    outFilePath = new PathString($"/{_options.OutFile}");
+                }               
+                context.AddBlock(outFilePath);
             }
 
             foreach (FileWithDirectory inputFileInfo in context.InputFiles)
@@ -69,7 +79,7 @@ namespace NetPack.Typescript
                     if (!isSingleOutput)
                     {
                         var outFileName = Path.ChangeExtension(inputFileInfo.UrlPath, ".js");
-                        context.Blocker.AddBlock(inputFileInfo.UrlPath);
+                        context.AddBlock(outFileName);
                     }
 
                     string contents = inputFileInfo.FileInfo.ReadAllContent();
@@ -106,8 +116,8 @@ namespace NetPack.Typescript
                 {
                     SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
                     StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-
-                    context.AddUpdateOutputFile(new FileWithDirectory() { Directory = subPathInfo.Directory, FileInfo = outputFileInfo });                    
+                   
+                    context.AddUpdateOutputFile(new FileWithDirectory() { Directory = subPathInfo.Directory.ToPathString(), FileInfo = outputFileInfo });                    
                   
                 }
 
