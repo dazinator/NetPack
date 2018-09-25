@@ -60,7 +60,7 @@ namespace NetPack.Typescript
 
             if (isSingleOutput)
             {
-                PathString outFilePath;               
+                PathString outFilePath;
                 if (_options.OutFile.StartsWith("/"))
                 {
                     outFilePath = _options.OutFile;
@@ -68,7 +68,7 @@ namespace NetPack.Typescript
                 else
                 {
                     outFilePath = new PathString($"/{_options.OutFile}");
-                }               
+                }
                 context.AddBlock(outFilePath);
             }
 
@@ -78,13 +78,13 @@ namespace NetPack.Typescript
                 {
                     if (!isSingleOutput)
                     {
-                        var outFileName = Path.ChangeExtension(inputFileInfo.UrlPath, ".js");
+                        string outFileName = Path.ChangeExtension(inputFileInfo.UrlPath, ".js");
                         context.AddBlock(outFileName);
                     }
 
                     string contents = inputFileInfo.FileInfo.ReadAllContent();
                     requestDto.Files.Add(inputFileInfo.UrlPath, contents);
-                }              
+                }
 
                 requestDto.Inputs.Add(inputFileInfo.UrlPath);
             }
@@ -116,9 +116,9 @@ namespace NetPack.Typescript
                 {
                     SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
                     StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                   
-                    context.AddUpdateOutputFile(new FileWithDirectory() { Directory = subPathInfo.Directory.ToPathString(), FileInfo = outputFileInfo });                    
-                  
+
+                    context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+
                 }
 
                 // also, if source maps are enabled, but source is not inlined in the source map, then the 
@@ -131,8 +131,8 @@ namespace NetPack.Typescript
                         //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
                         //{
 
-                       // inputFileInfo.Directory, inputFileInfo.FileInfo
-                        context.AddUpdateSourceOutput(inputFileInfo);
+                        // inputFileInfo.Directory, inputFileInfo.FileInfo
+                        context.AddSource(inputFileInfo.Directory, inputFileInfo.FileInfo);
                         // }
                         // else
                         // {

@@ -132,8 +132,8 @@ namespace NetPack.JsCombine
                 IFileInfo indexMapFile = BuildIndexMap(ms, scriptInfos, outputFilePath, context.PipelineContext);
 
                 // Output the new map file in the pipeline.
-                var mapFile = new FileWithDirectory() { Directory = outputFilePath.Directory, FileInfo = indexMapFile };
-                context.AddUpdateOutputFile(mapFile);
+                //  var mapFile = new FileWithDirectory() { Directory = outputFilePath.Directory, FileInfo = indexMapFile };
+                context.AddOutput(outputFilePath.Directory.ToPathString(), indexMapFile);
 
 
 
@@ -150,7 +150,7 @@ namespace NetPack.JsCombine
                 // make sure all the source js files can be served up to the browser.
                 foreach (CombinedScriptInfo item in scriptInfos)
                 {
-                    context.AddUpdateSourceOutput(item.FileWithDirectory);
+                    context.AddSource(item.FileWithDirectory.Directory, item.FileWithDirectory.FileInfo);
                 }
 
 
@@ -160,7 +160,7 @@ namespace NetPack.JsCombine
             ms.Position = 0;
             MemoryStreamFileInfo bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
             // Output the new combines file.
-            context.AddUpdateOutputFile(new FileWithDirectory() { Directory = outputFilePath.Directory, FileInfo = bundleJsFile });
+            context.AddOutput(outputFilePath.Directory, bundleJsFile);
 
         }
 

@@ -31,11 +31,11 @@ namespace NetPack.JsMin
 
                 string outPutFileName = GetOutputFileName(item);
                 string subPath = item.Directory + outPutFileName;
-                context.Blocker.AddBlock(subPath);
+                context.AddBlock(subPath);
 
                 // preemptive block any map file until we have processed.
                 string mapFileName = outPutFileName + ".map";
-                context.Blocker.AddBlock(subPath + ".map");
+                context.AddBlock(subPath + ".map");
 
                 SourceMapBuilder mapBuilder = GetSourceMapBuilder(_options, outPutFileName, context.PipelineContext, item);
 
@@ -66,14 +66,14 @@ namespace NetPack.JsMin
                     {
                         // seperate file.
 
-                        context.AddUpdateOutputFile(new FileWithDirectory() { Directory = item.Directory, FileInfo = new StringFileInfo(jsonSourceMap, mapFileName) });
+                        context.AddOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
                         sourceMappingURL = $"//# sourceMappingURL={mapFileName.ToString()}";
                     }
 
                     output.Append(sourceMappingURL);
                 }
 
-                context.AddUpdateOutputFile(new FileWithDirectory() { Directory = item.Directory, FileInfo = new StringFileInfo(output.ToString(), outPutFileName) });
+                context.AddOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));
 
             }
 
