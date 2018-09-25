@@ -41,6 +41,7 @@ namespace NetPack.Web
                         input.Include("ts/*.ts");
                     }, options =>
                     {
+                        options.Target = Typescript.ScriptTarget.ES5;
                         options.Module = Typescript.ModuleKind.AMD;
                         options.InlineSources = true;
                     })
