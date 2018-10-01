@@ -8,9 +8,6 @@ using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
-using Microsoft.Extensions.Logging;
-using System.Linq;
-using Microsoft.AspNetCore.NodeServices.Sockets;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
