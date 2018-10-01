@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NetPack
 {
@@ -10,6 +11,16 @@ namespace NetPack
     public class CompositeDisposable : IDisposable
     {
         private readonly IList<IDisposable> _disposables;
+
+        /// <summary>
+        /// Creates a new instance of <see cref="CompositeDisposable"/>.
+        /// </summary>
+        /// <param name="disposables">The list of <see cref="IDisposable"/> to compose.</param>
+        public CompositeDisposable():this(new List<IDisposable>())
+        {
+          
+        }
+
         /// <summary>
         /// Creates a new instance of <see cref="CompositeDisposable"/>.
         /// </summary>
@@ -21,6 +32,11 @@ namespace NetPack
                 throw new ArgumentNullException(nameof(disposables));
             }
             _disposables = disposables;
+        }
+
+        public void Add(IDisposable disposable)
+        {
+            _disposables.Add(disposable);
         }
 
         public void Dispose()

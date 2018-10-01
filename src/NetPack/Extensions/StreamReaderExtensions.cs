@@ -11,12 +11,12 @@ namespace NetPack.Extensions
         private static System.Reflection.BindingFlags defaultFlags = System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.GetField;
         private static Type streamReaderType = typeof(StreamReader);
 
-        private static FieldInfo charBufferField = streamReaderType.GetField("charBuffer", defaultFlags);
-        private static FieldInfo charPosField = streamReaderType.GetField("charPos", defaultFlags);
-        private static FieldInfo charLenField = streamReaderType.GetField("charLen", defaultFlags);
-        private static FieldInfo byteBufferField = streamReaderType.GetField("byteBuffer", defaultFlags);
-        private static FieldInfo byteLenField = streamReaderType.GetField("byteLen", defaultFlags);
-        
+        private static FieldInfo charBufferField = streamReaderType.GetField("charBuffer", defaultFlags) ?? streamReaderType.GetField("_charBuffer", defaultFlags);
+        private static FieldInfo charPosField = streamReaderType.GetField("charPos", defaultFlags) ?? streamReaderType.GetField("_charPos", defaultFlags);
+        private static FieldInfo charLenField = streamReaderType.GetField("charLen", defaultFlags) ?? streamReaderType.GetField("_charLen", defaultFlags);
+        private static FieldInfo byteBufferField = streamReaderType.GetField("byteBuffer", defaultFlags) ?? streamReaderType.GetField("_byteBuffer", defaultFlags);
+        private static FieldInfo byteLenField = streamReaderType.GetField("byteLen", defaultFlags) ?? streamReaderType.GetField("_byteLen", defaultFlags);
+
         public static long GetActualPosition(this StreamReader reader)
         {
 

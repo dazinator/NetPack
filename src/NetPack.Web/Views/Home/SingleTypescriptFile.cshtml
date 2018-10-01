@@ -2,16 +2,16 @@
     ViewData["Title"] = "SingleTypescriptFile";
 }
 
-<p>Make a change to the 'wwwroot/ts/Greeter.ts' typescript file, then reload this page. <br/>
-    NetPack is watching that file, and will automatically re-compile it.</p>
+<p>
+    Make a change to the 'wwwroot/ts/Greeter.ts' typescript file, then reload this page. <br />
+    NetPack is watching that file, and will automatically re-compile it.
+</p>
 
 <p class="message"></p>
 
 @section scripts
-{
- 
-
-    <script type="text/javascript" src="/netpack/ts/Greeter.js"></script>
+    {
+    <script data-main="/netpack/ts/Greeter.js" src="/lib/require.js"></script>   
 }
 
 

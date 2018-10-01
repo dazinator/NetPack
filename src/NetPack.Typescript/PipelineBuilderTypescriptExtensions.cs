@@ -21,10 +21,10 @@ namespace NetPack
             var nodeJsRequirement = new NodeJsRequirement();
             builder.IncludeRequirement(nodeJsRequirement);
 
-            var typescriptPackageRequriement = new NpmModuleRequirement("typescript", true);
+            var typescriptPackageRequriement = new NpmModuleRequirement("typescript", true, "3.1.1");
             builder.IncludeRequirement(typescriptPackageRequriement);
 
-            var typescriptSimplePackageRequirement = new NpmModuleRequirement("netpack-typescript-compiler", true, "0.0.6");
+            var typescriptSimplePackageRequirement = new NpmModuleRequirement("netpack-typescript-compiler", true, "0.0.7");
             builder.IncludeRequirement(typescriptSimplePackageRequirement);
 
             var embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));

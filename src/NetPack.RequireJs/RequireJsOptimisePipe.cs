@@ -1,22 +1,23 @@
+using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.NodeServices;
+using Microsoft.Extensions.Logging;
+using NetPack.Extensions;
+using NetPack.Pipeline;
+using NetPack.Utils;
 using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.NodeServices;
-using NetPack.Extensions;
-using NetPack.Pipeline;
-using NetPack.Utils;
-using Microsoft.Extensions.Logging;
 
 namespace NetPack.RequireJs
 {
     public class RequireJsOptimisePipe : IPipe
     {
         private INetPackNodeServices _nodeServices;
-        private RequireJsOptimisationPipeOptions _options;
+        private readonly RequireJsOptimisationPipeOptions _options;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
-        private ILogger<RequireJsOptimisePipe> _logger;
+        private readonly ILogger<RequireJsOptimisePipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
 
         public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger) : this(nodeServices, embeddedResourceProvider, logger, new RequireJsOptimisationPipeOptions())
@@ -31,10 +32,10 @@ namespace NetPack.RequireJs
             _options = options;
             _script = new Lazy<StringAsTempFile>(() =>
             {
-                Assembly assy = this.GetType().GetAssemblyFromType();
-                var script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
-                var scriptContent = script.ReadAllContent();
-                return new StringAsTempFile(scriptContent);
+                Assembly assy = GetType().GetAssemblyFromType();
+                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
+                string scriptContent = script.ReadAllContent();
+                return _nodeServices.CreateStringAsTempFile(scriptContent);
             });
         }
 
@@ -42,14 +43,14 @@ namespace NetPack.RequireJs
         public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
 
-           // var pipeContext = context.PipeContext;
+            // var pipeContext = context.PipeContext;
 
 
-            var optimiseRequest = new RequireJsOptimiseRequestDto();
+            RequireJsOptimiseRequestDto optimiseRequest = new RequireJsOptimiseRequestDto();
 
-            foreach (var file in context.InputFiles)
+            foreach (FileWithDirectory file in context.InputFiles)
             {
-                var fileContent = file.FileInfo.ReadAllContent();
+                string fileContent = file.FileInfo.ReadAllContent();
                 //  var dir = file.Directory;
                 // var name = file.FileInfo.Name;
 
@@ -57,7 +58,7 @@ namespace NetPack.RequireJs
                 optimiseRequest.Files.Add(new NodeInMemoryFile()
                 {
                     Contents = fileContent,
-                    Path = file.FileSubPath.TrimStart(new char[] { '/' })
+                    Path = file.UrlPath.ToString().TrimStart(new char[] { '/' })
                 });
             }
 
@@ -65,12 +66,13 @@ namespace NetPack.RequireJs
 
             try
             {
-                var result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
-                foreach (var file in result.Files)
+                RequireJsOptimiseResult result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
+                foreach (NodeInMemoryFile file in result.Files)
                 {
-                    var filePath = file.Path.Replace('\\', '/');
-                    var subPathInfo = SubPathInfo.Parse(filePath);
-                    context.PipelineContext.AddGeneratedOutput(subPathInfo.Directory, new StringFileInfo(file.Contents, subPathInfo.Name));
+                    string filePath = file.Path.Replace('\\', '/');
+                    SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
+                    PathString dir = subPathInfo.Directory.ToPathString();
+                    context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
                 }
 
                 //if (!string.IsNullOrWhiteSpace(result.Error))

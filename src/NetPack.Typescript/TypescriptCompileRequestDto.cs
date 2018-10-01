@@ -14,5 +14,7 @@ namespace NetPack.Typescript
         public List<string> Inputs { get; set; }
         public TypeScriptPipeOptions Options { get; set; }
 
+        public Dictionary<string, string> EchoFiles { get; set; }    
+
     }
 }

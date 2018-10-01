@@ -1,4 +1,5 @@
 using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.Pipeline;
@@ -37,9 +38,11 @@ namespace NetPack.Typescript
             _script = new Lazy<StringAsTempFile>(() =>
             {
                 Assembly assy = GetType().GetAssemblyFromType();
-                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+                string scriptName = (_options.TestMode ?? false) ? "Embedded/netpack-testfiles.js" : "Embedded/netpack-typescript.js";
+                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, scriptName);
                 string scriptContent = script.ReadAllContent();
-                return new StringAsTempFile(scriptContent);
+
+                return _nodeServices.CreateStringAsTempFile(scriptContent);
             });
         }
 
@@ -58,25 +61,38 @@ namespace NetPack.Typescript
 
             if (isSingleOutput)
             {
-                context.Blocker.AddBlock(_options.OutFile);
+                PathString outFilePath;
+                if (_options.OutFile.StartsWith("/"))
+                {
+                    outFilePath = _options.OutFile;
+                }
+                else
+                {
+                    outFilePath = new PathString($"/{_options.OutFile}");
+                }
+                context.AddBlock(outFilePath);
             }
 
-            foreach (FileWithDirectory inputFileInfo in context.InputFiles)
+            if (context.InputFiles != null)
             {
-                if (context.IsInputDifferentFromLastTime(inputFileInfo))
+                foreach (FileWithDirectory inputFileInfo in context.InputFiles)
                 {
-                    if (!isSingleOutput)
+                    if (context.IsInputDifferentFromLastTime(inputFileInfo))
                     {
-                        var outFileName = Path.ChangeExtension(inputFileInfo.FileSubPath, ".js");
-                        context.Blocker.AddBlock(inputFileInfo.FileSubPath);
+                        if (!isSingleOutput)
+                        {
+                            string outFileName = Path.ChangeExtension(inputFileInfo.UrlPath, ".js");
+                            context.AddBlock(outFileName);
+                        }
+
+                        string contents = inputFileInfo.FileInfo.ReadAllContent();
+                        requestDto.Files.Add(inputFileInfo.UrlPath, contents);
                     }
 
-                    string contents = inputFileInfo.FileInfo.ReadAllContent();
-                    requestDto.Files.Add(inputFileInfo.FileSubPath, contents);
+                    requestDto.Inputs.Add(inputFileInfo.UrlPath);
                 }
-
-                requestDto.Inputs.Add(inputFileInfo.FileSubPath);
             }
+
 
             if (!requestDto.Files.Any())
             {
@@ -101,12 +117,29 @@ namespace NetPack.Typescript
                     throw typescriptCompilationException;
                 }
 
-                foreach (KeyValuePair<string, string> output in result.Sources)
+                if (_options.TestMode ?? false)
                 {
-                    SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
-                    StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-                    context.PipelineContext.AddGeneratedOutput(subPathInfo.Directory, outputFileInfo);
+                    foreach (var item in result.EchoFiles)
+                    {
+                        SubPathInfo subPathInfo = SubPathInfo.Parse(item.Key);
+                        StringFileInfo outputFileInfo = new StringFileInfo(item.Value, subPathInfo.Name);
+
+                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+                    }
                 }
+
+                if (result.Sources != null)
+                {
+                    foreach (KeyValuePair<string, string> output in result.Sources)
+                    {
+                        SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
+                        StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+
+                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+
+                    }
+                }
+               
 
                 // also, if source maps are enabled, but source is not inlined in the source map, then the 
                 // source file needs to be output so it can be served up to the browser.              
@@ -117,7 +150,9 @@ namespace NetPack.Typescript
                         //  context.AllowServe(inputFileInfo);
                         //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)
                         //{
-                        context.PipelineContext.AddSourceOutput(inputFileInfo.Directory, inputFileInfo.FileInfo);
+
+                        // inputFileInfo.Directory, inputFileInfo.FileInfo
+                        context.AddSource(inputFileInfo.Directory, inputFileInfo.FileInfo);
                         // }
                         // else
                         // {

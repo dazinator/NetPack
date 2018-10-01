@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,9 @@ namespace NetPack
 {
     public class FileWithDirectory : IEquatable<FileWithDirectory>
     {
-        public string Directory { get; set; }
+        public PathString Directory { get; set; }
 
-        public string FileSubPath { get { return $"{Directory}/{FileInfo.Name}"; } }
+        public PathString UrlPath { get { return $"{Directory}/{FileInfo.Name}"; } }
 
         public IFileInfo FileInfo { get; set; }
 
@@ -18,7 +19,7 @@ namespace NetPack
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Directory, other.Directory) && FileInfo.Equals(other.FileInfo);
+            return Directory.Equals(other.Directory) && FileInfo.Equals(other.FileInfo);
         }
 
         public override bool Equals(object obj)

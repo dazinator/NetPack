@@ -11,7 +11,7 @@ namespace NetPack.Typescript
             SourceMap = true;
             NoImplicitAny = true;
             Module = ModuleKind.AMD;
-            Target = ScriptTarget.ES6;
+            Target = ScriptTarget.ES2015;
             InlineSourceMap = false;
         }
 
@@ -51,20 +51,29 @@ namespace NetPack.Typescript
         /// </summary>
         public string Charset { get; set; }
 
+     
+        public bool? CheckJs { get; set; }
+
+
         /// <summary>
         /// Generates corresponding .d.ts file
         /// </summary>
         public bool? Declaration { get; set; }
+
+           
+        public bool? DeclarationMap { get; set; }
+
+        public bool? EmitDeclarationOnly { get; set; }
 
         /// <summary>
         /// Output directory for generated declaration files.
         /// </summary>
         public string DeclarationDir { get; set; }
 
-        /// <summary>
-        /// Show diagnostic information.
-        /// </summary>
-        public bool? Diagnostics { get; set; }
+        ///// <summary>
+        ///// Show diagnostic information.
+        ///// </summary>
+        //public bool? Diagnostics { get; set; }
 
         /// <summary>
         /// Disable size limitation on JavaScript project.
@@ -91,10 +100,10 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? ForceConsistentCasingInFileNames { get; set; }
 
-        /// <summary>
-        /// Print help message.
-        /// </summary>
-        public bool? Help { get; set; }
+        ///// <summary>
+        ///// Print help message.
+        ///// </summary>
+        //public bool? Help { get; set; }
 
         /// <summary>
         /// Import emit helpers (e.g. __extends, __rest, etc..) from tslib
@@ -112,10 +121,10 @@ namespace NetPack.Typescript
         public bool InlineSources { get; set; }
 
 
-        /// <summary>
-        /// Initializes a TypeScript project and creates a tsconfig.json file.
-        /// </summary>
-        public bool? Init { get; set; }
+        ///// <summary>
+        ///// Initializes a TypeScript project and creates a tsconfig.json file.
+        ///// </summary>
+        //public bool? Init { get; set; }
 
         /// <summary>
         /// Unconditionally emit imports for unresolved files.
@@ -134,6 +143,12 @@ namespace NetPack.Typescript
         /// Specify the JSX factory function to use when targeting react JSX emit, e.g. React.createElement or h.
         /// </summary>
         public string JsxFactory { get; set; }
+
+        /// <summary>
+        /// Unconditionally emit imports for unresolved files.
+        /// </summary>
+        public bool? KeyofStringsOnly { get; set; }
+
 
         /// <summary>
         /// List of library files to be included in the compilation.
@@ -166,15 +181,15 @@ namespace NetPack.Typescript
         /// </summary>
         public List<string> Lib { get; set; }
 
-        /// <summary>
-        /// Print names of generated files part of the compilation.
-        /// </summary>
-        public bool? ListEmittedFiles { get; set; }
+        ///// <summary>
+        ///// Print names of generated files part of the compilation.
+        ///// </summary>
+        //public bool? ListEmittedFiles { get; set; }
 
-        /// <summary>
-        /// Print names of files part of the compilation.
-        /// </summary>
-        public bool? ListFiles { get; set; }
+        ///// <summary>
+        ///// Print names of files part of the compilation.
+        ///// </summary>
+        //public bool? ListFiles { get; set; }
 
         /// <summary>
         /// The locale to use to show error messages, e.g. en-us.
@@ -223,6 +238,8 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? NoEmitOnError { get; set; }
 
+        public bool? NoErrorTruncation { get; set; }
+
         /// <summary>
         /// Report errors for fallthrough cases in switch statement.
         /// </summary>
@@ -244,6 +261,19 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? NoImplicitThis { get; set; }
 
+       
+        public bool? NoStrictGenericChecks { get; set; }
+
+        /// <summary>
+        /// Report errors on unused locals.
+        /// </summary>
+        public bool? NoUnusedLocals { get; set; }
+
+        /// <summary>
+        ///Report errors on unused parameters.
+        /// </summary>
+        public bool? NoUnusedParameters { get; set; }
+
         /// <summary>
         /// Do not emit "use strict" directives in module output.
         /// </summary>
@@ -260,15 +290,9 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? NoResolve { get; set; }
 
-        /// <summary>
-        /// Report errors on unused locals.
-        /// </summary>
-        public bool? NoUnusedLocals { get; set; }
+     
 
-        /// <summary>
-        ///Report errors on unused parameters.
-        /// </summary>
-        public bool? NoUnusedParameters { get; set; }
+      
 
         /// <summary>
         /// DEPRECATED. Use --outFile instead.
@@ -298,10 +322,13 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? PreserveConstEnums { get; set; }
 
-        /// <summary>
-        /// Stylize errors and messages using color and context.
-        /// </summary>
-        public bool? Pretty { get; set; }
+        
+        public bool? PreserveSymlinks { get; set; }
+
+        ///// <summary>
+        ///// Stylize errors and messages using color and context.
+        ///// </summary>
+        //public bool? Pretty { get; set; }
 
         /// <summary>
         /// Compile a project given a valid configuration file.
@@ -314,6 +341,9 @@ namespace NetPack.Typescript
         /// Specifies the object invoked for createElement and __spread when targeting "react" JSX emit.
         /// </summary>
         public string ReactNamespace { get; set; }
+        
+        
+        public bool? Composite { get; set; }
 
         /// <summary>
         /// Remove all comments except copy-right header comments beginning with /*!
@@ -351,15 +381,23 @@ namespace NetPack.Typescript
         /// </summary>
         public string SourceRoot { get; set; }
 
+               
+        public bool? StrictFunctionTypes { get; set; }
+
         /// <summary>
         /// In strict null checking mode, the null and undefined values are not in the domain of every type and are only assignable to themselves and any (the one exception being that undefined is also assignable to void).
         /// </summary>
         public bool? StrictNullChecks { get; set; }
 
+        public bool? StrictPropertyInitialization { get; set; }
+
         /// <summary>
         /// Do not emit declarations for code that has an /** @internal */ JSDoc annotation.
         /// </summary>
         public bool? StripInternal { get; set; }
+
+      
+      
 
         /// <summary>
         /// Suppress excess property checks for object literals.
@@ -382,6 +420,8 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? TraceResolution { get; set; }
 
+       
+        public bool? ResolveJsonModule { get; set; }
 
         /// <summary>
         /// List of names of type definitions to include. See @types, –typeRoots and –types for more details.
@@ -393,15 +433,19 @@ namespace NetPack.Typescript
         /// </summary>
         public List<string> TypeRoots { get; set; }
 
-        /// <summary>
-        /// Print the compiler’s version.
-        /// </summary>
-        public bool? Version { get; set; }
+        public bool? EsModuleInterop { get; set; }
 
-        /// <summary>
-        /// Run the compiler in watch mode. Watch input files and trigger recompilation on changes.
-        /// </summary>
-        public bool? Watch { get; set; }
+        ///// <summary>
+        ///// Print the compiler’s version.
+        ///// </summary>
+        //public bool? Version { get; set; }
+
+        ///// <summary>
+        ///// Run the compiler in watch mode. Watch input files and trigger recompilation on changes.
+        ///// </summary>
+        //public bool? Watch { get; set; }
+
+        public bool? TestMode { get; set; }
 
     }
 
@@ -409,8 +453,13 @@ namespace NetPack.Typescript
     {
         ES3 = 0,
         ES5 = 1,
-        ES6 = 2,
-        Latest = 2,
+        ES2015 = 2,
+        ES2016 = 3,
+        ES2017 = 4,
+        ES2018 = 5,
+        ESNext = 6,
+        JSON = 100,
+        Latest = 6
     }
     public enum ModuleKind
     {
@@ -419,6 +468,8 @@ namespace NetPack.Typescript
         AMD = 2,
         UMD = 3,
         System = 4,
+        ES2015 = 5,
+        ESNext = 6       
     }
 
     public enum NewLineKind
@@ -438,5 +489,6 @@ namespace NetPack.Typescript
         None = 0,
         Preserve = 1,
         React = 2,
+        ReactNative = 3
     }
 }

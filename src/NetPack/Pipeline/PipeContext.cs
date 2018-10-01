@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using NetPack.FileLocking;
 using Polly;
 using System;
 using System.Collections.Generic;
@@ -65,12 +67,12 @@ namespace NetPack.Pipeline
         /// <summary>
         /// Returns the previous files that were output.
         /// </summary>
-        private List<FileWithDirectory> PreviousOutputFiles { get; set; }
+        private HashSet<Tuple<PathString, IFileInfo>> PreviousOutputFiles { get; set; }
 
         /// <summary>
         /// Returns the previous sources that were output.
         /// </summary>
-        private List<FileWithDirectory> PreviousSources { get; set; }
+        private HashSet<Tuple<PathString, IFileInfo>> PreviousSources { get; set; }
 
         /// <summary>
         ///   /// <summary>
@@ -90,7 +92,7 @@ namespace NetPack.Pipeline
 
             foreach (FileWithDirectory item in PreviousInputFiles)
             {
-                if (item.FileSubPath == fileWithDirectory.FileSubPath)
+                if (item.UrlPath == fileWithDirectory.UrlPath)
                 {
                     return item;
                 }
@@ -122,12 +124,12 @@ namespace NetPack.Pipeline
         /// <summary>
         /// Returns all the files that are detected as outputs from processing.
         /// </summary>
-        public List<FileWithDirectory> OutputFiles { get; set; }
+        public HashSet<Tuple<PathString, IFileInfo>> OutputFiles { get; set; }
 
         /// <summary>
         /// These are outputs from the pipeline but represent source / unchanged files.
         /// </summary>
-        public List<FileWithDirectory> Sources { get; set; }
+        public HashSet<Tuple<PathString, IFileInfo>> Sources { get; set; }
 
         public IEnumerable<FileWithDirectory> GetChangedInputFiles()
         {
@@ -156,9 +158,6 @@ namespace NetPack.Pipeline
             // ExcludeFiles = FileProvider.GetFiles(input.e)
         }
 
-        public Action<PipeContext> OnUpdateRequestLocks { get; set; }
-        public List<string> OutputFilesForRequestLocks { get; set; }
-
         private void SetInput(FileWithDirectory[] newInputs)
         {
             // grab the input files from the file provider.
@@ -166,10 +165,10 @@ namespace NetPack.Pipeline
             PreviousOutputFiles = OutputFiles;
             PreviousSources = Sources;
 
-            OutputFiles = OutputFiles ?? new List<FileWithDirectory>();
+            OutputFiles = OutputFiles ?? new HashSet<Tuple<PathString, IFileInfo>>();
             OutputFiles.Clear();
 
-            Sources = Sources ?? new List<FileWithDirectory>();
+            Sources = Sources ?? new HashSet<Tuple<PathString, IFileInfo>>();
             Sources.Clear();
 
             InputFiles = newInputs;
@@ -186,8 +185,13 @@ namespace NetPack.Pipeline
 
         }
 
-        public IFileBlocker Blocker { get; private set; }
+        protected IFileBlocker Blocker { get; private set; }
 
+        public void AddBlock(PathString path)
+        {
+            PathString outputPath = PipelineContext.BaseRequestPath.Add(path);
+            Blocker.AddBlock(outputPath);
+        }
 
         internal async Task ProcessChanges(IPipeLine parentPipeline)
         {
@@ -201,11 +205,11 @@ namespace NetPack.Pipeline
 
                     SetInputFiles(parentPipeline.InputAndGeneratedFileProvider);
                     // lock previous outputs
-                    using (Blocker = new FileBlocker())
+                    using (Blocker = new FileLocker())
                     {
 
-                      //  fileBlocker.AddBlocks(PreviousOutputFiles);
-                      //  fileBlocker.AddBlocks(PreviousOutputFiles);
+                        //  fileBlocker.AddBlocks(PreviousOutputFiles);
+                        //  fileBlocker.AddBlocks(PreviousOutputFiles);
 
                         LastProcessStartTime = DateTime.UtcNow;
 
@@ -219,7 +223,7 @@ namespace NetPack.Pipeline
                         }
                     }
 
-                       
+
                 }
                 catch (Exception ex)
                 {
@@ -240,21 +244,22 @@ namespace NetPack.Pipeline
 
         private void FlushOutputs(IPipelineContext pipelineContext)
         {
-            foreach (FileWithDirectory item in OutputFiles)
+            foreach (Tuple<PathString, IFileInfo> item in OutputFiles)
             {
-                pipelineContext.AddGeneratedOutput(item.Directory, item.FileInfo);
+                pipelineContext.AddGeneratedOutput(item.Item1, item.Item2);
             }
 
-            foreach (FileWithDirectory item in Sources)
+            foreach (Tuple<PathString, IFileInfo> item in Sources)
             {
-                PipelineContext.AddSourceOutput(item.Directory, item.FileInfo);
+                PipelineContext.AddSourceOutput(item.Item1, item.Item2);
             }
         }
 
-        public void AddUpdateOutputFile(FileWithDirectory outputFile)
+        public void AddOutput(PathString directory, IFileInfo file)
         {
             // var item = new FileWithDirectory() { Directory = directory, FileInfo = fileInfo };
-            OutputFiles.Add(outputFile);
+            var pathAndFile = Tuple.Create<PathString, IFileInfo>(directory, file);
+            OutputFiles.Add(pathAndFile);
         }
 
         /// <summary>
@@ -262,9 +267,10 @@ namespace NetPack.Pipeline
         /// </summary>
         /// <param name="directory"></param>
         /// <param name="fileInfo"></param>
-        public void AddUpdateSourceOutput(FileWithDirectory outputSourceFile)
+        public void AddSource(PathString directory, IFileInfo file)
         {
-            Sources.Add(outputSourceFile);
+            var pathAndFile = Tuple.Create<PathString, IFileInfo>(directory, file);
+            Sources.Add(pathAndFile);            
         }
 
         /// <summary>

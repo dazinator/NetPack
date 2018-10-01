@@ -219,7 +219,7 @@ namespace NetPack.Typescript.Tests
                       // options.InlineSourceMap = true;
                       //  options.Module = ModuleKind.Amd;
                   })
-                  .UseBaseRequestPath("netpack")
+                  .UseBaseRequestPath("/netpack")
 
                   // allows the files produced from processing to be resolved via the environemtns webroot file provider..
                   .Watch(); // Input files are watched, and when changes occur, pipeline will automatically trigger necessary processing.

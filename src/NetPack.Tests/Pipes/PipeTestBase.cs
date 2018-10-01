@@ -38,7 +38,7 @@ namespace NetPack.Tests.Pipes
             //  _fileProvider.AddFile(subPath, content);
             var fileInfo = new StringFileInfo(fileContent, subPath.Name);
             _directory.AddFile(subPath.Directory, fileInfo);
-            return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
+            return new FileWithDirectory() { Directory = "/" + subPath.Directory, FileInfo = fileInfo };
         }
 
         protected async Task WhenFilesProcessedByPipe(Func<IPipe> pipeFactory, params FileWithDirectory[] files)
@@ -49,7 +49,7 @@ namespace NetPack.Tests.Pipes
             var input = new PipelineInput();
             foreach (var item in files)
             {
-                input.AddInclude(item.FileSubPath);
+                input.AddInclude(item.UrlPath);
             }
             Sut = pipeFactory();
             var pipeContext = new PipeContext(input, Sut, new LoggerFactory().AddConsole().CreateLogger<PipeContext>());

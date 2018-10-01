@@ -3,25 +3,41 @@
 }
 
 <p>
-    The RequireJS processor for NetPack is a processor that is useful if you are using AMD modules. It does the following:
-
+    Netpack offers a RequireJS TagHelper for optimising AMD modules into a bundle using r.js optimiser, within your Razor pages directly:
+    <pre>
+        &lt;require-js-optimise in=&quot;amd/*.js&quot;
+                         main=&quot;SomePage&quot;
+                         out-name=&quot;built.js&quot;
+                         out-path=&quot;/netpack&quot;&gt;
+        &lt;/require-js-optimise&gt;
+</pre>
 </p>
+
 
 <ul>
     <li>
-        Combines related scripts together into build layers and minifies them via UglifyJS (the default).
+        in = the files containing the AMD modules to be included in the optimisation process for the page.
     </li>
     <li>
-        Optimizes CSS by inlining CSS files referenced by @@import and removing comments.
+        main = the AMD module that is the entry point for the page.
+    </li>
+    <li>
+        out-name = the name of the optimised js file that is produced as the output.
+    </li>
+    <li>
+        out-path = the path where the optimised file (as specified by out-name) can be served.
     </li>
 </ul>
-<p>Modules loaded from optimised file:</p>
+
+
+
+<p>For example, on this page, these AMD modules have been loaded from an optimised file:</p>
 <ul id="modules"></ul>
 
 
 
 @section scripts
-{
+    {
 
 
     <script data-main="/netpack/built.js" src="/lib/require.js"></script>

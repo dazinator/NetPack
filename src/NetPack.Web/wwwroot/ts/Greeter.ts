@@ -1,12 +1,13 @@
-﻿///<reference path="./Another.ts" />
-import {Another} from "./Another";
+﻿import {Another} from "../ts/Another";
 
 class Greeter {
     constructor(public greeting: string) { }
     greet() {
-        return " < h1 > " + this.greeting + " < /h1>";
+        return this.greeting;
     }
 };
 
-var greeter = new Greeter("Hi there!!!!");
+var y = new Another("foo bare");
+
+var greeter = new Greeter("Hi dazd!!!!");
 document.body.querySelector(".message").innerHTML += greeter.greet();  

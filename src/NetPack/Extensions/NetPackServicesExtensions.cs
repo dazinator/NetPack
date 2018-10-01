@@ -10,6 +10,7 @@ using NetPack.Utils;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using Microsoft.AspNetCore.NodeServices.Sockets;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -56,19 +57,32 @@ namespace NetPack
         public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions)
         {
             // Enable Node Services
-            services.AddNodeServices((options) =>
-            {
-               // options.
-               // HostingModel = NodeHostingModel.Socket;
-            });
+            //services.AddNodeServices((options) =>
+            //{
+            //    options.UseSocketHosting();
+            //    options.WatchFileExtensions = null;
+            //   // options.NodeInstanceOutputLogger
+            //   // options.
+            //   // HostingModel = NodeHostingModel.Socket;
+            //});
 
 
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {
+                //var nodeServices = serviceProvider.GetRequiredService<INodeServices>();
+
                 var options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
+                // otherwise node services restarts automatically when file changes are made, losing state - we want to handle watch on netcore side.
+                options.WatchFileExtensions = null;
 
                 var nodeServices = NodeServicesFactory.CreateNodeServices(options);
+#if NODESERVICESASYNC
+                 var lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
+                 return new NetPackNodeServices(nodeServices, lifetime);
+#else
                 return new NetPackNodeServices(nodeServices);
+#endif
+
             });
 
             services.AddSingleton(new NodeJsRequirement());

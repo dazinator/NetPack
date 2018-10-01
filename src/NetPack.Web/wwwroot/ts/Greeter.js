@@ -1,17 +1,17 @@
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "../ts/Another"], function (require, exports, Another_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Greeter = /** @class */ (function () {
-        function Greeter(greeting) {
+    class Greeter {
+        constructor(greeting) {
             this.greeting = greeting;
         }
-        Greeter.prototype.greet = function () {
-            return " < h1 > " + this.greeting + " < /h1>";
-        };
-        return Greeter;
-    }());
+        greet() {
+            return this.greeting;
+        }
+    }
     ;
-    var greeter = new Greeter("Hi there!!!!");
+    var y = new Another_1.Another("foo bare");
+    var greeter = new Greeter("Hi dazd!!!!");
     document.body.querySelector(".message").innerHTML += greeter.greet();
 });
 //# sourceMappingURL=Greeter.js.map
