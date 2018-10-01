@@ -9,5 +9,5 @@ class Greeter {
 
 var y = new Another("foo bare");
 
-var greeter = new Greeter("Hi daz!!!!");
-//document.body.querySelector(".message").innerHTML += greeter.greet();  
+var greeter = new Greeter("Hi dazd!!!!");
+document.body.querySelector(".message").innerHTML += greeter.greet();  

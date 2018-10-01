@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D3B0CC01-206
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7B67F775-DBC7-4AF2-924D-E588FB317BF4}"
 	ProjectSection(SolutionItems) = preProject
+		.eslintignore = .eslintignore
 		..\appveyor.yml = ..\appveyor.yml
 		..\build.cake = ..\build.cake
 		..\build.cmd = ..\build.cmd

@@ -10,6 +10,11 @@
     <EmbeddedResource Include="Embedded\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
   </ItemGroup>
 
+  <!--<ItemGroup>
+    <None Remove="Embedded\netpack-testfiles.js" />
+    <None Remove="Embedded\netpack-typescript.js" />
+  </ItemGroup>-->
+
   <ItemGroup>
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
   </ItemGroup> 

@@ -10,9 +10,12 @@
 <p class="message"></p>
 
 @section scripts
-{
-    @*see https://github.com/aspnet/StaticFiles/issues/158*@  
-    <script type="text/javascript" src="/netpack/bundle.js"></script>
+    {
+    @*see https://github.com/aspnet/StaticFiles/issues/158*@
+    <script data-main="/netpack/bundle.js" src="/lib/require.js"></script>
+
+
+
 
 }
 

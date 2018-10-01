@@ -1,18 +1,17 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Another = /** @class */ (function () {
-        function Another(another) {
+    class Another {
+        constructor(another) {
             this.another = another;
         }
-        Another.prototype.greet = function () {
+        greet() {
             return " < h1 > " + this.another + " < /h1>";
-        };
-        return Another;
-    }());
+        }
+    }
     exports.Another = Another;
     ;
-    var another = new Another("xmass greetings!");
+    var another = new Another("xmasses greetings!");
     document.body.querySelector(".message").innerHTML += another.greet();
 });
 //# sourceMappingURL=Another.js.map

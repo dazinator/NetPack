@@ -10,5 +10,7 @@ namespace NetPack.Typescript
         public string Message { get; set; }
 
         public JObject Echo { get; set; }
+
+        public Dictionary<string, string> EchoFiles { get; set; }
     }
 }

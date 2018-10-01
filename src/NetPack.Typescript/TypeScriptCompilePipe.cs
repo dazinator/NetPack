@@ -38,7 +38,8 @@ namespace NetPack.Typescript
             _script = new Lazy<StringAsTempFile>(() =>
             {
                 Assembly assy = GetType().GetAssemblyFromType();
-                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-typescript.js");
+                string scriptName = (_options.TestMode ?? false) ? "Embedded/netpack-testfiles.js" : "Embedded/netpack-typescript.js";
+                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, scriptName);
                 string scriptContent = script.ReadAllContent();
 
                 return _nodeServices.CreateStringAsTempFile(scriptContent);
@@ -72,22 +73,26 @@ namespace NetPack.Typescript
                 context.AddBlock(outFilePath);
             }
 
-            foreach (FileWithDirectory inputFileInfo in context.InputFiles)
+            if (context.InputFiles != null)
             {
-                if (context.IsInputDifferentFromLastTime(inputFileInfo))
+                foreach (FileWithDirectory inputFileInfo in context.InputFiles)
                 {
-                    if (!isSingleOutput)
+                    if (context.IsInputDifferentFromLastTime(inputFileInfo))
                     {
-                        string outFileName = Path.ChangeExtension(inputFileInfo.UrlPath, ".js");
-                        context.AddBlock(outFileName);
+                        if (!isSingleOutput)
+                        {
+                            string outFileName = Path.ChangeExtension(inputFileInfo.UrlPath, ".js");
+                            context.AddBlock(outFileName);
+                        }
+
+                        string contents = inputFileInfo.FileInfo.ReadAllContent();
+                        requestDto.Files.Add(inputFileInfo.UrlPath, contents);
                     }
 
-                    string contents = inputFileInfo.FileInfo.ReadAllContent();
-                    requestDto.Files.Add(inputFileInfo.UrlPath, contents);
+                    requestDto.Inputs.Add(inputFileInfo.UrlPath);
                 }
-
-                requestDto.Inputs.Add(inputFileInfo.UrlPath);
             }
+
 
             if (!requestDto.Files.Any())
             {
@@ -112,14 +117,29 @@ namespace NetPack.Typescript
                     throw typescriptCompilationException;
                 }
 
-                foreach (KeyValuePair<string, string> output in result.Sources)
+                if (_options.TestMode ?? false)
                 {
-                    SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
-                    StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+                    foreach (var item in result.EchoFiles)
+                    {
+                        SubPathInfo subPathInfo = SubPathInfo.Parse(item.Key);
+                        StringFileInfo outputFileInfo = new StringFileInfo(item.Value, subPathInfo.Name);
 
-                    context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
-
+                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+                    }
                 }
+
+                if (result.Sources != null)
+                {
+                    foreach (KeyValuePair<string, string> output in result.Sources)
+                    {
+                        SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
+                        StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+
+                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+
+                    }
+                }
+               
 
                 // also, if source maps are enabled, but source is not inlined in the source map, then the 
                 // source file needs to be output so it can be served up to the browser.              

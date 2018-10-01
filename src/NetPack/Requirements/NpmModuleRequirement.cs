@@ -162,6 +162,7 @@ namespace NetPack.Requirements
             // package already installed with same name, but is it the required version? 
             if (_version != null)
             {
+                // TODO: Support min version or semantic version range
                 List<string> installedPackageVersions = installedPackages[_packageName];
                 if (!installedPackageVersions.Contains(_version))
                 {

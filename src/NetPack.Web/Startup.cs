@@ -40,10 +40,14 @@ namespace NetPack.Web
                     {
                         input.Include("ts/*.ts");
                     }, options =>
-                    {
+                    {                       
                         options.Target = Typescript.ScriptTarget.ES5;
                         options.Module = Typescript.ModuleKind.AMD;
-                        options.InlineSources = true;
+                        options.InlineSources = false;
+                        options.InlineSourceMap = false;
+                        options.NoImplicitAny = true;
+                        options.SourceMap = true;                       
+
                     })
                     // Another processor that combines multiple js files into a single "bundle" file.
                     .AddJsCombinePipe(input =>
