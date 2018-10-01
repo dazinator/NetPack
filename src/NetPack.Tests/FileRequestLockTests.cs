@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetPack.FileLocking;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -19,7 +20,7 @@ namespace NetPack.Tests
             ManualResetEvent manualResetEvent = new ManualResetEvent(false);
             Task waitTask = null;
 
-            using (var requestLock = FileRequestServices.BlockFilePath("/wwwwroot/somefile.js"))
+            using (var requestLock = new FileLocker().AddBlock("/wwwwroot/somefile.js"))
             {
 
                 // start a backgorund thread that waits for the lock to become free.
@@ -28,7 +29,7 @@ namespace NetPack.Tests
                
                 ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
                 {
-                    waitTask = FileRequestServices.WhenFileNotLocked("/wwwwroot/somefile.js", new TimeSpan(0, 0, 10), CancellationToken.None);
+                    waitTask = FileLocks.WaitIfLockedAsync("/wwwwroot/somefile.js", new TimeSpan(0, 0, 10), CancellationToken.None);
                     manualResetEvent.Set();
                 }));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -37,21 +38,23 @@ namespace NetPack.Tests
               
                 manualResetEvent.WaitOne();
 
-                Assert.Equal(false, waitTask.IsCanceled);
-                Assert.Equal(false, waitTask.IsFaulted);
-                Assert.Equal(false, waitTask.IsCompleted);
+                Assert.False(waitTask.IsCanceled);
+                Assert.False(waitTask.IsFaulted);
+                Assert.False(waitTask.IsCompleted);
 
                 await Task.Delay(new TimeSpan(0, 0, 4));
 
                 // verify request task still waiting.
-
+                Assert.False(waitTask.IsCanceled);
+                Assert.False(waitTask.IsFaulted);
+                Assert.False(waitTask.IsCompleted);
             }
 
             // now that the lock is disposed, the request task should complete
             await waitTask;
-            Assert.Equal(true, waitTask.IsCompleted);
-            Assert.Equal(false, waitTask.IsFaulted);
-            Assert.False(FileRequestServices.HasLock("/wwwwroot/somefile.js"));
+            Assert.True(waitTask.IsCompleted);
+            Assert.False(waitTask.IsFaulted);
+           // Assert.False(FileRequestServices.HasLock("/wwwwroot/somefile.js"));
 
         }
 

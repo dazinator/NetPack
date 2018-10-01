@@ -4,6 +4,6 @@ namespace NetPack
 {
     public interface INetPackNodeServices : INodeServices
     {
-        
+        StringAsTempFile CreateStringAsTempFile(string content);
     }
 }

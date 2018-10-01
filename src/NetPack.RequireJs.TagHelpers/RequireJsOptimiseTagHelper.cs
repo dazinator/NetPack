@@ -1,14 +1,20 @@
 ﻿using System;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.DependencyInjection;
 using NetPack.Pipeline;
 
 namespace NetPack.RequireJs
 {
     public class RequireJsOptimiseTagHelper : TagHelper
     {
-        public RequireJsOptimiseTagHelper(IPipelineConfigurationBuilder builder, PipelineManager pipelineManager)
+
+        private readonly IServiceProvider _serviceProvider;
+
+        public RequireJsOptimiseTagHelper(IServiceProvider serviceProvider, PipelineManager pipelineManager)
         {
-            Builder = builder;
+            _serviceProvider = serviceProvider;
+            //Builder = builder;
             PipelineManager = pipelineManager;
             RequireJsSrc = "/lib/require.js";
             PipelineName = Guid.NewGuid().ToString();
@@ -65,9 +71,13 @@ namespace NetPack.RequireJs
                 return pipeline;
             }
 
+            
+
+            var sourcesDirectory = _serviceProvider.GetRequiredService<IDirectory>();
+            var builder = new PipelineConfigurationBuilder(_serviceProvider, sourcesDirectory);
 
 
-            var pipeBuilder = Builder.WithHostingEnvironmentWebrootProvider()
+            var pipeBuilder = builder.WithHostingEnvironmentWebrootProvider()
              .AddRequireJsOptimisePipe(input =>
              {
                  input.Include(this.In);

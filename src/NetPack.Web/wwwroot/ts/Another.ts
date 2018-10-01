@@ -5,5 +5,6 @@
     }
 };
 
-var another = new Another("seasons greetings!");
+var another = new Another("xmasses greetings!");
 document.body.querySelector(".message").innerHTML += another.greet();  
+

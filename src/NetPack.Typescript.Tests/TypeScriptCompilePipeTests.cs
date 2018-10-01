@@ -9,6 +9,7 @@ using Xunit;
 using Dazinator.AspNet.Extensions.FileProviders;
 using NetPack.Typescript;
 using NetPack.Tests.Pipes;
+using System.Threading;
 
 namespace NetPack.Typescript.Tests
 {
@@ -30,6 +31,8 @@ namespace NetPack.Typescript.Tests
                                                  { "SomeFolder/somefile.js.map", "some map code" }
                                              }
                                          });
+
+            mockNodeInstance.Setup(a => a.CreateStringAsTempFile(It.IsAny<string>())).Returns(new StringAsTempFile("blah", CancellationToken.None));
 
             var mockJsRequirement = new Moq.Mock<NodeJsRequirement>();
             mockJsRequirement.Setup(a => a.Check());

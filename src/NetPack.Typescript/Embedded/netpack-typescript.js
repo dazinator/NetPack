@@ -12,7 +12,7 @@ module.exports = {
             if (typescriptFiles.hasOwnProperty(property)) {
                 allFiles[property] = typescriptFiles[property];
             }
-        }
+        }      
 
         var inputs = requestDto.inputs;
         var inputFiles = {};
@@ -42,7 +42,7 @@ module.exports = {
 
         // Act
         var result = sut.compileStrings(inputFiles, options, errorHandler);
-        //result.Echo = allFiles;
+        result.Echo = allFiles;
 
         callback(null, result);
 

@@ -24,7 +24,7 @@ namespace NetPack.Pipeline
             IFileProvider fileProvider,
             IDirectory sourceOutput, IDirectory directory) : this(
                 fileProvider,
-                sourceOutput, directory, string.Empty)
+                sourceOutput, directory, "/")
         {
 
         }

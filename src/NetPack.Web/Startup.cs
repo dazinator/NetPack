@@ -40,8 +40,14 @@ namespace NetPack.Web
                     {
                         input.Include("ts/*.ts");
                     }, options =>
-                    {
-                        options.InlineSources = true;
+                    {                       
+                        options.Target = Typescript.ScriptTarget.ES5;
+                        options.Module = Typescript.ModuleKind.AMD;
+                        options.InlineSources = false;
+                        options.InlineSourceMap = false;
+                        options.NoImplicitAny = true;
+                        options.SourceMap = true;                       
+
                     })
                     // Another processor that combines multiple js files into a single "bundle" file.
                     .AddJsCombinePipe(input =>
@@ -72,7 +78,7 @@ namespace NetPack.Web
                      {
                          input.Include("js/*.js");
                      })
-                    .UseBaseRequestPath("netpack") // serves all outputs using the specified base request path.
+                    .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
 
                 });

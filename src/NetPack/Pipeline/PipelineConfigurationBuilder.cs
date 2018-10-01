@@ -7,6 +7,7 @@ using NetPack.RequireJs;
 using NetPack.Requirements;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace NetPack.Pipeline
 {
@@ -54,7 +55,7 @@ namespace NetPack.Pipeline
 
         public IFileProvider FileProvider { get; set; }
 
-        public string BaseRequestPath { get; set; }
+        public PathString BaseRequestPath { get; set; }
 
         public string Name { get; set; }
 
@@ -120,16 +121,16 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public IPipelineBuilder UseBaseRequestPath(string baseRequestPath = null)
+        public IPipelineBuilder UseBaseRequestPath(PathString baseRequestPath)
         {
 
-            if (baseRequestPath != null)
-            {
-                if (!baseRequestPath.StartsWith("/"))
-                {
-                    baseRequestPath = "/" + baseRequestPath;
-                }
-            }
+            //if (baseRequestPath != null)
+            //{
+            //    if (!baseRequestPath.StartsWith("/"))
+            //    {
+            //        baseRequestPath = "/" + baseRequestPath;
+            //    }
+            //}
 
             BaseRequestPath = baseRequestPath;
             return this;
