@@ -19,6 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Embedded\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 

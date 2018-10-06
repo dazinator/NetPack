@@ -1,12 +1,10 @@
 ﻿using NetPack.Node.Dto;
 using System.Collections.Generic;
 
-namespace NetPack.RequireJs
+namespace NetPack.Rollup
 {
-
-    public class RequireJsOptimiseResult
+    public class RollupResponse
     {
         public List<NodeInMemoryFile> Files { get; set; }
-       // public string Error { get; set; }
     }
 }

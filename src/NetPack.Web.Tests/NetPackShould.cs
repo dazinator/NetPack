@@ -72,7 +72,7 @@ namespace NetPack.Web.Tests
             var updatedFileContents = await GetResponseString("netpack/ts/somefile.js");
 
             Assert.NotEqual(originalFileContents, updatedFileContents);
-            Assert.True(updatedFileContents.Contains("// modified on"));
+            Assert.Contains("// modified on", updatedFileContents);
 
 
         }

@@ -11,26 +11,27 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NetPack.RequireJs
+namespace NetPack.Rollup
 {
-    public class RequireJsOptimisePipe : IPipe
+    public class RollupPipe : IPipe
     {
         private INetPackNodeServices _nodeServices;
-        private readonly RequireJsOptimisationPipeOptions _options;
+        private readonly RollupPipeOptions _options;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
-        private readonly ILogger<RequireJsOptimisePipe> _logger;
+        private readonly ILogger<RollupPipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
 
-        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger) : this(nodeServices, embeddedResourceProvider, logger, new RequireJsOptimisationPipeOptions())
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger) : this(nodeServices, embeddedResourceProvider, logger, new RollupPipeOptions())
         {
 
         }
 
-        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger, RequireJsOptimisationPipeOptions options)
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupPipeOptions options)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
             _options = options;
+            _logger = logger;
             _script = new Lazy<StringAsTempFile>(() =>
             {
                 Assembly assy = GetType().GetAssemblyFromType();
@@ -43,11 +44,7 @@ namespace NetPack.RequireJs
 
         public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
-
-            // var pipeContext = context.PipeContext;
-
-
-            RequireJsOptimiseRequestDto optimiseRequest = new RequireJsOptimiseRequestDto();
+            RollupRequest optimiseRequest = new RollupRequest();
 
             foreach (FileWithDirectory file in context.InputFiles)
             {
@@ -65,37 +62,14 @@ namespace NetPack.RequireJs
 
             optimiseRequest.Options = _options;
 
-            try
+            RollupResponse result = await _nodeServices.InvokeAsync<RollupResponse>(_script.Value.FileName, optimiseRequest);
+            foreach (NodeInMemoryFile file in result.Files)
             {
-                RequireJsOptimiseResult result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
-                foreach (NodeInMemoryFile file in result.Files)
-                {
-                    string filePath = file.Path.Replace('\\', '/');
-                    SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
-                    PathString dir = subPathInfo.Directory.ToPathString();
-                    context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
-                }
-
-                //if (!string.IsNullOrWhiteSpace(result.Error))
-                //{
-                //    throw new RequireJsOptimiseException(result.Error);
-                //}
+                string filePath = file.Path.Replace('\\', '/');
+                SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
+                PathString dir = subPathInfo.Directory.ToPathString();
+                context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
             }
-            catch (Exception e)
-            {
-
-                //var jsonRequest = Newtonsoft.Json.JsonConvert.SerializeObject(optimiseRequest, new JsonSerializerSettings()
-                //{
-                //    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                //});
-
-                throw;
-            }
-
-
         }
-
-
-
     }
 }
