@@ -16,6 +16,7 @@
   </ItemGroup>-->
 
   <ItemGroup>
+    <PackageReference Include="Dazinator.AspNet.Extensions.FileProviders" Version="1.5.0-unstable0014" />
     <PackageReference Include="DotNet.Glob" Version="2.1.1" />
    
     <PackageReference Include="NUglify" Version="1.5.2" />
@@ -56,10 +57,6 @@
   
   <ItemGroup>
     <Folder Include="Properties\" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\Dazinator.AspNet.Extensions.FileProviders\Dazinator.AspNet.Extensions.FileProviders.csproj" />
   </ItemGroup>
 
 </Project>

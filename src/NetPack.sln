@@ -40,8 +40,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.JsMin", "NetPack.Js
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.JsMin.Tests", "NetPack.JsMin.Tests\NetPack.JsMin.Tests.csproj", "{989CED5B-9C15-4E4E-A86B-9E0C910114B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dazinator.AspNet.Extensions.FileProviders", "Dazinator.AspNet.Extensions.FileProviders\Dazinator.AspNet.Extensions.FileProviders.csproj", "{77E9DEBB-DED5-4334-8CD6-466739CFC355}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,10 +98,6 @@ Global
 		{989CED5B-9C15-4E4E-A86B-9E0C910114B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{989CED5B-9C15-4E4E-A86B-9E0C910114B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{989CED5B-9C15-4E4E-A86B-9E0C910114B0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77E9DEBB-DED5-4334-8CD6-466739CFC355}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77E9DEBB-DED5-4334-8CD6-466739CFC355}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77E9DEBB-DED5-4334-8CD6-466739CFC355}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77E9DEBB-DED5-4334-8CD6-466739CFC355}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -122,7 +116,6 @@ Global
 		{261D76B9-9EC3-42BB-BCEE-548985415662} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 		{CB1E2D47-0AD4-4548-8F11-A23EC97E6710} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 		{989CED5B-9C15-4E4E-A86B-9E0C910114B0} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
-		{77E9DEBB-DED5-4334-8CD6-466739CFC355} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F97B401-084D-46B4-A4FD-53F4E50B4048}
