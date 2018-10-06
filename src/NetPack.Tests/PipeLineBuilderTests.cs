@@ -2,12 +2,9 @@ using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Builder.Internal;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NetPack.File;
 using NetPack.Pipeline;
-using NetPack.RequireJs;
 using System.Linq;
 using Xunit;
 
