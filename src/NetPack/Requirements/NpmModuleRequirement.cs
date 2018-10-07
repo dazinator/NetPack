@@ -16,6 +16,8 @@ namespace NetPack.Requirements
         private readonly string _version = null;
         private readonly bool _installIfNotFound = false;
 
+        public string PackageName => _packageName;
+
         public NpmModuleRequirement(string packageName, bool installIfNotFound, string version = null)
         {
             _packageName = packageName;
@@ -149,12 +151,12 @@ namespace NetPack.Requirements
         {
             Dictionary<string, List<string>> installedPackages = GetInstalledPackages();
 
-            if (!installedPackages.ContainsKey(_packageName))
+            if (!installedPackages.ContainsKey(PackageName))
             {
                 if (_installIfNotFound)
                 {
                     // try and install the requird npm module.
-                    InstallNpmPackage(_packageName, _version);
+                    InstallNpmPackage(PackageName, _version);
                     return;
                 }
             }
@@ -163,10 +165,10 @@ namespace NetPack.Requirements
             if (_version != null)
             {
                 // TODO: Support min version or semantic version range
-                List<string> installedPackageVersions = installedPackages[_packageName];
+                List<string> installedPackageVersions = installedPackages[PackageName];
                 if (!installedPackageVersions.Contains(_version))
                 {
-                    InstallNpmPackage(_packageName, _version);
+                    InstallNpmPackage(PackageName, _version);
                 }
             }
 
@@ -238,7 +240,7 @@ namespace NetPack.Requirements
             if (obj.GetType() == typeof(NpmModuleRequirement))
             {
                 NpmModuleRequirement req = (NpmModuleRequirement)obj;
-                return req._packageName == _packageName && req._version == _version;
+                return req.PackageName == PackageName && req._version == _version;
             }
             return false;
         }

@@ -1,3 +1,6 @@
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+
 namespace NetPack.Rollup
 {
     public class RollupPipeOptions
@@ -5,9 +8,16 @@ namespace NetPack.Rollup
 
         public RollupPipeOptions()
         {
-          //  Modules = new List<ModuleInfo>();
-          //  Optimizer = Optimisers.uglify2;
+            Plugins = new List<RollupPlugin>();          
         }
-   
+
+        public void AddPlugin(string name, JObject configuration)
+        {
+            Plugins.Add(new RollupPlugin(name, configuration));
+        }
+
+        public List<RollupPlugin> Plugins { get; set; }
+
     }
+
 }
