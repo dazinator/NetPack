@@ -1,0 +1,8 @@
+﻿import rollupHost from "netpack-rollup";
+import RollupInputOptions from "netpack-rollup";
+import RollupOutputOptions from "netpack-rollup";
+import hypothetical = require("rollup-plugin-hypothetical")
+import * as fs from "fs";
+
+import plugin0 from 'foopackage';
+import plugin1 from 'barpackage';

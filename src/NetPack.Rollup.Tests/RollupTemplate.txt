@@ -1,0 +1,7 @@
+﻿import rollupHost from "netpack-rollup";
+import RollupInputOptions from "netpack-rollup";
+import RollupOutputOptions from "netpack-rollup";
+import hypothetical = require("rollup-plugin-hypothetical")
+import * as fs from "fs";
+{{ for plugin in plugins }}
+import plugin{{ for.index }} from '{{ plugin.package_name }}';{{ end }}

@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Embedded\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
   </ItemGroup>
 

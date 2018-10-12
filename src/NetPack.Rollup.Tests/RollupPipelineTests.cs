@@ -1,11 +1,16 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
+﻿using ApprovalTests;
+using ApprovalTests.Reporters;
+using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
+using Scriban;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace NetPack.Rollup.Tests
 {
+    
     public class RollupPipelineTests
     {
 
@@ -42,6 +47,6 @@ namespace NetPack.Rollup.Tests
                         });
                 });
             });
-        }
+        }  
     }
 }

@@ -4,7 +4,7 @@ namespace NetPack.Rollup
 {
     public class RollupPlugin
     {
-        private readonly string _packageName;
+        private readonly string _packageName;      
         private readonly JObject _moduleConfiguration;
 
         public RollupPlugin(string packageName) : this(packageName, null)
@@ -17,6 +17,7 @@ namespace NetPack.Rollup
             _moduleConfiguration = configuration;
         }
 
+        public string PackageName => _packageName;     
     }
 
 }
