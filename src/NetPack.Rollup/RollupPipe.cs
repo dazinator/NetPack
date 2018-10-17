@@ -16,26 +16,32 @@ namespace NetPack.Rollup
     public class RollupPipe : IPipe
     {
         private INetPackNodeServices _nodeServices;
-        private readonly RollupPipeOptions _options;
+        private readonly RollupInputOptions _inputOptions;
+        private readonly RollupOutputOptions _outputOptions;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
         private readonly ILogger<RollupPipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
 
-        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger) : this(nodeServices, embeddedResourceProvider, logger, new RollupPipeOptions())
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions())
         {
 
         }
 
-        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupPipeOptions options)
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions(), new RollupOutputOptions())
+        {            
+        }
+
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputOptions outputOptions)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
-            _options = options;
+            _inputOptions = inputOptions;
+            _outputOptions = outputOptions;
             _logger = logger;
             _script = new Lazy<StringAsTempFile>(() =>
             {
                 Assembly assy = GetType().GetAssemblyFromType();
-                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
+                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-rollup-optimise.js");
                 string scriptContent = script.ReadAllContent();
                 return _nodeServices.CreateStringAsTempFile(scriptContent);
             });
@@ -56,20 +62,34 @@ namespace NetPack.Rollup
                 optimiseRequest.Files.Add(new NodeInMemoryFile()
                 {
                     Contents = fileContent,
-                    Path = file.UrlPath.ToString().TrimStart(new char[] { '/' })
+                    Path = file.UrlPath.ToString() //.TrimStart(new char[] { '/' })
                 });
             }
 
-            optimiseRequest.Options = _options;
+            optimiseRequest.InputOptions = _inputOptions;
+            optimiseRequest.OutputOptions = _outputOptions;
 
-            RollupResponse result = await _nodeServices.InvokeAsync<RollupResponse>(_script.Value.FileName, optimiseRequest);
-            foreach (NodeInMemoryFile file in result.Files)
-            {
-                string filePath = file.Path.Replace('\\', '/');
-                SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
-                PathString dir = subPathInfo.Directory.ToPathString();
-                context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
-            }
+            RollupResponse result = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
+            //if(result.Files!= null)
+            //{
+            //    foreach (NodeInMemoryFile file in result.Files)
+            //    {
+            //        string filePath = file.Path.Replace('\\', '/');
+            //        SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
+            //        PathString dir = subPathInfo.Directory.ToPathString();
+            //        context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
+            //    }
+            //}
+
+           
+
+            var code = result.Code;
+            var map = result.SourceMap;
+
+            context.AddOutput("/", new StringFileInfo(code.ToString(), _outputOptions.File));
+         //   context.AddOutput("/", new StringFileInfo(code.ToString(), _outputOptions.File));
+
+
         }
     }
 }

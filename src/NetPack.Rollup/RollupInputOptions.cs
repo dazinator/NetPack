@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace NetPack.Rollup
 {
-    public class RollupPipeOptions
+    public class RollupInputOptions
     {
 
-        public RollupPipeOptions()
+        public RollupInputOptions()
         {
             Plugins = new List<RollupPlugin>();          
         }
@@ -17,6 +17,9 @@ namespace NetPack.Rollup
         }
 
         public List<RollupPlugin> Plugins { get; set; }
+
+        public string Input { get; set; }
+
 
     }
 

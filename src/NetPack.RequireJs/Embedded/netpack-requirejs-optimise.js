@@ -26,7 +26,7 @@ module.exports = function (callback, request) {
             if (results.hasOwnProperty(property)) {
 
                 if (!hasFile(property)) {
-                    response.files.push({ path: property, contents: results[property] })
+                    response.files.push({ path: property, contents: results[property] });
                 }
             }
         }

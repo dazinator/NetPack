@@ -10,8 +10,11 @@ namespace NetPack.Rollup
             Files = new List<NodeInMemoryFile>();
         }
 
-        public RollupPipeOptions Options { get; set; }
-    
+        public RollupInputOptions InputOptions { get; set; }
+
+        public RollupOutputOptions OutputOptions { get; set; }
+        
+
         public List<NodeInMemoryFile> Files { get; set; }   
     }
 }

@@ -9,13 +9,22 @@ namespace NetPack
     public class RollupPipeOptionsBuilder
     {
         private readonly IPipelineBuilder _builder;
-        private readonly RollupPipeOptions _options;
+        private readonly RollupInputOptions _inputOptions;
+        private readonly RollupOutputOptions _outputOptions;
 
+        public RollupPipeOptionsBuilder(IPipelineBuilder builder): this(builder, new RollupInputOptions())
+        {           
+        }
 
-        public RollupPipeOptionsBuilder(IPipelineBuilder builder, RollupPipeOptions options)
+        public RollupPipeOptionsBuilder(IPipelineBuilder builder, RollupInputOptions inputOptions): this(builder, new RollupInputOptions(), new RollupOutputOptions())
+        {           
+        }
+
+        public RollupPipeOptionsBuilder(IPipelineBuilder builder, RollupInputOptions inputOptions, RollupOutputOptions outputOptions)
         {
             _builder = builder;
-            _options = options;
+            _inputOptions = inputOptions;
+            _outputOptions = outputOptions;
         }
 
         public RollupPipeOptionsBuilder AddPlugin(Action<IRollupPluginOptionsBuilder> configurePlugin)
@@ -26,9 +35,12 @@ namespace NetPack
             return this;
         }
 
+
         public IPipelineBuilder IPipelineBuilder => _builder;
 
-        public RollupPipeOptions RollupPipeOptions => _options;
+        public RollupInputOptions InputOptions => _inputOptions;
+
+        public RollupOutputOptions OutputOptions => _outputOptions;
 
     }
 }

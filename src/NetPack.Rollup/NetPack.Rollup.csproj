@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Embedded\netpack-rollup-optimise.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Embedded\netpack-rollup-optimise.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
   </ItemGroup>
 
@@ -15,7 +23,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Embedded\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 

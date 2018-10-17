@@ -26,7 +26,7 @@ namespace NetPack.Rollup.Tests
         public async Task Can_Generate_Script()
         {
 
-            var rollupOptions = new RollupPipeOptions();
+            var rollupOptions = new RollupInputOptions();
             dynamic pluginOptions = new Newtonsoft.Json.Linq.JObject();
             pluginOptions.Start = true;
             pluginOptions.Times = 1;

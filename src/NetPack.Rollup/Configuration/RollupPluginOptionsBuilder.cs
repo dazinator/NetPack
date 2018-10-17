@@ -45,7 +45,7 @@ namespace NetPack
         public RollupPipeOptionsBuilder Build()
         {
             _builder.IPipelineBuilder.IncludeRequirement(_moduleRequirement);
-            _builder.RollupPipeOptions.AddPlugin(_moduleRequirement.PackageName, _options);
+            _builder.InputOptions.AddPlugin(_moduleRequirement.PackageName, _options);
             return _builder;
         }       
     }
