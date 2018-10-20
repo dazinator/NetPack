@@ -5,7 +5,7 @@ namespace NetPack.Rollup
     public class RollupPlugin
     {
         private readonly string _packageName;      
-        private readonly JObject _moduleConfiguration;
+        private readonly JObject _pluginConfiguration;
 
         public RollupPlugin(string packageName) : this(packageName, null)
         {
@@ -14,10 +14,14 @@ namespace NetPack.Rollup
         public RollupPlugin(string packageName, JObject configuration)
         {
             _packageName = packageName;
-            _moduleConfiguration = configuration;
+            _pluginConfiguration = configuration;
         }
 
-        public string PackageName => _packageName;     
+        public string PackageName => _packageName;
+
+        public JObject PluginConfiguration => _pluginConfiguration;
+
+        public string PluginConfigurationJson => PluginConfiguration?.ToString();
     }
 
 }

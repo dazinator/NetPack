@@ -42,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.JsMin.Tests", "NetP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Rollup", "NetPack.Rollup\NetPack.Rollup.csproj", "{159A2AC0-2E7E-48CD-8B4E-99F030A5ECC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetPack.Rollup.Tests", "NetPack.Rollup.Tests\NetPack.Rollup.Tests.csproj", "{1EA9AD3B-25F8-4251-981D-7E61A66CE915}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Rollup.Tests", "NetPack.Rollup.Tests\NetPack.Rollup.Tests.csproj", "{1EA9AD3B-25F8-4251-981D-7E61A66CE915}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

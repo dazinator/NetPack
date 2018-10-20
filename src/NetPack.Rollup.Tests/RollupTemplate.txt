@@ -1,7 +1,65 @@
-﻿import rollupHost from "netpack-rollup";
-import RollupInputOptions from "netpack-rollup";
-import RollupOutputOptions from "netpack-rollup";
-import hypothetical = require("rollup-plugin-hypothetical")
-import * as fs from "fs";
+﻿"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const rolluphost_1 = require("netpack-rollup");
+const RollupFileOptions_1 = require("netpack-rollup/dist/RollupFileOptions");
+const RollupOutputOptions_1 = require("netpack-rollup/dist/RollupOutputOptions");
+const hypothetical = require("rollup-plugin-hypothetical");
+const fs = require("fs");
 {{ for plugin in plugins }}
 import plugin{{ for.index }} from '{{ plugin.package_name }}';{{ end }}
+
+var allFiles = {};
+
+module.exports = {
+
+    build: function (callback, requestDto) {
+
+        var files = requestDto.files;
+        for (var i = 0; i < requestDto.files.length; i++) {
+
+            var file = requestDto.files[i];
+            allFiles[file.path] = file.contents;
+        }
+
+        var inputOptionsDto = requestDto.inputOptions;
+        var outputOptionsDto = requestDto.outputOptions;
+
+        var inputOptions = new RollupFileOptions_1.default();
+        inputOptions.input = inputOptionsDto.input;
+        // inputOptions.entry = inputOptionsDto.input;
+
+        var hypotheticalPlugin = hypothetical({
+            files: allFiles
+        });
+        hypotheticalPlugin.cwd = false;
+		var plugins = [hypotheticalPlugin];		
+		{{ for plugin in plugins }}		
+		{{ if plugin.plugin_configuration_json }}		
+		var pluginConfig{{ for.index }} = {{ plugin.plugin_configuration_json }}
+		var newPlugin{{ for.index }} = plugin{{ for.index }}(pluginConfig{{ for.index }});{{ else }}var newPlugin{{ for.index }} = plugin{{ for.index }}();{{ end }}		
+		plugins.push(newPlugin{{ for.index }});
+		{{ end }}
+
+        inputOptions.plugins = plugins;
+        var outputOptions = new RollupOutputOptions_1.default();
+        outputOptions.format = outputOptionsDto.format;
+
+        let sut = new rolluphost_1.default();
+		
+        sut.build(inputOptions, outputOptions).then(result => {
+            if (result === undefined) {
+               callback("result was undefined", null);
+            }
+            else {
+                var code = result.Code;
+                var sourceMap = result.SourceMap;
+                // response.files.push({ path: property, contents: results[property] })
+                var rollupResult = { Code: code, SourceMap: sourceMap };
+                callback(null, rollupResult);
+            }          
+
+        }).catch((reason) => {
+            callback(reason, null);
+        });
+    }
+};
