@@ -5,8 +5,9 @@ const RollupFileOptions_1 = require("netpack-rollup/dist/RollupFileOptions");
 const RollupOutputOptions_1 = require("netpack-rollup/dist/RollupOutputOptions");
 const hypothetical = require("rollup-plugin-hypothetical");
 const fs = require("fs");
-{{ for plugin in plugins }}
-const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
+
+const plugin0 = require("foopackage");
+const barp = require("barpackage");
 
 var allFiles = {};
 
@@ -33,11 +34,11 @@ module.exports = {
         });
         hypotheticalPlugin.cwd = false;
 		var plugins = [hypotheticalPlugin];		
-		{{ for plugin in plugins }}{{ if plugin.import_only }}{{ else }}{{ if plugin.plugin_configuration_json }}		
-		var pluginConfig{{ for.index }} = {{ plugin.plugin_configuration_json }}
-		var newPlugin{{ for.index }} = {{ plugin.default_export_name ?? "plugin" + for.index }}(pluginConfig{{ for.index }});{{ else }}var newPlugin{{ for.index }} = {{ plugin.default_export_name ?? "plugin" + for.index }}();{{ end }}		
-		plugins.push(newPlugin{{ for.index }});
-		{{ end }}{{ end }}
+				
+		var pluginConfig0 = {"Start":true,"Times":1,"Things":["foo","bar"]}
+		var newPlugin0 = plugin0(pluginConfig0);		
+		plugins.push(newPlugin0);
+		
 
         inputOptions.plugins = plugins;
         var outputOptions = new RollupOutputOptions_1.default();

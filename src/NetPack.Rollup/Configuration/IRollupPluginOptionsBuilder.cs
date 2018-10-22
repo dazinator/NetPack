@@ -7,8 +7,8 @@ namespace NetPack
 {
     public interface IRollupPluginOptionsBuilder
     {
-        RollupPluginOptionsBuilder RequiresNpmModule(string name, string version, bool installAutomatically = true);
-        RollupPluginOptionsBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement);
-        RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
+        IRollupPluginStepConfigurationBuilder RequiresNpmModule(string name, string version, bool installAutomatically = true);
+        IRollupPluginStepConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement);
+      //  RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
     }
 }

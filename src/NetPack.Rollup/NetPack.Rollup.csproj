@@ -8,10 +8,14 @@
 
   <ItemGroup>
     <None Remove="Embedded\netpack-rollup-optimise.js" />
+    <None Remove="Embedded\RollupTemplate.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Embedded\netpack-rollup-optimise.js" />
+    <EmbeddedResource Include="Embedded\RollupTemplate.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +28,10 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Scriban" Version="1.2.7" />
   </ItemGroup>
 
 </Project>

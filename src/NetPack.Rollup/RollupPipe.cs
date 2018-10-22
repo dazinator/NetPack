@@ -21,6 +21,7 @@ namespace NetPack.Rollup
         private IEmbeddedResourceProvider _embeddedResourceProvider;
         private readonly ILogger<RollupPipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
+        private readonly Lazy<RollupScriptGenerator> _rollupScriptGenerator;
 
         public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions())
         {
@@ -38,11 +39,15 @@ namespace NetPack.Rollup
             _inputOptions = inputOptions;
             _outputOptions = outputOptions;
             _logger = logger;
+            _rollupScriptGenerator = new Lazy<RollupScriptGenerator>(() => {
+                Assembly assy = GetType().GetAssemblyFromType();
+                var template = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/RollupTemplate.txt");
+                return new RollupScriptGenerator(template);
+            });
+
             _script = new Lazy<StringAsTempFile>(() =>
             {
-                Assembly assy = GetType().GetAssemblyFromType();
-                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-rollup-optimise.js");
-                string scriptContent = script.ReadAllContent();
+                string scriptContent = _rollupScriptGenerator.Value.GenerateScript(_inputOptions);
                 return _nodeServices.CreateStringAsTempFile(scriptContent);
             });
         }

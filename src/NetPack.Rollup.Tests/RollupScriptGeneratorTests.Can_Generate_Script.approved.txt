@@ -6,8 +6,8 @@ const RollupOutputOptions_1 = require("netpack-rollup/dist/RollupOutputOptions")
 const hypothetical = require("rollup-plugin-hypothetical");
 const fs = require("fs");
 
-import plugin0 from 'foopackage';
-import plugin1 from 'barpackage';
+const plugin0 = require("foopackage");
+const plugin1 = require("barpackage");
 
 var allFiles = {};
 
@@ -35,18 +35,9 @@ module.exports = {
         hypotheticalPlugin.cwd = false;
 		var plugins = [hypotheticalPlugin];		
 				
-				
-		var pluginConfig0 = {
-  "Start": true,
-  "Times": 1,
-  "Things": [
-    "foo",
-    "bar"
-  ]
-}
+		var pluginConfig0 = {"Start":true,"Times":1,"Things":["foo","bar"]}
 		var newPlugin0 = plugin0(pluginConfig0);		
 		plugins.push(newPlugin0);
-				
 		var newPlugin1 = plugin1();		
 		plugins.push(newPlugin1);
 		

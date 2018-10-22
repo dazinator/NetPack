@@ -19,12 +19,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NetPack.Rollup\NetPack.Rollup.csproj" />
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
     <ProjectReference Include="..\NetPack.Typescript\NetPack.Typescript.csproj" />
     <ProjectReference Include="..\NetPack.JsCombine\NetPack.JsCombine.csproj" />
     <ProjectReference Include="..\NetPack.RequireJs\NetPack.RequireJs.csproj" />
     <ProjectReference Include="..\NetPack.RequireJs.TagHelpers\NetPack.RequireJs.TagHelpers.csproj" />
     <ProjectReference Include="..\NetPack.JsMin\NetPack.JsMin.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\Home\RollupOptimised.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
   </ItemGroup>
 
   <!--<ItemGroup>

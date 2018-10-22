@@ -40,13 +40,13 @@ namespace NetPack.Web
                     {
                         input.Include("ts/*.ts");
                     }, options =>
-                    {                       
+                    {
                         options.Target = Typescript.ScriptTarget.ES5;
                         options.Module = Typescript.ModuleKind.AMD;
                         options.InlineSources = false;
                         options.InlineSourceMap = false;
                         options.NoImplicitAny = true;
-                        options.SourceMap = true;                       
+                        options.SourceMap = true;
 
                     })
                     // Another processor that combines multiple js files into a single "bundle" file.
@@ -64,20 +64,49 @@ namespace NetPack.Web
                         options.GenerateSourceMaps = true;
                         options.Optimizer = Optimisers.none;
                         options.BaseUrl = "amd";
-                         // options.
-                         //  options.AppDir = "amd";
-                         options.Name = "SomePage"; // The name of the AMD module to optimise.
-                         options.Out = "built.js"; // The name of the output file.
+                        // options.
+                        //  options.AppDir = "amd";
+                        options.Name = "SomePage"; // The name of the AMD module to optimise.
+                        options.Out = "built.js"; // The name of the output file.
 
-                         // Here we list the module names
-                         //options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
-                         //options.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
-                         //  options.Modules.Add(new ModuleInfo() { Name = "SomePage" });
-                     })
+                        // Here we list the module names
+                        //options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
+                        //options.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
+                        //  options.Modules.Add(new ModuleInfo() { Name = "SomePage" });
+                    })
                      .AddJsMinPipe(input =>
                      {
                          input.Include("js/*.js");
                      })
+                     .AddRollupPipe(input =>
+                     {
+                         input.Include("amd/*.js")
+                              .Include("js/requireConfig.js");
+                     }, options =>
+                     {
+                         // we add a rollup plugin which converts AMD files to ES2016 modules, so they can be included in a rollup bundle.
+                         // https://www.npmjs.com/package/rollup-plugin-amd
+                         options.AddPlugin((a) =>
+                         {
+                             a.RequiresNpmModule("module-lookup-amd", "5.0.1")
+                              .ImportOnly()   // only imported into the script as default export name, won't be included in rollupjs plugins list, but other plugin config could reference it.
+                              .DefaultExportName("lookup");                           
+                         })
+                         .AddPlugin((a) =>
+                         {
+                             a.RequiresNpmModule("rollup-plugin-amd", "3.0.0")
+                             .Register((amdPluginOptions) =>
+                             {
+                                 amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: '/js/requireConfig.js' }); }FUNC";
+                             });
+                             // a.WithConfiguration();
+                         });
+                         options.InputOptions.Input = "/amd/SomePage.js";                         
+                         options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
+                         options.OutputOptions.File = "rollupbundle.js";
+                     })
+
+
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
 

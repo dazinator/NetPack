@@ -46,6 +46,11 @@ namespace NetPack.Web.Controllers
             return View();
         }
 
+        public IActionResult RollupOptimised()
+        {
+            return View();
+        }
+
         public IActionResult RequireJsOptimisedTagHelper()
         {
 

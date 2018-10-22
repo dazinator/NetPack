@@ -40,7 +40,7 @@ namespace NetPack.Rollup.Tests
                         }, options =>
                         {
                             options.AddPlugin((plugin) => plugin.RequiresNpmModule("foo", "1.0.0")
-                                                                .WithConfiguration((dynamic c) =>
+                                                                .Register((dynamic c) =>
                                                                  {
                                                                      c.Prop = true;
                                                                  }));

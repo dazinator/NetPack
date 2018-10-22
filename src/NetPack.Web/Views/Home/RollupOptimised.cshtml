@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "Multiple Compiled Typescript Files";
+}
+
+<p>
+    The Rollup processor for NetPack allows rollupjs to be used to process inputs and create an output.
+    In this case a single bundle file is being produced.
+    The pipeline supports rollup plugins, so you can easily include additional rollup plugins in the rollup optimisation
+    process. Rollup Plugins can be found here: https://github.com/rollup/awesome
+</p>
+
+<ul>
+    <li>
+        Invoke rollupjs to process your inputs.
+    </li>
+    <li>
+        Include / configure any rollupjs plugins to be run as part of rollup processing.
+    </li>
+</ul>
+<p>Modules loaded from optimised file:</p>
+<ul id="modules"></ul>
+
+@section scripts
+    {
+
+<script>
+    // you can register settings like this before require.js is loaded
+    var require = {
+        baseUrl: '/amd'
+    };
+</script>
+
+    @*<script src="/lib/require.js"></script>*@
+    <script data-main="/netpack/rollupbundle.js" src="/lib/require.js"></script>
+
+
+}
+
+
