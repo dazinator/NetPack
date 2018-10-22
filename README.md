@@ -19,6 +19,7 @@ NetPack currently has processors for:
 - [ ] Javascript minficatiion
 - [x] rjs optimisation. (Optimises your AMD javascript files, into bundles, using the rjs optimiser.)
 - [ ] [SystemJS Production workflows](https://github.com/systemjs/systemjs/blob/master/docs/production-workflows.md)
+- [ ] rollupjs processing. (Define rollup js workflows for your assets)
 
 `NetPack` is easy. 
 
