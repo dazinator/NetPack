@@ -97,11 +97,12 @@ namespace NetPack.Web
                              a.RequiresNpmModule("rollup-plugin-amd", "3.0.0")
                              .Register((amdPluginOptions) =>
                              {
-                                 amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: '/js/requireConfig.js' }); }FUNC";
+                                 amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: {baseUrl: '/amd'} }); }FUNC";
+                              //   amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: './js/requireConfig.js' }); }FUNC";
                              });
                              // a.WithConfiguration();
                          });
-                         options.InputOptions.Input = "/amd/SomePage.js";                         
+                         options.InputOptions.Input = "/amd/RollupPage.js";                         
                          options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
                          options.OutputOptions.File = "rollupbundle.js";
                      })
