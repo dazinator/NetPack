@@ -102,8 +102,8 @@ namespace NetPack.Web
                              });
                              // a.WithConfiguration();
                          });
-                         options.InputOptions.Input = "/amd/RollupPage.js";                         
-                         options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
+                         options.InputOptions.Input = "/amd/SomePage.js";                         
+                         options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
                          options.OutputOptions.File = "rollupbundle.js";
                      })
 

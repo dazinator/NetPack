@@ -1,7 +1,7 @@
 ﻿define("ModuleA", ["require", "exports"], function (require, exports) {
     "use strict";
 
-    var self = this;
+    var self = {};
     self.addModuleToList = function (listId, moduleName) {
 
         var ul = document.getElementById(listId);
@@ -11,7 +11,6 @@
     };
 
     self.addModuleToList("modules", "ModuleA");
-
     return self;
 
 });
