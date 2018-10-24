@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using NetPack.Node.Dto;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace NetPack.Rollup
 {
-    public class RollupResponse
+    public class RollupCodeSplittingResponse
     {
         public string[] Files { get; set; }
 

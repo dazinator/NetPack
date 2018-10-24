@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Threading;
 
 namespace NetPack.Rollup
 {

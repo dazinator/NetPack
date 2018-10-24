@@ -1,14 +1,13 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace NetPack.Rollup
 {
-    public class RollupInputOptions
+    public class BaseRollupInputOptions
     {
-
-        public RollupInputOptions()
+        public BaseRollupInputOptions()
         {
-            Plugins = new List<RollupPlugin>();          
+            Plugins = new List<RollupPlugin>();
         }
 
         public void AddPlugin(string name, JObject configuration, string defaultExportName = null, bool importOnly = false)
@@ -17,10 +16,6 @@ namespace NetPack.Rollup
         }
 
         public List<RollupPlugin> Plugins { get; set; }
-
-        public string Input { get; set; }
-
-
     }
 
 }

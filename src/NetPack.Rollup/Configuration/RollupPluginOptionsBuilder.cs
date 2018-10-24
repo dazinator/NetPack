@@ -16,62 +16,60 @@ namespace NetPack
     public class RollupPluginOptionsBuilder : IRollupPluginOptionsBuilder, IRollupPluginStepConfigurationBuilder
     {
         private JObject _options = null;
-        private RollupPipeOptionsBuilder _builder;
+       // private RollupPipeOptionsBuilder _builder;
         private NpmModuleRequirement _moduleRequirement = null;
         private bool _importOnly = false;
         private string _defaultExportName = null;
 
-        public RollupPluginOptionsBuilder(RollupPipeOptionsBuilder builder)
+        public NpmModuleRequirement ModuleRequirement { get => _moduleRequirement; set => _moduleRequirement = value; }
+        public JObject Options { get => _options; set => _options = value; }
+        public string DefaultExportName1 { get => _defaultExportName; set => _defaultExportName = value; }
+        public bool IsImportOnly { get => _importOnly; set => _importOnly = value; }
+
+        public RollupPluginOptionsBuilder()
         {
-            _builder = builder;
+            
         }
 
         public IRollupPluginStepConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement)
         {
             NpmModuleRequirementBuilder builder = new NpmModuleRequirementBuilder();
             configureNpmModuleRequirement?.Invoke(builder);
-            _moduleRequirement = builder.BuildRequirement();
+            ModuleRequirement = builder.BuildRequirement();
             return this;
         }
 
         public IRollupPluginStepConfigurationBuilder RequiresNpmModule(string packageName, string version, bool installAutomatically = true)
         {
             NpmModuleRequirement module = new NpmModuleRequirement(packageName, installAutomatically, version);
-            _moduleRequirement = module;
+            ModuleRequirement = module;
             return this;
         }
 
 
         public IRollupPluginStepConfigurationBuilder Register(Action<dynamic> configure = null)
         {
-            _importOnly = false;
+            IsImportOnly = false;
             if (configure != null)
             {
                 JObject options = new JObject();
                 configure?.Invoke(options);
-                _options = options;
+                Options = options;
             }
             return this;
         }
 
         public IRollupPluginStepConfigurationBuilder ImportOnly()
         {
-            _importOnly = true;
+            IsImportOnly = true;
             return this;
         }
 
         public IRollupPluginStepConfigurationBuilder DefaultExportName(string name)
         {
-            _defaultExportName = name;
+            DefaultExportName1 = name;
             return this;
         }
-
-
-        public RollupPipeOptionsBuilder Build()
-        {
-            _builder.IPipelineBuilder.IncludeRequirement(_moduleRequirement);
-            _builder.InputOptions.AddPlugin(_moduleRequirement.PackageName, _options, _defaultExportName, _importOnly);
-            return _builder;
-        }
+       
     }
 }
