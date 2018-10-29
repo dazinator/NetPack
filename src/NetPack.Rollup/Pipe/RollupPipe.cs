@@ -1,5 +1,4 @@
 using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
@@ -17,7 +16,7 @@ namespace NetPack.Rollup
     {
         private INetPackNodeServices _nodeServices;
         private readonly RollupInputOptions _inputOptions;
-        private readonly RollupOutputOptions _outputOptions;
+        private readonly RollupOutputFileOptions _outputOptions;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
         private readonly ILogger<RollupPipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
@@ -28,11 +27,11 @@ namespace NetPack.Rollup
 
         }
 
-        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions(), new RollupOutputOptions())
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions(), new RollupOutputFileOptions())
         {            
         }
 
-        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputOptions outputOptions)
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputFileOptions outputOptions)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -60,8 +59,6 @@ namespace NetPack.Rollup
             foreach (FileWithDirectory file in context.InputFiles)
             {
                 string fileContent = file.FileInfo.ReadAllContent();
-                //  var dir = file.Directory;
-                // var name = file.FileInfo.Name;
 
                 // expose all input files to the node process, so r.js can see them using fs.
                 optimiseRequest.Files.Add(new NodeInMemoryFile()
@@ -75,26 +72,10 @@ namespace NetPack.Rollup
             optimiseRequest.OutputOptions = _outputOptions;
 
             RollupResponse result = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
-            //if(result.Files!= null)
-            //{
-            //    foreach (NodeInMemoryFile file in result.Files)
-            //    {
-            //        string filePath = file.Path.Replace('\\', '/');
-            //        SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
-            //        PathString dir = subPathInfo.Directory.ToPathString();
-            //        context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
-            //    }
-            //}
-
-           
-
+         
             var code = result.Code;
             var map = result.SourceMap;
-
             context.AddOutput("/", new StringFileInfo(code.ToString(), _outputOptions.File));
-         //   context.AddOutput("/", new StringFileInfo(code.ToString(), _outputOptions.File));
-
-
         }
     }
 }

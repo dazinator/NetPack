@@ -29,7 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Views\Home\RollupOptimised.cshtml">
+    <Content Update="Views\Home\RollupCodeSplitting.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Home\RollupBundle.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
   </ItemGroup>

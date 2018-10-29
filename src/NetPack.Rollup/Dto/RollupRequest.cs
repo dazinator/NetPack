@@ -12,8 +12,7 @@ namespace NetPack.Rollup
 
         public RollupInputOptions InputOptions { get; set; }
 
-        public RollupOutputOptions OutputOptions { get; set; }
-        
+        public RollupOutputFileOptions OutputOptions { get; set; }        
 
         public List<NodeInMemoryFile> Files { get; set; }   
     }

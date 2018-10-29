@@ -12,7 +12,7 @@ namespace NetPack.Rollup
 
         public RollupCodeSplittingInputOptions InputOptions { get; set; }
 
-        public RollupOutputOptions OutputOptions { get; set; }        
+        public RollupOutputDirOptions OutputOptions { get; set; }        
 
         public List<NodeInMemoryFile> Files { get; set; }   
     }

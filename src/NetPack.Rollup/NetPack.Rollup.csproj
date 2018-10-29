@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Embedded\netpack-rollup-optimise.js" />
     <None Remove="Embedded\RollupCodeSplittingTemplate.txt" />
     <None Remove="Embedded\RollupTemplate.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Embedded\netpack-rollup-optimise.js" />
     <EmbeddedResource Include="Embedded\RollupCodeSplittingTemplate.txt">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

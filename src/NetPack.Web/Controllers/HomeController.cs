@@ -46,7 +46,12 @@ namespace NetPack.Web.Controllers
             return View();
         }
 
-        public IActionResult RollupOptimised()
+        public IActionResult RollupBundle()
+        {
+            return View();
+        }
+
+        public IActionResult RollupCodeSplitting()
         {
             return View();
         }

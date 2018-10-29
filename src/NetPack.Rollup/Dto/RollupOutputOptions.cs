@@ -3,30 +3,15 @@ using Newtonsoft.Json.Converters;
 
 namespace NetPack.Rollup
 {
-    public class RollupOutputOptions
+    public class BaseRollupOutputOptions
     {
-
-        public RollupOutputOptions()
+        public BaseRollupOutputOptions()
         {
-            Format = RollupOutputFormat.System;
-            File = "bundle.js";
+            Format = RollupOutputFormat.System;            
         }
 
-        [JsonConverter(typeof(StringEnumConverter))]        
+        [JsonConverter(typeof(StringEnumConverter))]
         public RollupOutputFormat Format { get; set; }
 
-        /// <summary>
-        /// The bundle file to be produced.
-        /// </summary>
-        public string File { get; set; }
-
-        /// <summary>
-        /// When using experimentalCodeSplitting, rather than a single file, multiple output files will be placed under this dir.
-        /// </summary>
-        public string Dir { get; set; }
-
-
-
     }
-
 }

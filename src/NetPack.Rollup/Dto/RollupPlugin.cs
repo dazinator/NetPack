@@ -44,9 +44,5 @@ namespace NetPack.Rollup
         public bool ImportOnly => _importOnly;
 
         public string DefaultExportName => _defaultExportName;
-
-      
-
     }
-
 }

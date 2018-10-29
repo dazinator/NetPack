@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Rollup Bundle";
+}
+
+<p>
+    NetPack allows you to use rollup to process your files.   
+    NetPack's API allows you to configure rollup, including which plugins to use.
+    Rollup Plugins can be found here: https://github.com/rollup/awesome
+</p>
+
+<ul>
+    <li>
+        Invoke rollupjs to generate a single bundle file.
+    </li>
+    <li>
+       Configure any rollupjs plugins you want to run as part of rollup processing.
+    </li>
+</ul>
+<p>Modules loaded from optimised file:</p>
+<ul id="modules"></ul>
+
+@section scripts
+    {
+
+<script>
+    // you can register settings like this before require.js is loaded
+    var require = {
+        baseUrl: '/amd'
+    };
+</script>
+
+    @*<script src="/lib/require.js"></script>*@
+    <script data-main="/netpack/rollupbundle.js" src="/lib/require.js"></script>
+
+
+}
+
+

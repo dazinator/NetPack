@@ -46,20 +46,19 @@ module.exports = {
         outputOptions.format = outputOptionsDto.format;		
 		outputOptions.dir = outputOptionsDto.dir;
 
-        let sut = new rolluphost_1.default();
-		
-        sut.BuildChunks(inputOptions, outputOptions).then(result => {
-                for (let key in result) {
-                    var file = result[key];
-                    var code = file.code;
-                    var map = file.sourceMap;
+        let sut = new rolluphost_1.default();		
 
-					var rollupResult = { Code: code, SourceMap: map };
-                    callback(null, rollupResult);                   
+        sut.BuildChunks(inputOptions, outputOptions).then(result => {
+		        var results = [];
+                for (let key in result) {
+                    var file = result[key];                
+					results.push({ Code: file.code, SourceMap: file.map, FileName: file.fileName });                                  
                 }
+				var rollupResult = { Results: results }
+				callback(null, rollupResult);   
                 //            
             }).catch((reason) => {
-                assert_1.fail("error " + reason);
+                callback("error " + reason);
             });
     }
 };

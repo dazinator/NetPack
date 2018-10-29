@@ -6,24 +6,25 @@ using System;
 // Extension method put in root namespace for discoverability purposes.
 namespace NetPack
 {
-    public class BaseRollupPipeOptionsBuilder<TInputOptions, TBuilder>
+    public class BaseRollupPipeOptionsBuilder<TInputOptions, TOutputOptions, TBuilder>
         where TInputOptions : BaseRollupInputOptions, new()
-        where TBuilder: BaseRollupPipeOptionsBuilder<TInputOptions, TBuilder>
+        where TOutputOptions : BaseRollupOutputOptions, new()
+        where TBuilder: BaseRollupPipeOptionsBuilder<TInputOptions, TOutputOptions, TBuilder>
     {
         private readonly IPipelineBuilder _builder;
         private readonly TInputOptions _inputOptions;
-        private readonly RollupOutputOptions _outputOptions;
+        private readonly TOutputOptions _outputOptions;
 
 
         public BaseRollupPipeOptionsBuilder(IPipelineBuilder builder) : this(builder, new TInputOptions())
         {
         }
 
-        public BaseRollupPipeOptionsBuilder(IPipelineBuilder builder, TInputOptions inputOptions) : this(builder, new TInputOptions(), new RollupOutputOptions())
+        public BaseRollupPipeOptionsBuilder(IPipelineBuilder builder, TInputOptions inputOptions) : this(builder, new TInputOptions(), new TOutputOptions())
         {
         }
 
-        public BaseRollupPipeOptionsBuilder(IPipelineBuilder builder, TInputOptions inputOptions, RollupOutputOptions outputOptions)
+        public BaseRollupPipeOptionsBuilder(IPipelineBuilder builder, TInputOptions inputOptions, TOutputOptions outputOptions)
         {
             _builder = builder;
             _inputOptions = inputOptions;
@@ -43,7 +44,7 @@ namespace NetPack
 
         public TInputOptions InputOptions => _inputOptions;
 
-        public RollupOutputOptions OutputOptions => _outputOptions;
+        public TOutputOptions OutputOptions => _outputOptions;
 
     }
 }

@@ -106,6 +106,28 @@ namespace NetPack.Web
                          options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
                          options.OutputOptions.File = "rollupbundle.js";
                      })
+                     // rollup code splitting example.
+                      .AddRollupCodeSplittingPipe(input =>
+                      {
+                          input.Include("esm/**/*.js");
+                      }, options =>
+                      {
+                          options.InputOptions.AddEntryPoint("/esm/main-a.js")
+                                              .AddEntryPoint("/esm/main-b.js");
+                          options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
+                          options.OutputOptions.Dir = "/rollup/module/";
+                      })
+                      // rollup code splitting example - for browsers that don't support native modules we use systemjs.
+                      .AddRollupCodeSplittingPipe(input =>
+                      {
+                          input.Include("esm/**/*.js");
+                      }, options =>
+                      {
+                          options.InputOptions.AddEntryPoint("/esm/main-a.js")
+                                              .AddEntryPoint("/esm/main-b.js");
+                          options.OutputOptions.Format = Rollup.RollupOutputFormat.System;
+                          options.OutputOptions.Dir = "/rollup/nomodule/";
+                      })
 
 
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.

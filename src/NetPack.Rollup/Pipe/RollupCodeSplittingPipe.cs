@@ -16,7 +16,7 @@ namespace NetPack.Rollup
     {
         private INetPackNodeServices _nodeServices;
         private readonly RollupCodeSplittingInputOptions _inputOptions;
-        private readonly RollupOutputOptions _outputOptions;
+        private readonly RollupOutputDirOptions _outputOptions;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
         private readonly ILogger<RollupCodeSplittingPipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
@@ -27,20 +27,21 @@ namespace NetPack.Rollup
 
         }
 
-        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupCodeSplittingInputOptions(), new RollupOutputOptions())
+        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupCodeSplittingInputOptions(), new RollupOutputDirOptions())
         {
         }
 
-        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions inputOptions, RollupOutputOptions outputOptions)
+        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions inputOptions, RollupOutputDirOptions outputOptions)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
             _inputOptions = inputOptions;
             _outputOptions = outputOptions;
             _logger = logger;
-            _rollupScriptGenerator = new Lazy<RollupCodeSplittingScriptGenerator>(() => {
+            _rollupScriptGenerator = new Lazy<RollupCodeSplittingScriptGenerator>(() =>
+            {
                 Assembly assy = GetType().GetAssemblyFromType();
-                var template = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/RollupCodeSplittingTemplate.txt");
+                Microsoft.Extensions.FileProviders.IFileInfo template = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/RollupCodeSplittingTemplate.txt");
                 return new RollupCodeSplittingScriptGenerator(template);
             });
 
@@ -59,9 +60,6 @@ namespace NetPack.Rollup
             foreach (FileWithDirectory file in context.InputFiles)
             {
                 string fileContent = file.FileInfo.ReadAllContent();
-                //  var dir = file.Directory;
-                // var name = file.FileInfo.Name;
-
                 // expose all input files to the node process, so r.js can see them using fs.
                 optimiseRequest.Files.Add(new NodeInMemoryFile()
                 {
@@ -74,26 +72,12 @@ namespace NetPack.Rollup
             optimiseRequest.OutputOptions = _outputOptions;
 
             RollupCodeSplittingResponse result = await _nodeServices.InvokeExportAsync<RollupCodeSplittingResponse>(_script.Value.FileName, "build", optimiseRequest);
-            //if(result.Files!= null)
-            //{
-            //    foreach (NodeInMemoryFile file in result.Files)
-            //    {
-            //        string filePath = file.Path.Replace('\\', '/');
-            //        SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
-            //        PathString dir = subPathInfo.Directory.ToPathString();
-            //        context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
-            //    }
-            //}
 
-
-
-            var code = result.Code;
-            var map = result.SourceMap;
-
-            context.AddOutput("/", new StringFileInfo(code.ToString(), _outputOptions.File));
-            //   context.AddOutput("/", new StringFileInfo(code.ToString(), _outputOptions.File));
-
-
+            string outDir = $"/{_outputOptions.Dir}";
+            foreach (RollupChunk item in result.Results)
+            {
+                context.AddOutput(outDir, new StringFileInfo(item.Code.ToString(), item.FileName));
+            }
         }
     }
 }

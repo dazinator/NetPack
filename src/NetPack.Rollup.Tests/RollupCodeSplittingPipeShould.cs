@@ -114,7 +114,7 @@ export default function () {
                         }, options =>
                         {
                             options.InputOptions.AddEntryPoint("/wwwroot/Main.js")
-                                                .AddEntryPoint("/wwwroot/SecondJs.js");                           
+                                                .AddEntryPoint("/wwwroot/Second.js");                           
 
                             options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
                             options.OutputOptions.Dir = "/rollup";
