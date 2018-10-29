@@ -24,9 +24,9 @@ module.exports = {
         var inputOptionsDto = requestDto.inputOptions;
         var outputOptionsDto = requestDto.outputOptions;
 
-        var inputOptions = new RollupFileOptions_1.default();
+        var inputOptions = new RollupFileOptions_1.RollupDirOptions();
         inputOptions.input = inputOptionsDto.input;
-		inputOptions.experimentalCodeSplitting = true;
+		// inputOptions.experimentalCodeSplitting = true;
 
         // inputOptions.entry = inputOptionsDto.input;
 
@@ -42,26 +42,24 @@ module.exports = {
 		{{ end }}{{ end }}
 
         inputOptions.plugins = plugins;
-        var outputOptions = new RollupOutputOptions_1.default();
+        var outputOptions = new RollupOutputOptions_1.RollupOutputOptionsDir();
         outputOptions.format = outputOptionsDto.format;		
 		outputOptions.dir = outputOptionsDto.dir;
 
         let sut = new rolluphost_1.default();
 		
-        sut.build(inputOptions, outputOptions).then(result => {
-            if (result === undefined) {
-               callback("result was undefined", null);
-            }
-            else {
-                var code = result.Code;
-                var sourceMap = result.SourceMap;
-                // response.files.push({ path: property, contents: results[property] })
-                var rollupResult = { Code: code, SourceMap: sourceMap };
-                callback(null, rollupResult);
-            }          
+        sut.BuildChunks(inputOptions, outputOptions).then(result => {
+                for (let key in result) {
+                    var file = result[key];
+                    var code = file.code;
+                    var map = file.sourceMap;
 
-        }).catch((reason) => {
-            callback(reason, null);
-        });
+					var rollupResult = { Code: code, SourceMap: map };
+                    callback(null, rollupResult);                   
+                }
+                //            
+            }).catch((reason) => {
+                assert_1.fail("error " + reason);
+            });
     }
 };

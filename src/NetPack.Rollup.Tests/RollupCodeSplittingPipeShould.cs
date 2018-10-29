@@ -44,7 +44,8 @@ namespace NetPack.Rollup.Tests
         {
             // Act
             string responseString = await GetResponseString();
-            Assert.Contains("File: built/bundle.js", responseString);
+            Assert.Contains("File: built/Main.js", responseString);
+            Assert.Contains("File: built/Second.js", responseString);
         }
     }
 
