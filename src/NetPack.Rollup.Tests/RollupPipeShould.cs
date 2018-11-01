@@ -240,7 +240,7 @@ classA.doSomething();
                                  options.InputOptions.Input = "/wwwroot/ModuleB.js";
                                  options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
                                  options.OutputOptions.File = "iifebundle.js";
-                                 options.OutputOptions.Sourcemap = SourceMapType.File;
+                                 options.OutputOptions.Sourcemap = SourceMapType.Inline;
                                  options.OutputOptions.Name = "mybundle";
                              })
                               .AddRollupPipe(input =>

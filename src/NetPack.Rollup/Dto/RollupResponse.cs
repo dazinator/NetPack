@@ -7,5 +7,7 @@ namespace NetPack.Rollup
         public RollupResult Result { get; set; }
 
         public JObject Echo { get; set; }
+
+        public JValue EchoValue { get; set; }
     }
 }

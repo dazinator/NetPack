@@ -78,7 +78,7 @@ module.exports = {
                callback("result was undefined", null);
             }
             else {             
-				var response = { Result: result }
+				var response = { Result: result, EchoValue: outputOptionsDto.sourcemap }
 				callback(null, response); 
             }          
         }).catch((reason) => {
