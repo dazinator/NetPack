@@ -1,5 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using System;
 
 namespace NetPack.Rollup
 {
@@ -23,6 +25,20 @@ namespace NetPack.Rollup
         /// </summary>
         public string Name { get; set; }
 
+        public void ConfigureGlobals(Action<dynamic> globals)
+        {
+            if (Globals == null)
+            {
+                Globals = new JObject();
+            }
+            globals?.Invoke(Globals);
+        }
+       
+        /// <summary>
+        /// Object of id: name pairs, used for umd/iife bundles.
+        /// Used to tell Rollup which module ids are mapped to global variables.
+        /// </summary>
+        public JObject Globals { get; set; }
     }
 
 }

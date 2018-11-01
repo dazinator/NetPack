@@ -66,7 +66,17 @@ namespace NetPack.Rollup.Tests
             string responseString = await GetResponseString("path=external");
             Assert.Contains("File: built/bundlewithexternal.js", responseString);
             Assert.Contains("File: built/bundlewithexternal.js.map", responseString);
-           
+            Assert.Contains("System.register(['SomeExternalLib'], function(exports, module) {", responseString);
+        }
+
+        [Fact]
+        public async Task Create_Bundle_With_External_Globals()
+        {
+            // Act
+            string responseString = await GetResponseString("path=external");
+            Assert.Contains("File: built/bundlewithexternal.js", responseString);
+            Assert.Contains("File: built/bundlewithexternal.js.map", responseString);
+            Assert.Contains("var mybundlewithglobal = (function (exports,jjj) {", responseString);
         }
 
         public class RollupPipeShouldTestsStartup
@@ -124,6 +134,24 @@ classA.doSomething();
 
 ";
 
+            public const string ModuleWithExternalGlobalDependency = @"
+
+import jjj from 'jquery';
+
+
+export class ClassA {
+    constructor(another) { }
+    doSomething() {
+    jjj.bar();
+        // return ""<h1>"" + this.greeting + ""</h1>"";
+    }
+}
+
+var classA = new ClassA(""Hello, world!"");
+classA.doSomething();
+
+";
+
 
             //public const string ConfigFileContent =
             //    @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
@@ -149,9 +177,9 @@ classA.doSomething();
                         outputPath = outputPath + "/" + pathText;
                     }
 
-                    foreach (var outputFile in env.WebRootFileProvider.GetDirectoryContents(outputPath))
+                    foreach (Microsoft.Extensions.FileProviders.IFileInfo outputFile in env.WebRootFileProvider.GetDirectoryContents(outputPath))
                     {
-                        if(!outputFile.IsDirectory)
+                        if (!outputFile.IsDirectory)
                         {
                             using (StreamReader reader = new StreamReader(outputFile.CreateReadStream()))
                             {
@@ -159,7 +187,7 @@ classA.doSomething();
                                 builder.Append(reader.ReadToEnd());
                                 builder.AppendLine();
                             }
-                        }                       
+                        }
                     }
 
                     await context.Response.WriteAsync(builder.ToString());
@@ -175,7 +203,7 @@ classA.doSomething();
                 inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
                 inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
                 inMemoryFileProvider.Directory.AddFile("wwwroot/external", new StringFileInfo(ModuleWithExternalDependency, "ModuleWithExternalDependency.js"));
-
+                inMemoryFileProvider.Directory.AddFile("wwwroot/external", new StringFileInfo(ModuleWithExternalGlobalDependency, "ModuleWithExternalGlobalDependency.js"));
 
                 services.AddNetPack((setup) =>
                 {
@@ -218,6 +246,26 @@ classA.doSomething();
                                   //options.OutputOptions.Sourcemap = SourceMapType.File;
                                   //options.OutputOptions.Name = "mybundle";
                               })
+                               .AddRollupPipe(input =>
+                               {
+                                   input.Include("wwwroot/external/ModuleWithExternalGlobalDependency.js");
+                               }, options =>
+                               {
+                                   options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalGlobalDependency.js";
+                                   options.InputOptions.External.Add("jjj");
+                                   options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
+                                   options.OutputOptions.File = "/external/bundlewithexternalglobal.js";
+                                   options.OutputOptions.Name = "mybundlewithglobal";
+                                   options.OutputOptions.Sourcemap = SourceMapType.File;
+                                   options.OutputOptions.ConfigureGlobals(globals =>
+                                   {
+                                       globals.jquery = "jjj";
+                                   });
+
+                                   //options.OutputOptions.Sourcemap = SourceMapType.File;
+                                   //options.OutputOptions.Name = "mybundle";
+                               })
+
 
                             .UseBaseRequestPath("/built");
                     });

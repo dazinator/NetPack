@@ -51,6 +51,12 @@ module.exports = {
 		{
 		   outputOptions.name = outputOptionsDto.name;
 		}
+		if(outputOptionsDto.globals != null)
+		{
+		   outputOptions.globals = outputOptionsDto.globals;
+		}
+		
+
 		if(outputOptionsDto.sourcemap != null)
 		{
 			if(outputOptionsDto.sourcemap == "inline")
