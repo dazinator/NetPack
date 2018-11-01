@@ -39,6 +39,21 @@ namespace NetPack.Rollup
         /// Used to tell Rollup which module ids are mapped to global variables.
         /// </summary>
         public JObject Globals { get; set; }
+
+
+        public void ConfigurePaths(Action<dynamic> paths)
+        {
+            if (Paths == null)
+            {
+                Paths = new JObject();
+            }
+            paths?.Invoke(Paths);
+        }
+
+        /// <summary>
+        ///  Object of id: path pairs. Where supplied, these paths will be used in the generated bundle instead of the module ID, allowing you to (for example) load dependencies from a CDN
+        /// </summary>
+        public JObject Paths { get; set; }
     }
 
 }

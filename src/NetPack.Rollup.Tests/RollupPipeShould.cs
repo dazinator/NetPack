@@ -79,6 +79,16 @@ namespace NetPack.Rollup.Tests
             Assert.Contains("var mybundlewithglobal = (function (exports,jjj) {", responseString);
         }
 
+        [Fact]
+        public async Task Create_Bundle_With_External_Module_From_CDN()
+        {
+            // Act
+            string responseString = await GetResponseString("path=externalcdn");
+            Assert.Contains("File: built/bundlewithexternalglobalcdn.js", responseString);
+            Assert.Contains("File: built/bundlewithexternalglobalcdn.js.map", responseString);
+            Assert.Contains("https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js", responseString);
+        }
+
         public class RollupPipeShouldTestsStartup
         {
             public const string AmdModuleAFileContent = @"
@@ -261,10 +271,39 @@ classA.doSomething();
                                    {
                                        globals.jquery = "jjj";
                                    });
+                                   options.OutputOptions.ConfigurePaths(paths =>
+                                   {
+                                       //  configure path for jquery module to be loaded from CDN.
+                                       paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+                                   });
 
                                    //options.OutputOptions.Sourcemap = SourceMapType.File;
                                    //options.OutputOptions.Name = "mybundle";
                                })
+                                .AddRollupPipe(input =>
+                                {
+                                    input.Include("wwwroot/external/ModuleWithExternalGlobalDependency.js");
+                                }, options =>
+                                {
+                                    options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalGlobalDependency.js";
+                                    options.InputOptions.External.Add("jjj");
+                                    options.OutputOptions.Format = Rollup.RollupOutputFormat.Amd;
+                                    options.OutputOptions.File = "/externalcdn/bundlewithexternalglobalcdn.js";
+                                    options.OutputOptions.Name = "mybundlewithglobalcdn";
+                                    options.OutputOptions.Sourcemap = SourceMapType.File;
+                                    options.OutputOptions.ConfigureGlobals(globals =>
+                                    {
+                                        globals.jquery = "jjj";
+                                    });
+                                    options.OutputOptions.ConfigurePaths(paths =>
+                                    {
+                                        //  configure path for jquery module to be loaded from CDN.
+                                        paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+                                    });
+
+                                    //options.OutputOptions.Sourcemap = SourceMapType.File;
+                                    //options.OutputOptions.Name = "mybundle";
+                                })
 
 
                             .UseBaseRequestPath("/built");

@@ -57,6 +57,10 @@ module.exports = {
 		{
 		   outputOptions.globals = outputOptionsDto.globals;
 		}
+		if(outputOptionsDto.paths != null)
+		{
+		   outputOptions.paths = outputOptionsDto.paths;
+		}
 		if(outputOptionsDto.sourcemap != null)
 		{
 			if(outputOptionsDto.sourcemap == "inline")
