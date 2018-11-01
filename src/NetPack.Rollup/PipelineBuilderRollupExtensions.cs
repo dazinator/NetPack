@@ -46,7 +46,7 @@ namespace NetPack
             NpmModuleRequirement rollupPluginHypothetical = new NpmModuleRequirement("rollup-plugin-hypothetical", true, "2.1.0");
             builder.IncludeRequirement(rollupPluginHypothetical);
 
-            NpmModuleRequirement netpackRollup = new NpmModuleRequirement("netpack-rollup", true, "1.0.10");
+            NpmModuleRequirement netpackRollup = new NpmModuleRequirement("netpack-rollup", true, "1.0.12");
             builder.IncludeRequirement(netpackRollup);
 
             return nodeServices;

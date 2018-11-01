@@ -45,6 +45,7 @@ namespace NetPack.Rollup.Tests
             // Act
             string responseString = await GetResponseString();
             Assert.Contains("File: built/bundle.js", responseString);
+            Assert.Contains("File: built/bundle.js.map", responseString);
         }
     }
 
@@ -139,6 +140,7 @@ var classA = new ClassA(""Hello, world!"");
                             options.InputOptions.Input = "/wwwroot/ModuleB.js";
                             options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
                             options.OutputOptions.File = "bundle.js";
+                            options.OutputOptions.Sourcemap =  SourceMapType.File;
                         })
                         .UseBaseRequestPath("/built");
                 });

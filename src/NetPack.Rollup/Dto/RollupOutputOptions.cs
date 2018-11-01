@@ -13,5 +13,8 @@ namespace NetPack.Rollup
         [JsonConverter(typeof(StringEnumConverter))]
         public RollupOutputFormat Format { get; set; }
 
+        public SourceMapType? Sourcemap { get; set; }     
+
     }
+
 }

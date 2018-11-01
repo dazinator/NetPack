@@ -42,6 +42,17 @@ module.exports = {
         inputOptions.plugins = plugins;
         var outputOptions = new RollupOutputOptions_1.default();
         outputOptions.format = outputOptionsDto.format;
+		if(outputOptionsDto.sourcemap != null)
+		{
+			if(outputOptionsDto.sourcemap == "inline")
+			{
+			   outputOptions.sourcemap = "inline";
+			}
+			else
+			{
+			   outputOptions.sourcemap = true;
+			}
+		}
 
         let sut = new rolluphost_1.default();
 		
@@ -49,14 +60,10 @@ module.exports = {
             if (result === undefined) {
                callback("result was undefined", null);
             }
-            else {
-                var code = result.Code;
-                var sourceMap = result.SourceMap;
-                // response.files.push({ path: property, contents: results[property] })
-                var rollupResult = { Code: code, SourceMap: sourceMap };
-                callback(null, rollupResult);
+            else {             
+				var response = { Result: result }
+				callback(null, response); 
             }          
-
         }).catch((reason) => {
             callback(reason, null);
         });

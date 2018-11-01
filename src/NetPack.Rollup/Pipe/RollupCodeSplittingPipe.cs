@@ -74,9 +74,16 @@ namespace NetPack.Rollup
             RollupCodeSplittingResponse result = await _nodeServices.InvokeExportAsync<RollupCodeSplittingResponse>(_script.Value.FileName, "build", optimiseRequest);
 
             string outDir = $"/{_outputOptions.Dir}";
-            foreach (RollupChunk item in result.Results)
+            foreach (var item in result.Result)
             {
                 context.AddOutput(outDir, new StringFileInfo(item.Code.ToString(), item.FileName));
+
+                if (item.SourceMap != null)
+                {
+                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(item.SourceMap);
+                    context.AddOutput(outDir, new StringFileInfo(json, item.FileName + ".map"));
+                }
+
             }
         }
     }

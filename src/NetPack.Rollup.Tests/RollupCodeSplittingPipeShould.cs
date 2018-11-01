@@ -45,7 +45,9 @@ namespace NetPack.Rollup.Tests
             // Act
             string responseString = await GetResponseString();
             Assert.Contains("File: built/Main.js", responseString);
+            Assert.Contains("File: built/Main.js.map", responseString);
             Assert.Contains("File: built/Second.js", responseString);
+            Assert.Contains("File: built/Second.js.map", responseString);
         }
     }
 
@@ -117,6 +119,7 @@ export default function () {
                                                 .AddEntryPoint("/wwwroot/Second.js");                           
 
                             options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
+                            options.OutputOptions.Sourcemap = SourceMapType.File;
                             options.OutputOptions.Dir = "/rollup";
                         })
                         .UseBaseRequestPath("/built");

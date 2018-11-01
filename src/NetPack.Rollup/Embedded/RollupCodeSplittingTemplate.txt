@@ -45,17 +45,23 @@ module.exports = {
         var outputOptions = new RollupOutputOptions_1.RollupOutputOptionsDir();
         outputOptions.format = outputOptionsDto.format;		
 		outputOptions.dir = outputOptionsDto.dir;
+		if(outputOptionsDto.sourcemap != null)
+		{
+			if(outputOptionsDto.sourcemap == "inline")
+			{
+			   outputOptions.sourcemap = "inline";
+			}
+			else
+			{
+			   outputOptions.sourcemap = true;
+			}
+		}
 
         let sut = new rolluphost_1.default();		
 
         sut.BuildChunks(inputOptions, outputOptions).then(result => {
-		        var results = [];
-                for (let key in result) {
-                    var file = result[key];                
-					results.push({ Code: file.code, SourceMap: file.map, FileName: file.fileName });                                  
-                }
-				var rollupResult = { Results: results }
-				callback(null, rollupResult);   
+		       	var response = { Result: result }
+				callback(null, response);   
                 //            
             }).catch((reason) => {
                 callback("error " + reason);

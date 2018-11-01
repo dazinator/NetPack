@@ -71,11 +71,15 @@ namespace NetPack.Rollup
             optimiseRequest.InputOptions = _inputOptions;
             optimiseRequest.OutputOptions = _outputOptions;
 
-            RollupResponse result = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
-         
-            var code = result.Code;
-            var map = result.SourceMap;
-            context.AddOutput("/", new StringFileInfo(code.ToString(), _outputOptions.File));
+            RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);         
+            var result = response.Result;
+          
+            context.AddOutput("/", new StringFileInfo(result.Code.ToString(), _outputOptions.File));
+            if(result.SourceMap != null)
+            {
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(result.SourceMap);                
+                context.AddOutput("/", new StringFileInfo(json, _outputOptions.File + ".map"));
+            }
         }
     }
 }
