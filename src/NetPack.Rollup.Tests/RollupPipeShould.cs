@@ -66,7 +66,7 @@ namespace NetPack.Rollup.Tests
             string responseString = await GetResponseString("path=external");
             Assert.Contains("File: built/bundlewithexternal.js", responseString);
             Assert.Contains("File: built/bundlewithexternal.js.map", responseString);
-            Assert.Contains("System.register(['SomeExternalLib'], function(exports, module) {", responseString);
+            Assert.Contains("System.register(['SomeExternalLib'], function (exports, module) {", responseString);
         }
 
         [Fact]
