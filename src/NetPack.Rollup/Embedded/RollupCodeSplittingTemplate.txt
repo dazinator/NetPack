@@ -42,6 +42,10 @@ module.exports = {
 		{{ end }}{{ end }}
 
         inputOptions.plugins = plugins;
+		if(inputOptionsDto.external != null)
+		{
+		   inputOptions.external = inputOptionsDto.external;
+		}
         var outputOptions = new RollupOutputOptions_1.RollupOutputOptionsDir();
         outputOptions.format = outputOptionsDto.format;		
 		outputOptions.dir = outputOptionsDto.dir;

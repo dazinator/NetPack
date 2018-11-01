@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -55,7 +56,17 @@ namespace NetPack.Rollup.Tests
             string responseString = await GetResponseString();
             Assert.Contains("File: built/iifebundle.js", responseString);
             Assert.Contains("File: built/iifebundle.js.map", responseString);
-            Assert.Contains("var mybundle = (function(exports)", responseString);
+            Assert.Contains("var mybundle = (function (exports) {", responseString);
+        }
+
+        [Fact]
+        public async Task Create_Bundle_With_External_Modules()
+        {
+            // Act
+            string responseString = await GetResponseString("path=external");
+            Assert.Contains("File: built/bundlewithexternal.js", responseString);
+            Assert.Contains("File: built/bundlewithexternal.js.map", responseString);
+           
         }
 
         public class RollupPipeShouldTestsStartup
@@ -94,6 +105,26 @@ var classA = new ClassA(""Hello, world!"");
         classA.doSomething();
 
 ";
+
+            public const string ModuleWithExternalDependency = @"
+
+import {foo} from ""SomeExternalLib"";
+
+
+export class ClassA {
+    constructor(another) { }
+    doSomething() {
+    foo.bar();
+        // return ""<h1>"" + this.greeting + ""</h1>"";
+    }
+}
+
+var classA = new ClassA(""Hello, world!"");
+classA.doSomething();
+
+";
+
+
             //public const string ConfigFileContent =
             //    @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
 
@@ -104,17 +135,31 @@ var classA = new ClassA(""Hello, world!"");
 
                 app.Run(async (context) =>
                 {
+
+                    StringValues? path = context.Request.Query?["path"];
+                    string pathText = path.GetValueOrDefault().ToString();
+
+
                     // Write the content of outputs files to the response for inspection.
                     StringBuilder builder = new StringBuilder();
 
-                    foreach (Microsoft.Extensions.FileProviders.IFileInfo outputFile in env.WebRootFileProvider.GetDirectoryContents("built"))
+                    string outputPath = "built";
+                    if (!string.IsNullOrWhiteSpace(pathText))
                     {
-                        using (StreamReader reader = new StreamReader(outputFile.CreateReadStream()))
+                        outputPath = outputPath + "/" + pathText;
+                    }
+
+                    foreach (var outputFile in env.WebRootFileProvider.GetDirectoryContents(outputPath))
+                    {
+                        if(!outputFile.IsDirectory)
                         {
-                            builder.AppendLine("File: " + "built" + "/" + outputFile.Name);
-                            builder.Append(reader.ReadToEnd());
-                            builder.AppendLine();
-                        }
+                            using (StreamReader reader = new StreamReader(outputFile.CreateReadStream()))
+                            {
+                                builder.AppendLine("File: " + "built" + "/" + outputFile.Name);
+                                builder.Append(reader.ReadToEnd());
+                                builder.AppendLine();
+                            }
+                        }                       
                     }
 
                     await context.Response.WriteAsync(builder.ToString());
@@ -129,6 +174,8 @@ var classA = new ClassA(""Hello, world!"");
                 InMemoryFileProvider inMemoryFileProvider = new InMemoryFileProvider();
                 inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
                 inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
+                inMemoryFileProvider.Directory.AddFile("wwwroot/external", new StringFileInfo(ModuleWithExternalDependency, "ModuleWithExternalDependency.js"));
+
 
                 services.AddNetPack((setup) =>
                 {
@@ -158,6 +205,19 @@ var classA = new ClassA(""Hello, world!"");
                                  options.OutputOptions.Sourcemap = SourceMapType.File;
                                  options.OutputOptions.Name = "mybundle";
                              })
+                              .AddRollupPipe(input =>
+                              {
+                                  input.Include("wwwroot/external/ModuleWithExternalDependency.js");
+                              }, options =>
+                              {
+                                  options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalDependency.js";
+                                  options.InputOptions.External.Add("SomeExternalLib");
+                                  options.OutputOptions.Format = Rollup.RollupOutputFormat.System;
+                                  options.OutputOptions.File = "/external/bundlewithexternal.js";
+                                  options.OutputOptions.Sourcemap = SourceMapType.File;
+                                  //options.OutputOptions.Sourcemap = SourceMapType.File;
+                                  //options.OutputOptions.Name = "mybundle";
+                              })
 
                             .UseBaseRequestPath("/built");
                     });

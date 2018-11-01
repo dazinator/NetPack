@@ -8,6 +8,7 @@ namespace NetPack.Rollup
         public BaseRollupInputOptions()
         {
             Plugins = new List<RollupPlugin>();
+            External = new List<string>();
         }
 
         public void AddPlugin(string name, JObject configuration, string defaultExportName = null, bool importOnly = false)
@@ -15,7 +16,16 @@ namespace NetPack.Rollup
             Plugins.Add(new RollupPlugin(name, configuration, defaultExportName, importOnly));
         }
 
+        /// <summary>
+        /// List of plugins that will participate in the rollup bundling process.
+        /// </summary>
         public List<RollupPlugin> Plugins { get; set; }
+
+        /// <summary>
+        ///  A List of module IDs that should remain external to the bundle.
+        /// </summary>
+        public List<string> External { get; set; }
+
     }
 
 }

@@ -1,4 +1,5 @@
 using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
@@ -6,6 +7,7 @@ using NetPack.Node.Dto;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +30,7 @@ namespace NetPack.Rollup
         }
 
         public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions(), new RollupOutputFileOptions())
-        {            
+        {
         }
 
         public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputFileOptions outputOptions)
@@ -38,9 +40,10 @@ namespace NetPack.Rollup
             _inputOptions = inputOptions;
             _outputOptions = outputOptions;
             _logger = logger;
-            _rollupScriptGenerator = new Lazy<RollupScriptGenerator>(() => {
+            _rollupScriptGenerator = new Lazy<RollupScriptGenerator>(() =>
+            {
                 Assembly assy = GetType().GetAssemblyFromType();
-                var template = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/RollupTemplate.txt");
+                Microsoft.Extensions.FileProviders.IFileInfo template = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/RollupTemplate.txt");
                 return new RollupScriptGenerator(template);
             });
 
@@ -71,14 +74,16 @@ namespace NetPack.Rollup
             optimiseRequest.InputOptions = _inputOptions;
             optimiseRequest.OutputOptions = _outputOptions;
 
-            RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);         
-            var result = response.Result;
-          
-            context.AddOutput("/", new StringFileInfo(result.Code.ToString(), _outputOptions.File));
-            if(result.SourceMap != null)
+            RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
+            RollupResult result = response.Result;
+
+            PathStringUtils.GetPathAndFilename(_outputOptions.File, out PathString rootPath, out string fileName);                       
+
+            context.AddOutput(rootPath, new StringFileInfo(result.Code.ToString(), fileName));
+            if (result.SourceMap != null)
             {
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(result.SourceMap);                
-                context.AddOutput("/", new StringFileInfo(json, _outputOptions.File + ".map"));
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(result.SourceMap);
+                context.AddOutput(rootPath, new StringFileInfo(json, fileName + ".map"));
             }
         }
     }

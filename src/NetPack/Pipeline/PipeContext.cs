@@ -255,6 +255,8 @@ namespace NetPack.Pipeline
             }
         }
 
+        
+
         public void AddOutput(PathString directory, IFileInfo file)
         {
             // var item = new FileWithDirectory() { Directory = directory, FileInfo = fileInfo };
