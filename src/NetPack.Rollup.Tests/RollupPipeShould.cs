@@ -34,24 +34,33 @@ namespace NetPack.Rollup.Tests
                 request += "?" + querystring;
             }
 
-            var response = await _client.GetAsync(request);
+            HttpResponseMessage response = await _client.GetAsync(request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
 
         [Fact]
-        public async Task Optimise_Specified_Js_Files()
+        public async Task Create_Bundle_File_With_SourceMap()
         {
             // Act
             string responseString = await GetResponseString();
             Assert.Contains("File: built/bundle.js", responseString);
             Assert.Contains("File: built/bundle.js.map", responseString);
         }
-    }
 
-    public class RollupPipeShouldTestsStartup
-    {
-        public const string AmdModuleAFileContent = @"
+        [Fact]
+        public async Task Create_Iife_Bundle_With_Variable_Name()
+        {
+            // Act
+            string responseString = await GetResponseString();
+            Assert.Contains("File: built/iifebundle.js", responseString);
+            Assert.Contains("File: built/iifebundle.js.map", responseString);
+            Assert.Contains("var mybundle = (function(exports)", responseString);
+        }
+
+        public class RollupPipeShouldTestsStartup
+        {
+            public const string AmdModuleAFileContent = @"
 export class ClassA {
     constructor(another) { }
     doSomething() {
@@ -64,7 +73,7 @@ classA.doSomething();
 
 ";
 
-        public const string AmdModuleBFileContent = @"
+            public const string AmdModuleBFileContent = @"
 
       import {ClassA} from ""./ModuleA"";
 
@@ -85,67 +94,76 @@ var classA = new ClassA(""Hello, world!"");
         classA.doSomething();
 
 ";
-        //public const string ConfigFileContent =
-        //    @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
+            //public const string ConfigFileContent =
+            //    @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-
-            app.UseNetPack();
-
-
-
-            //  var pipeline = fileProcessingBuilder.Pipeline;
-            // pipeline.Initialise();
-
-            app.Run(async (context) =>
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
             {
-                // Write the content of outputs files to the response for inspection.
-                var builder = new StringBuilder();
 
-                foreach (Microsoft.Extensions.FileProviders.IFileInfo outputFile in env.WebRootFileProvider.GetDirectoryContents("built"))
+                app.UseNetPack();
+
+                app.Run(async (context) =>
                 {
-                    using (var reader = new StreamReader(outputFile.CreateReadStream()))
+                    // Write the content of outputs files to the response for inspection.
+                    StringBuilder builder = new StringBuilder();
+
+                    foreach (Microsoft.Extensions.FileProviders.IFileInfo outputFile in env.WebRootFileProvider.GetDirectoryContents("built"))
                     {
-                        builder.AppendLine("File: " + "built" + "/" + outputFile.Name);
-                        builder.Append(reader.ReadToEnd());
-                        builder.AppendLine();
+                        using (StreamReader reader = new StreamReader(outputFile.CreateReadStream()))
+                        {
+                            builder.AppendLine("File: " + "built" + "/" + outputFile.Name);
+                            builder.Append(reader.ReadToEnd());
+                            builder.AppendLine();
+                        }
                     }
-                }
 
-                await context.Response.WriteAsync(builder.ToString());
-            });
-
-        }
-        public void ConfigureServices(IServiceCollection services)
-        {
-
-            // Provide some in memory files, that are AMD modules to be used as input for the RequireJs Optimise Pipe
-            var inMemoryFileProvider = new InMemoryFileProvider();
-            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
-            inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
-
-            services.AddNetPack((setup) =>
-            {
-
-                var fileProcessingBuilder = setup.AddPipeline(a =>
-                {
-
-                    a.WithFileProvider(inMemoryFileProvider)
-                        .AddRollupPipe(input =>
-                        {
-                            input.Include("wwwroot/*.js");
-                        }, options =>
-                        {
-                            options.InputOptions.Input = "/wwwroot/ModuleB.js";
-                            options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
-                            options.OutputOptions.File = "bundle.js";
-                            options.OutputOptions.Sourcemap =  SourceMapType.File;
-                        })
-                        .UseBaseRequestPath("/built");
+                    await context.Response.WriteAsync(builder.ToString());
                 });
 
-            });
+            }
+
+            public void ConfigureServices(IServiceCollection services)
+            {
+
+                // Provide some in memory files, that are AMD modules to be used as input for the RequireJs Optimise Pipe
+                InMemoryFileProvider inMemoryFileProvider = new InMemoryFileProvider();
+                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleAFileContent, "ModuleA.js"));
+                inMemoryFileProvider.Directory.AddFile("wwwroot", new StringFileInfo(AmdModuleBFileContent, "ModuleB.js"));
+
+                services.AddNetPack((setup) =>
+                {
+
+                    NetPackServicesExtensions.FileProcessingOptions fileProcessingBuilder = setup.AddPipeline(a =>
+                    {
+
+                        a.WithFileProvider(inMemoryFileProvider)
+                            .AddRollupPipe(input =>
+                            {
+                                input.Include("wwwroot/*.js");
+                            }, options =>
+                            {
+                                options.InputOptions.Input = "/wwwroot/ModuleB.js";
+                                options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
+                                options.OutputOptions.File = "bundle.js";
+                                options.OutputOptions.Sourcemap = SourceMapType.File;
+                            })
+                             .AddRollupPipe(input =>
+                             {
+                                 input.Include("wwwroot/*.js");
+                             }, options =>
+                             {
+                                 options.InputOptions.Input = "/wwwroot/ModuleB.js";
+                                 options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
+                                 options.OutputOptions.File = "iifebundle.js";
+                                 options.OutputOptions.Sourcemap = SourceMapType.File;
+                                 options.OutputOptions.Name = "mybundle";
+                             })
+
+                            .UseBaseRequestPath("/built");
+                    });
+
+                });
+            }
         }
     }
 }

@@ -45,6 +45,10 @@ module.exports = {
         var outputOptions = new RollupOutputOptions_1.RollupOutputOptionsDir();
         outputOptions.format = outputOptionsDto.format;		
 		outputOptions.dir = outputOptionsDto.dir;
+		if(outputOptionsDto.name != null)
+		{
+		   outputOptions.name = outputOptionsDto.name;
+		}
 		if(outputOptionsDto.sourcemap != null)
 		{
 			if(outputOptionsDto.sourcemap == "inline")

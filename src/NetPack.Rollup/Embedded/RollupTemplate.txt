@@ -42,6 +42,10 @@ module.exports = {
         inputOptions.plugins = plugins;
         var outputOptions = new RollupOutputOptions_1.default();
         outputOptions.format = outputOptionsDto.format;
+		if(outputOptionsDto.name != null)
+		{
+		   outputOptions.name = outputOptionsDto.name;
+		}
 		if(outputOptionsDto.sourcemap != null)
 		{
 			if(outputOptionsDto.sourcemap == "inline")
