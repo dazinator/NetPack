@@ -9,6 +9,7 @@ const fs = require("fs");
 const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
 
 var allFiles = {};
+let cache = null;
 
 module.exports = {
 
@@ -46,6 +47,12 @@ module.exports = {
 		{
 		   inputOptions.external = inputOptionsDto.external;
 		}
+
+		if(cache != null)
+		{
+		   inputOptions.cache = cache;
+		}
+
         var outputOptions = new RollupOutputOptions_1.RollupOutputOptionsDir();
         outputOptions.format = outputOptionsDto.format;		
 		outputOptions.dir = outputOptionsDto.dir;
@@ -76,9 +83,9 @@ module.exports = {
         let sut = new rolluphost_1.default();		
 
         sut.BuildChunks(inputOptions, outputOptions).then(result => {
-		       	var response = { Result: result }
-				callback(null, response);   
-                //            
+		        cache = result.Cache;
+		       	var response = { Result: result.Outputs }
+				callback(null, response);                           
             }).catch((reason) => {
                 callback("error " + reason);
             });

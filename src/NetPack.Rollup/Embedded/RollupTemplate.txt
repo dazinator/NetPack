@@ -9,6 +9,7 @@ const fs = require("fs");
 const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
 
 var allFiles = {};
+let cache = null;
 
 module.exports = {
 
@@ -45,6 +46,11 @@ module.exports = {
 		   inputOptions.external = inputOptionsDto.external;
 		}
 
+		if(cache != null)
+		{
+		   inputOptions.cache = cache;
+		}
+
         var outputOptions = new RollupOutputOptions_1.default();
         outputOptions.format = outputOptionsDto.format;
 		if(outputOptionsDto.name != null)
@@ -77,10 +83,10 @@ module.exports = {
             if (result === undefined) {
                callback("result was undefined", null);
             }
-            else {             
-				var response = { Result: result, EchoValue: outputOptionsDto.sourcemap }
-				callback(null, response); 
-            }          
+			cache = result.Cache;
+            var response = { Result: result.Output }
+			callback(null, response); 
+                    
         }).catch((reason) => {
             callback(reason, null);
         });
