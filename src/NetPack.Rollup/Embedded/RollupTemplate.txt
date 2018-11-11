@@ -100,17 +100,19 @@ module.exports = {
 		let sut = new rolluphost_1.default();		
 		var results = {};
 
+		var inputOptions = getInputOptions(inputOptionsDto);
+
 		for (var i = 0; i < outputsArrayLength; i++) {
 		    var outputOptionsDto = outputOptionsArray[i];				
 			var outputOptions = getOutputOptions(outputOptionsDto);
-			var inputOptions = getInputOptions(inputOptionsDto);
+			
 		    results[outputOptions.file] = [];
 
 
 			//inputOptions["_i"] = i;
 		    var p = sut.build(inputOptions, outputOptions).then(result => {	
 			    cache = result.Cache; // TODO: key cache by output?
-			    results[result.Output.FileName].push(result.Output);
+			    results[outputOptions.file].push(result.Output);
 				return result.Output;
 			});
 
