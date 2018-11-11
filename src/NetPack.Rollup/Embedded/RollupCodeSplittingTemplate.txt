@@ -10,25 +10,10 @@ const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plu
 
 var allFiles = {};
 
-module.exports = {
-
-    build: function (callback, requestDto) {
-
-        var files = requestDto.files;
-        for (var i = 0; i < requestDto.files.length; i++) {
-
-            var file = requestDto.files[i];
-            allFiles[file.path] = file.contents;
-        }
-
-        var inputOptionsDto = requestDto.inputOptions;
-        var outputOptionsDto = requestDto.outputOptions;
+function getDirInputOptions(dto) {
 
         var inputOptions = new RollupFileOptions_1.RollupDirOptions();
-        inputOptions.input = inputOptionsDto.input;
-		// inputOptions.experimentalCodeSplitting = true;
-
-        // inputOptions.entry = inputOptionsDto.input;
+        inputOptions.input = dto.input;
 
         var hypotheticalPlugin = hypothetical({
             files: allFiles
@@ -42,28 +27,34 @@ module.exports = {
 		{{ end }}{{ end }}
 
         inputOptions.plugins = plugins;
-		if(inputOptionsDto.external != null)
+		if(dto.external != null)
 		{
-		   inputOptions.external = inputOptionsDto.external;
+		   inputOptions.external = dto.external;
 		}
+
+		return inputOptions;
+}
+
+function getDirOutputOptions(dto) {
+   
         var outputOptions = new RollupOutputOptions_1.RollupOutputOptionsDir();
-        outputOptions.format = outputOptionsDto.format;		
-		outputOptions.dir = outputOptionsDto.dir;
-		if(outputOptionsDto.name != null)
+        outputOptions.format = dto.format;
+	    outputOptions.dir = dto.dir;
+		if(dto.name != null)
 		{
-		   outputOptions.name = outputOptionsDto.name;
+		   outputOptions.name = dto.name;
 		}
-		if(outputOptionsDto.globals != null)
+		if(dto.globals != null)
 		{
-		   outputOptions.globals = outputOptionsDto.globals;
+		   outputOptions.globals = dto.globals;
 		}
-		if(outputOptionsDto.paths != null)
+		if(dto.paths != null)
 		{
-		   outputOptions.paths = outputOptionsDto.paths;
-		}
-		if(outputOptionsDto.sourcemap != null)
+		   outputOptions.paths = dto.paths;
+		}	
+		if(dto.sourcemap != null)
 		{
-			if(outputOptionsDto.sourcemap == "inline")
+			if(dto.sourcemap == "inline")
 			{
 			   outputOptions.sourcemap = "inline";
 			}
@@ -72,15 +63,53 @@ module.exports = {
 			   outputOptions.sourcemap = true;
 			}
 		}
+		if(dto.amd != null)
+		{
+		   outputOptions.amd = dto.amd;
+		}
 
-        let sut = new rolluphost_1.default();		
+		return outputOptions;
+}
 
-        sut.BuildChunks(inputOptions, outputOptions).then(result => {
-		       	var response = { Result: result }
-				callback(null, response);   
-                //            
-            }).catch((reason) => {
-                callback("error " + reason);
-            });
+
+module.exports = {
+
+    build: function (callback, requestDto) {
+
+        var files = requestDto.files;
+        for (var i = 0; i < requestDto.files.length; i++) {
+
+            var file = requestDto.files[i];
+            allFiles[file.path] = file.contents;
+        }
+
+        var inputOptionsDto = requestDto.inputOptions;
+		var outputOptionsArray = requestDto.outputOptions;
+		var outputsArrayLength = outputOptionsArray.length;	
+		var errorMessage = null;
+		var promises = [];
+
+		let sut = new rolluphost_1.default();		
+		var results = {};
+
+		for (var i = 0; i < outputsArrayLength; i++) {
+		    var outputOptionsDto = outputOptionsArray[i];				
+			var outputOptions = getDirOutputOptions(outputOptionsDto);
+			var inputOptions = getDirInputOptions(inputOptionsDto);
+			
+		    var p = sut.BuildChunks(inputOptions, outputOptions).then(result => {			    
+			     results[outputOptionsDto.dir] = result.Outputs;
+			});
+
+			promises.push(p);			
+	    }   
+
+		Promise.all(promises).then(function(values) {
+		   var response = { Results: results };
+		   callback(null, response); 
+		}).catch((reason) => {
+			    errorMessage = reason;				
+				callback(errorMessage, null);
+			});      
     }
 };

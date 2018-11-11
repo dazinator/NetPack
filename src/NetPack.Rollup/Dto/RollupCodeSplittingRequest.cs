@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace NetPack.Rollup
 {
-    public class RollupCodeSplittingRequest
-    {
-        public RollupCodeSplittingRequest()
-        {
-            Files = new List<NodeInMemoryFile>();
-        }
+    //public class RollupCodeSplittingRequest
+    //{
+    //    public RollupCodeSplittingRequest()
+    //    {
+    //        Files = new List<NodeInMemoryFile>();
+    //    }
 
-        public RollupCodeSplittingInputOptions InputOptions { get; set; }
+    //    public RollupCodeSplittingInputOptions InputOptions { get; set; }
 
-        public RollupOutputDirOptions OutputOptions { get; set; }        
+    //    public RollupOutputDirOptions OutputOptions { get; set; }        
 
-        public List<NodeInMemoryFile> Files { get; set; }   
-    }
+    //    public List<NodeInMemoryFile> Files { get; set; }   
+    //}
 }

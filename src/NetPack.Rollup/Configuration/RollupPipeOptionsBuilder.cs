@@ -1,5 +1,6 @@
 ﻿using NetPack.Pipeline;
 using NetPack.Rollup;
+using System.Collections.Generic;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -13,11 +14,11 @@ namespace NetPack
         {
         }
 
-        public RollupPipeOptionsBuilder(IPipelineBuilder builder, RollupInputOptions inputOptions) : this(builder, new RollupInputOptions(), new RollupOutputFileOptions())
+        public RollupPipeOptionsBuilder(IPipelineBuilder builder, RollupInputOptions inputOptions) : this(builder, new RollupInputOptions(), new List<RollupOutputFileOptions>())
         {
         }
 
-        public RollupPipeOptionsBuilder(IPipelineBuilder builder, RollupInputOptions inputOptions, RollupOutputFileOptions outputOptions) : base(builder, inputOptions, outputOptions)
+        public RollupPipeOptionsBuilder(IPipelineBuilder builder, RollupInputOptions inputOptions, List<RollupOutputFileOptions> outputOptions) : base(builder, inputOptions, outputOptions)
         {
         }
 

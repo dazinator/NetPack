@@ -1,4 +1,5 @@
 ﻿using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
@@ -16,7 +17,7 @@ namespace NetPack.Rollup
     {
         private INetPackNodeServices _nodeServices;
         private readonly RollupCodeSplittingInputOptions _inputOptions;
-        private readonly RollupOutputDirOptions _outputOptions;
+        private readonly RollupOutputDirOptions[] _outputOptions;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
         private readonly ILogger<RollupCodeSplittingPipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
@@ -27,11 +28,11 @@ namespace NetPack.Rollup
 
         }
 
-        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupCodeSplittingInputOptions(), new RollupOutputDirOptions())
+        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupCodeSplittingInputOptions(), new RollupOutputDirOptions[] { })
         {
         }
 
-        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions inputOptions, RollupOutputDirOptions outputOptions)
+        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions inputOptions, RollupOutputDirOptions[] outputOptions)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -55,7 +56,7 @@ namespace NetPack.Rollup
 
         public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
         {
-            RollupCodeSplittingRequest optimiseRequest = new RollupCodeSplittingRequest();
+            var optimiseRequest = new RollupRequest();
 
             foreach (FileWithDirectory file in context.InputFiles)
             {
@@ -71,20 +72,25 @@ namespace NetPack.Rollup
             optimiseRequest.InputOptions = _inputOptions;
             optimiseRequest.OutputOptions = _outputOptions;
 
-            RollupCodeSplittingResponse result = await _nodeServices.InvokeExportAsync<RollupCodeSplittingResponse>(_script.Value.FileName, "build", optimiseRequest);
+            var response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
 
-            string outDir = $"/{_outputOptions.Dir}";
-            foreach (var item in result.Result)
+            foreach (var output in _outputOptions)
             {
-                context.AddOutput(outDir, new StringFileInfo(item.Code.ToString(), item.FileName));
+                var outputResults = response.Results[output.Dir];
 
-                if (item.SourceMap != null)
+                string outDir = $"/{output.Dir}";
+                foreach (var item in outputResults)
                 {
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(item.SourceMap);
-                    context.AddOutput(outDir, new StringFileInfo(json, item.FileName + ".map"));
-                }
+                    context.AddOutput(outDir, new StringFileInfo(item.Code.ToString(), item.FileName));
 
-            }
+                    if (item.SourceMap != null)
+                    {
+                        var json = Newtonsoft.Json.JsonConvert.SerializeObject(item.SourceMap);
+                        context.AddOutput(outDir, new StringFileInfo(json, item.FileName + ".map"));
+                    }
+
+                }
+            }           
         }
     }
 }

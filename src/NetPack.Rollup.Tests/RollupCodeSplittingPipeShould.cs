@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -34,13 +35,13 @@ namespace NetPack.Rollup.Tests
                 request += "?" + querystring;
             }
 
-            var response = await _client.GetAsync(request);
+            HttpResponseMessage response = await _client.GetAsync(request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
 
         [Fact]
-        public async Task Optimise_Specified_Js_Files()
+        public async Task Create_Code_Split_Bundle()
         {
             // Act
             string responseString = await GetResponseString();
@@ -49,6 +50,24 @@ namespace NetPack.Rollup.Tests
             Assert.Contains("File: built/Second.js", responseString);
             Assert.Contains("File: built/Second.js.map", responseString);
         }
+
+        [Fact]
+        public async Task Create_Multiple_Format_Bundles_From_Same_Inputs()
+        {
+            // Act
+            string responseString = await GetResponseString("path=modules");
+            Assert.Contains("File: built/Main.js", responseString);
+            Assert.Contains("File: built/Main.js.map", responseString);
+            Assert.Contains("File: built/Second.js", responseString);
+            Assert.Contains("File: built/Second.js.map", responseString);
+
+            responseString = await GetResponseString("path=nomodules");
+            Assert.Contains("File: built/Main.js", responseString);
+            Assert.Contains("File: built/Main.js.map", responseString);
+            Assert.Contains("File: built/Second.js", responseString);
+            Assert.Contains("File: built/Second.js.map", responseString);
+        }
+
     }
 
     public class RollupCodeSplittingPipeShouldTestsStartup
@@ -78,22 +97,35 @@ export default function () {
 
             app.Run(async (context) =>
             {
-                // Write the content of outputs files to the response for inspection.
-                var builder = new StringBuilder();
 
-                foreach (Microsoft.Extensions.FileProviders.IFileInfo outputFile in env.WebRootFileProvider.GetDirectoryContents("built/rollup"))
+                StringValues? path = context.Request.Query?["path"];
+                string pathText = path.GetValueOrDefault().ToString();
+
+
+                // Write the content of outputs files to the response for inspection.
+                StringBuilder builder = new StringBuilder();
+
+                string outputPath = "built";
+                if (!string.IsNullOrWhiteSpace(pathText))
                 {
-                    using (var reader = new StreamReader(outputFile.CreateReadStream()))
+                    outputPath = outputPath + "/" + pathText;
+                }
+
+                foreach (Microsoft.Extensions.FileProviders.IFileInfo outputFile in env.WebRootFileProvider.GetDirectoryContents(outputPath))
+                {
+                    if (!outputFile.IsDirectory)
                     {
-                        builder.AppendLine("File: " + "built" + "/" + outputFile.Name);
-                        builder.Append(reader.ReadToEnd());
-                        builder.AppendLine();
+                        using (StreamReader reader = new StreamReader(outputFile.CreateReadStream()))
+                        {
+                            builder.AppendLine("File: " + "built" + "/" + outputFile.Name);
+                            builder.Append(reader.ReadToEnd());
+                            builder.AppendLine();
+                        }
                     }
                 }
 
                 await context.Response.WriteAsync(builder.ToString());
             });
-
         }
         public void ConfigureServices(IServiceCollection services)
         {
@@ -116,12 +148,37 @@ export default function () {
                         }, options =>
                         {
                             options.InputOptions.AddEntryPoint("/wwwroot/Main.js")
-                                                .AddEntryPoint("/wwwroot/Second.js");                           
+                                                .AddEntryPoint("/wwwroot/Second.js");
 
-                            options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
-                            options.OutputOptions.Sourcemap = SourceMapType.File;
-                            options.OutputOptions.Dir = "/rollup";
+                            options.AddOutput((output) => {
+                                output.Format = Rollup.RollupOutputFormat.Esm;
+                                output.Sourcemap = SourceMapType.File;
+                                output.Dir = "/rollup";                                
+                            });
+                           
                         })
+                        // Example of a rollup build that produces multiple output formats from same set of inputs.
+                         .AddRollupCodeSplittingPipe(input =>
+                         {
+                             input.Include("wwwroot/*.js");
+                         }, options =>
+                         {
+                             options.InputOptions.AddEntryPoint("/wwwroot/Main.js")
+                                                 .AddEntryPoint("/wwwroot/Second.js");
+
+                             options.AddOutput((output) => {
+                                 output.Format = Rollup.RollupOutputFormat.Esm;
+                                 output.Sourcemap = SourceMapType.File;
+                                 output.Dir = "/rollup/modules";
+                             });
+
+                             options.AddOutput((output) => {
+                                 output.Format = Rollup.RollupOutputFormat.Umd;
+                                 output.Sourcemap = SourceMapType.File;
+                                 output.Dir = "/rollup/nomodules";
+                             });
+
+                         })
                         .UseBaseRequestPath("/built");
                 });
 

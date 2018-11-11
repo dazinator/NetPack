@@ -38,7 +38,7 @@ namespace NetPack.Rollup.Tests
             HttpResponseMessage response = await _client.GetAsync(request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
-        }
+        }       
 
         [Fact]
         public async Task Create_Bundle_File_With_SourceMap()
@@ -80,6 +80,16 @@ namespace NetPack.Rollup.Tests
         }
 
         [Fact]
+        public async Task Create_Bundle_With_Amd_Id()
+        {
+            // Act
+            string responseString = await GetResponseString("path=externalcdn");
+            Assert.Contains("File: built/bundlewithexternalglobalcdn.js", responseString);
+            Assert.Contains("File: built/bundlewithexternalglobalcdn.js.map", responseString);
+            Assert.Contains("define('custom'", responseString);
+        }
+
+        [Fact]
         public async Task Create_Bundle_With_External_Module_From_CDN()
         {
             // Act
@@ -87,6 +97,15 @@ namespace NetPack.Rollup.Tests
             Assert.Contains("File: built/bundlewithexternalglobalcdn.js", responseString);
             Assert.Contains("File: built/bundlewithexternalglobalcdn.js.map", responseString);
             Assert.Contains("https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js", responseString);
+        }
+
+        [Fact]
+        public async Task Create_Multiple_Format_Bundles_From_Same_Inputs()
+        {
+            // Act
+            string responseString = await GetResponseString();
+            Assert.Contains("File: built/modulesbundle.js", responseString);
+            Assert.Contains("File: built/nomodulesbundle.js", responseString);
         }
 
         public class RollupPipeShouldTestsStartup
@@ -228,20 +247,29 @@ classA.doSomething();
                             }, options =>
                             {
                                 options.InputOptions.Input = "/wwwroot/ModuleB.js";
-                                options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
-                                options.OutputOptions.File = "bundle.js";
-                                options.OutputOptions.Sourcemap = SourceMapType.File;
+                                options.AddOutput((output) =>
+                                {
+                                    output.Format = Rollup.RollupOutputFormat.Esm;
+                                    output.File = "bundle.js";
+                                    output.Sourcemap = SourceMapType.File;
+                                });
+                               
                             })
                              .AddRollupPipe(input =>
                              {
                                  input.Include("wwwroot/*.js");
                              }, options =>
-                             {
+                             {                               
+
                                  options.InputOptions.Input = "/wwwroot/ModuleB.js";
-                                 options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
-                                 options.OutputOptions.File = "iifebundle.js";
-                                 options.OutputOptions.Sourcemap = SourceMapType.Inline;
-                                 options.OutputOptions.Name = "mybundle";
+                                 options.AddOutput((output) =>
+                                 {
+                                     output.Format = Rollup.RollupOutputFormat.Iife;
+                                     output.File = "iifebundle.js";
+                                     output.Sourcemap = SourceMapType.Inline;
+                                     output.Name = "mybundle";
+                                 });
+                                 
                              })
                               .AddRollupPipe(input =>
                               {
@@ -250,9 +278,13 @@ classA.doSomething();
                               {
                                   options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalDependency.js";
                                   options.InputOptions.External.Add("SomeExternalLib");
-                                  options.OutputOptions.Format = Rollup.RollupOutputFormat.System;
-                                  options.OutputOptions.File = "/external/bundlewithexternal.js";
-                                  options.OutputOptions.Sourcemap = SourceMapType.File;
+
+                                  options.AddOutput((output) =>
+                                  {
+                                      output.Format = Rollup.RollupOutputFormat.System;
+                                      output.File = "/external/bundlewithexternal.js";
+                                      output.Sourcemap = SourceMapType.File;
+                                  });                                  
                                   //options.OutputOptions.Sourcemap = SourceMapType.File;
                                   //options.OutputOptions.Name = "mybundle";
                               })
@@ -263,19 +295,24 @@ classA.doSomething();
                                {
                                    options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalGlobalDependency.js";
                                    options.InputOptions.External.Add("jjj");
-                                   options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
-                                   options.OutputOptions.File = "/external/bundlewithexternalglobal.js";
-                                   options.OutputOptions.Name = "mybundlewithglobal";
-                                   options.OutputOptions.Sourcemap = SourceMapType.File;
-                                   options.OutputOptions.ConfigureGlobals(globals =>
+                                   options.AddOutput((output) =>
                                    {
-                                       globals.jquery = "jjj";
+                                       output.Format = Rollup.RollupOutputFormat.Iife;
+                                       output.File = "/external/bundlewithexternalglobal.js";
+                                       output.Name = "mybundlewithglobal";
+                                       output.Sourcemap = SourceMapType.File;
+                                       output.ConfigureGlobals(globals =>
+                                       {
+                                           globals.jquery = "jjj";
+                                       });
+                                       output.ConfigurePaths(paths =>
+                                       {
+                                           //  configure path for jquery module to be loaded from CDN.
+                                           paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+                                       });
                                    });
-                                   options.OutputOptions.ConfigurePaths(paths =>
-                                   {
-                                       //  configure path for jquery module to be loaded from CDN.
-                                       paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
-                                   });
+
+                                   
 
                                    //options.OutputOptions.Sourcemap = SourceMapType.File;
                                    //options.OutputOptions.Name = "mybundle";
@@ -287,22 +324,49 @@ classA.doSomething();
                                 {
                                     options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalGlobalDependency.js";
                                     options.InputOptions.External.Add("jjj");
-                                    options.OutputOptions.Format = Rollup.RollupOutputFormat.Amd;
-                                    options.OutputOptions.File = "/externalcdn/bundlewithexternalglobalcdn.js";
-                                    options.OutputOptions.Name = "mybundlewithglobalcdn";
-                                    options.OutputOptions.Sourcemap = SourceMapType.File;
-                                    options.OutputOptions.ConfigureGlobals(globals =>
-                                    {
-                                        globals.jquery = "jjj";
-                                    });
-                                    options.OutputOptions.ConfigurePaths(paths =>
-                                    {
-                                        //  configure path for jquery module to be loaded from CDN.
-                                        paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
-                                    });
 
+                                    options.AddOutput((output) =>
+                                    {
+                                        output.Format = Rollup.RollupOutputFormat.Amd;
+                                        output.File = "/externalcdn/bundlewithexternalglobalcdn.js";
+                                        output.Name = "mybundlewithglobalcdn";
+                                        output.Sourcemap = SourceMapType.File;
+                                        output.ConfigureGlobals(globals =>
+                                        {
+                                            globals.jquery = "jjj";
+                                        });
+                                        output.ConfigurePaths(paths =>
+                                        {
+                                            //  configure path for jquery module to be loaded from CDN.
+                                            paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+                                        });
+                                        output.ConfigureAmd(amd =>
+                                        {
+                                            amd.id = "custom";
+                                        });
+                                    });
                                     //options.OutputOptions.Sourcemap = SourceMapType.File;
                                     //options.OutputOptions.Name = "mybundle";
+                                })
+                                .AddRollupPipe(input =>
+                                {
+                                    input.Include("wwwroot/*.js");
+                                }, options =>
+                                {
+                                    options.InputOptions.Input = "/wwwroot/ModuleB.js";
+                                    options.AddOutput((output) =>
+                                    {
+                                        output.Format = Rollup.RollupOutputFormat.Esm;
+                                        output.File = "modulesbundle.js";
+                                        output.Sourcemap = SourceMapType.File;
+                                    });
+                                    options.AddOutput((output) =>
+                                    {
+                                        output.Format = Rollup.RollupOutputFormat.System;
+                                        output.File = "nomodulesbundle.js";
+                                        output.Sourcemap = SourceMapType.File;
+                                    });
+
                                 })
 
 

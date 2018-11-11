@@ -41,7 +41,6 @@ namespace NetPack.Rollup
         /// </summary>
         public JObject Globals { get; set; }
 
-
         public void ConfigurePaths(Action<dynamic> paths)
         {
             if (Paths == null)
@@ -55,6 +54,20 @@ namespace NetPack.Rollup
         ///  Object of id: path pairs. Where supplied, these paths will be used in the generated bundle instead of the module ID, allowing you to (for example) load dependencies from a CDN
         /// </summary>
         public JObject Paths { get; set; }
-    }
 
+        public void ConfigureAmd(Action<dynamic> amd)
+        {
+            if (Amd == null)
+            {
+                Amd = new JObject();
+            }
+            amd?.Invoke(Amd);
+        }
+
+        /// <summary>
+        ///  Configure options for when the bundle output format is AMD.
+        /// </summary>
+        public JObject Amd { get; set; }     
+
+    }       
 }

@@ -102,9 +102,12 @@ namespace NetPack.Web
                              });
                              // a.WithConfiguration();
                          });
-                         options.InputOptions.Input = "/amd/SomePage.js";                         
-                         options.OutputOptions.Format = Rollup.RollupOutputFormat.Iife;
-                         options.OutputOptions.File = "rollupbundle.js";
+                         options.InputOptions.Input = "/amd/SomePage.js";
+
+                         options.AddOutput((output) => {
+                             output.Format = Rollup.RollupOutputFormat.Iife;
+                             output.File = "rollupbundle.js";                           
+                         });                       
                      })
                      // rollup code splitting example.
                       .AddRollupCodeSplittingPipe(input =>
@@ -114,8 +117,11 @@ namespace NetPack.Web
                       {
                           options.InputOptions.AddEntryPoint("/esm/main-a.js")
                                               .AddEntryPoint("/esm/main-b.js");
-                          options.OutputOptions.Format = Rollup.RollupOutputFormat.Esm;
-                          options.OutputOptions.Dir = "/rollup/module/";
+
+                          options.AddOutput((output) => {
+                              output.Format = Rollup.RollupOutputFormat.Esm;
+                              output.Dir = "/rollup/module/";
+                          });                        
                       })
                       // rollup code splitting example - for browsers that don't support native modules we use systemjs.
                       .AddRollupCodeSplittingPipe(input =>
@@ -125,8 +131,33 @@ namespace NetPack.Web
                       {
                           options.InputOptions.AddEntryPoint("/esm/main-a.js")
                                               .AddEntryPoint("/esm/main-b.js");
-                          options.OutputOptions.Format = Rollup.RollupOutputFormat.System;
-                          options.OutputOptions.Dir = "/rollup/nomodule/";
+
+                          options.AddOutput((output) => {
+                              output.Format = Rollup.RollupOutputFormat.System;
+                              output.Dir = "/rollup/nomodule/";
+                          });
+                         
+                      })
+                      // rollup code splitting example - produces multiple rollup builds (different output formats)
+                      // from same set of input files sent to nodejs side once.
+                      .AddRollupCodeSplittingPipe(input =>
+                      {
+                          input.Include("esm/**/*.js");
+                      }, options =>
+                      {
+                          options.InputOptions.AddEntryPoint("/esm/main-a.js")
+                                              .AddEntryPoint("/esm/main-b.js");
+
+                          options.AddOutput((output) => {
+                              output.Format = Rollup.RollupOutputFormat.System;
+                              output.Dir = "/rollup/multi/nomodule/";
+                          });
+
+                          options.AddOutput((output) => {
+                              output.Format = Rollup.RollupOutputFormat.System;
+                              output.Dir = "/rollup/multi/module/";
+                          });
+
                       })
 
 

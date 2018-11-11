@@ -26,7 +26,7 @@ namespace NetPack
             IEmbeddedResourceProvider embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));
 
             ILogger<RollupPipe> logger = (ILogger<RollupPipe>)appServices.GetRequiredService(typeof(ILogger<RollupPipe>));
-            RollupPipe pipe = new RollupPipe(nodeServices, embeddedResourceProvider, logger, optionsBuilder.InputOptions, optionsBuilder.OutputOptions);
+            RollupPipe pipe = new RollupPipe(nodeServices, embeddedResourceProvider, logger, optionsBuilder.InputOptions, optionsBuilder.OutputOptions.ToArray());
             builder.AddPipe(input, pipe);
             return builder;
         }
@@ -46,7 +46,7 @@ namespace NetPack
             NpmModuleRequirement rollupPluginHypothetical = new NpmModuleRequirement("rollup-plugin-hypothetical", true, "2.1.0");
             builder.IncludeRequirement(rollupPluginHypothetical);
 
-            NpmModuleRequirement netpackRollup = new NpmModuleRequirement("netpack-rollup", true, "1.0.12");
+            NpmModuleRequirement netpackRollup = new NpmModuleRequirement("netpack-rollup", true, "1.0.16");
             builder.IncludeRequirement(netpackRollup);
 
             return nodeServices;
@@ -64,7 +64,7 @@ namespace NetPack
             IEmbeddedResourceProvider embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));
 
             ILogger<RollupCodeSplittingPipe> logger = (ILogger<RollupCodeSplittingPipe>)appServices.GetRequiredService(typeof(ILogger<RollupCodeSplittingPipe>));
-            RollupCodeSplittingPipe pipe = new RollupCodeSplittingPipe(nodeServices, embeddedResourceProvider, logger, optionsBuilder.InputOptions, optionsBuilder.OutputOptions);
+            RollupCodeSplittingPipe pipe = new RollupCodeSplittingPipe(nodeServices, embeddedResourceProvider, logger, optionsBuilder.InputOptions, optionsBuilder.OutputOptions.ToArray());
             builder.AddPipe(input, pipe);
             return builder;
         }

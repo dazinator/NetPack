@@ -7,7 +7,7 @@ using NetPack.Node.Dto;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +18,7 @@ namespace NetPack.Rollup
     {
         private INetPackNodeServices _nodeServices;
         private readonly RollupInputOptions _inputOptions;
-        private readonly RollupOutputFileOptions _outputOptions;
+        private readonly RollupOutputFileOptions[] _outputOptions;
         private IEmbeddedResourceProvider _embeddedResourceProvider;
         private readonly ILogger<RollupPipe> _logger;
         private Lazy<StringAsTempFile> _script = null;
@@ -29,11 +29,11 @@ namespace NetPack.Rollup
 
         }
 
-        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions(), new RollupOutputFileOptions())
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions options) : this(nodeServices, embeddedResourceProvider, logger, new RollupInputOptions(), new RollupOutputFileOptions[] { })
         {
         }
 
-        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputFileOptions outputOptions)
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputFileOptions[] outputOptions)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -75,16 +75,26 @@ namespace NetPack.Rollup
             optimiseRequest.OutputOptions = _outputOptions;
 
             RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
-            RollupResult result = response.Result;
+            //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
 
-            PathStringUtils.GetPathAndFilename(_outputOptions.File, out PathString rootPath, out string fileName);                       
-
-            context.AddOutput(rootPath, new StringFileInfo(result.Code.ToString(), fileName));
-            if (result.SourceMap != null)
+            foreach (RollupOutputFileOptions output in _outputOptions)
             {
-                string json = Newtonsoft.Json.JsonConvert.SerializeObject(result.SourceMap);
-                context.AddOutput(rootPath, new StringFileInfo(json, fileName + ".map"));
-            }
+                var outputResults = response.Results[output.File];
+
+                PathStringUtils.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
+
+                foreach (var outputItem in outputResults)
+                {                   
+                    context.AddOutput(rootPath, new StringFileInfo(outputItem.Code.ToString(), outputFileName));
+                    if (outputItem.SourceMap != null)
+                    {
+                        string json = Newtonsoft.Json.JsonConvert.SerializeObject(outputItem.SourceMap);
+                        context.AddOutput(rootPath, new StringFileInfo(json, outputFileName + ".map"));
+                    }
+                }
+
+            }          
+
         }
     }
 }
