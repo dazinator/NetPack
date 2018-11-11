@@ -9,6 +9,7 @@ const fs = require("fs");
 const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
 
 var allFiles = {};
+let cache = null;
 
 function getDirInputOptions(dto) {
 
@@ -30,6 +31,10 @@ function getDirInputOptions(dto) {
 		if(dto.external != null)
 		{
 		   inputOptions.external = dto.external;
+		}
+		if(cache != null)
+		{
+		   inputOptions.cache = cache;
 		}
 
 		return inputOptions;
@@ -97,14 +102,15 @@ module.exports = {
 			var outputOptions = getDirOutputOptions(outputOptionsDto);
 			var inputOptions = getDirInputOptions(inputOptionsDto);
 			
-		    var p = sut.BuildChunks(inputOptions, outputOptions).then(result => {			    
+		    var p = sut.BuildChunks(inputOptions, outputOptions).then(result => {		
+			     cache = result.Cache; // todo need to key cache by output?
 			     results[outputOptionsDto.dir] = result.Outputs;
 			});
 
 			promises.push(p);			
 	    }   
 
-		Promise.all(promises).then(function(values) {
+		Promise.all(promises).then(function(values) {		  
 		   var response = { Results: results };
 		   callback(null, response); 
 		}).catch((reason) => {

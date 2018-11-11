@@ -9,6 +9,7 @@ const fs = require("fs");
 const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
 
 var allFiles = {};
+let cache = null;
 
 function getInputOptions(dto) {
 
@@ -30,6 +31,10 @@ function getInputOptions(dto) {
 		if(dto.external != null)
 		{
 		   inputOptions.external = dto.external;
+		}
+		if(cache != null)
+		{
+		   inputOptions.cache = cache;
 		}
 
 		return inputOptions;
@@ -104,6 +109,7 @@ module.exports = {
 
 			//inputOptions["_i"] = i;
 		    var p = sut.build(inputOptions, outputOptions).then(result => {	
+			    cache = result.Cache; // TODO: key cache by output?
 			    results[result.Output.FileName].push(result.Output);
 				return result.Output;
 			});
