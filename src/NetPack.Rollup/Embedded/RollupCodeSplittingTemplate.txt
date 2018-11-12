@@ -9,9 +9,9 @@ const fs = require("fs");
 const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
 
 var allFiles = {};
-let cache = null;
+let cacheStore = {};
 
-function getDirInputOptions(dto) {
+function getDirInputOptions(dto, cachekey) {
 
         var inputOptions = new RollupFileOptions_1.RollupDirOptions();
         inputOptions.input = dto.input;
@@ -31,12 +31,13 @@ function getDirInputOptions(dto) {
 		if(dto.external != null)
 		{
 		   inputOptions.external = dto.external;
-		}
-		if(cache != null)
-		{
-		   inputOptions.cache = cache;
-		}
+		}		
 
+		if(cacheStore.hasOwnProperty(cachekey))
+		{
+		   inputOptions.cache = cacheStore[cachekey];
+        }	
+		
 		return inputOptions;
 }
 
@@ -100,11 +101,13 @@ module.exports = {
 		for (var i = 0; i < outputsArrayLength; i++) {
 		    var outputOptionsDto = outputOptionsArray[i];				
 			var outputOptions = getDirOutputOptions(outputOptionsDto);
-			var inputOptions = getDirInputOptions(inputOptionsDto);
-			
-		    var p = sut.BuildChunks(inputOptions, outputOptions).then(result => {		
-			     cache = result.Cache; // todo need to key cache by output?
-			     results[outputOptionsDto.dir] = result.Outputs;
+		    var key = outputOptions.dir;			
+
+			var inputOptions = getDirInputOptions(inputOptionsDto, key);		   
+
+		    var p = sut.BuildChunks(inputOptions, outputOptions, key).then(result => {		
+			     cacheStore[result.Key] = result.Cache;
+			     results[result.Key] = result.Outputs;
 			});
 
 			promises.push(p);			

@@ -44,7 +44,7 @@ namespace NetPack.Rollup.Tests
         public async Task Create_Code_Split_Bundle()
         {
             // Act
-            string responseString = await GetResponseString();
+            string responseString = await GetResponseString("path=rollup");
             Assert.Contains("File: built/Main.js", responseString);
             Assert.Contains("File: built/Main.js.map", responseString);
             Assert.Contains("File: built/Second.js", responseString);
@@ -55,13 +55,13 @@ namespace NetPack.Rollup.Tests
         public async Task Create_Multiple_Format_Bundles_From_Same_Inputs()
         {
             // Act
-            string responseString = await GetResponseString("path=modules");
+            string responseString = await GetResponseString("path=rollup/modules");
             Assert.Contains("File: built/Main.js", responseString);
             Assert.Contains("File: built/Main.js.map", responseString);
             Assert.Contains("File: built/Second.js", responseString);
             Assert.Contains("File: built/Second.js.map", responseString);
 
-            responseString = await GetResponseString("path=nomodules");
+            responseString = await GetResponseString("path=rollup/nomodules");
             Assert.Contains("File: built/Main.js", responseString);
             Assert.Contains("File: built/Main.js.map", responseString);
             Assert.Contains("File: built/Second.js", responseString);
@@ -173,7 +173,7 @@ export default function () {
                              });
 
                              options.AddOutput((output) => {
-                                 output.Format = Rollup.RollupOutputFormat.Umd;
+                                 output.Format = Rollup.RollupOutputFormat.System;
                                  output.Sourcemap = SourceMapType.File;
                                  output.Dir = "/rollup/nomodules";
                              });

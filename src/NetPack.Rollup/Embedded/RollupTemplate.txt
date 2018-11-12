@@ -9,9 +9,9 @@ const fs = require("fs");
 const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
 
 var allFiles = {};
-let cache = null;
+let cacheStore = {};
 
-function getInputOptions(dto) {
+function getInputOptions(dto, cachekey) {
 
         var inputOptions = new RollupFileOptions_1.default();
         inputOptions.input = dto.input;
@@ -32,10 +32,10 @@ function getInputOptions(dto) {
 		{
 		   inputOptions.external = dto.external;
 		}
-		if(cache != null)
+		if(cacheStore.hasOwnProperty(cachekey))
 		{
-		   inputOptions.cache = cache;
-		}
+		   inputOptions.cache = cacheStore[cachekey];
+        }	
 
 		return inputOptions;
 }
@@ -98,21 +98,19 @@ module.exports = {
 		var promises = [];
 
 		let sut = new rolluphost_1.default();		
-		var results = {};
-
-		var inputOptions = getInputOptions(inputOptionsDto);
+		var results = {};	
 
 		for (var i = 0; i < outputsArrayLength; i++) {
 		    var outputOptionsDto = outputOptionsArray[i];				
 			var outputOptions = getOutputOptions(outputOptionsDto);
+			var key = outputOptions.file;
+		    var inputOptions = getInputOptions(inputOptionsDto);
+		    results[key] = [];
+
 			
-		    results[outputOptions.file] = [];
-
-
-			//inputOptions["_i"] = i;
-		    var p = sut.build(inputOptions, outputOptions).then(result => {	
-			    cache = result.Cache; // TODO: key cache by output?
-			    results[outputOptions.file].push(result.Output);
+		    var p = sut.build(inputOptions, outputOptions, key).then(result => {	
+			    cacheStore[result.Key] = result.Cache;
+			    results[result.Key].push(result.Output);
 				return result.Output;
 			});
 
