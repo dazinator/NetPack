@@ -9,7 +9,7 @@
         li.appendChild(document.createTextNode(moduleName + " Loaded.. "));
         ul.appendChild(li);      
     };
-
+          
     self.addModuleToList("modules", "ModuleA");
     return self;
 

@@ -1,11 +1,10 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
 
 namespace NetPack.Pipeline
 {
@@ -19,14 +18,14 @@ namespace NetPack.Pipeline
 
     public class PipelineWatcher : IPipelineWatcher
     {
-        private CancellationTokenSource _tokenSource;
+        private readonly CancellationTokenSource _tokenSource;
 
         //  private CancellationTokenSource _tokenSource = new CancellationTokenSource();
 
         private List<IPipeLine> _pipelines = new List<IPipeLine>();
-        private Task _monitoringTask = null;
+        private readonly Task _monitoringTask = null;
 
-        private readonly ConcurrentDictionary<string, IChangeToken> _activeChangeTokens = new ConcurrentDictionary<string, IChangeToken>();
+        private readonly ConcurrentDictionary<Guid, IDisposable> _activeChangeTokens = new ConcurrentDictionary<Guid, IDisposable>();
         private ILogger<PipelineWatcher> _logger = null;
 
 
@@ -40,15 +39,16 @@ namespace NetPack.Pipeline
             _pipelines.Add(pipeline);
             //  var inputs = pipeline.Pipes.Select(a => a.Input);
 
-            foreach (var pipe in pipeline.Pipes)
+            foreach (PipeContext pipe in pipeline.Pipes)
             {
-                foreach (var include in pipe.Input.GetIncludes())
+                foreach (string include in pipe.Input.GetIncludes())
                 {
 
                     //input.IncludeList.ForEach((include) =>
                     //{
-                    var state = new StateInfo() { Input = include, PipeContext = pipe, Pipeline = pipeline };
+                    StateInfo state = new StateInfo() { Input = include, PipeContext = pipe, Pipeline = pipeline };
                     WatchChangeToken(state);
+
                 }
             }
 
@@ -61,37 +61,70 @@ namespace NetPack.Pipeline
             //  EnsureMonitorTaskRunning();
         }
 
-        private void HandleChangeTokenExpired(object state)
+        private IDisposable WatchChangeToken(StateInfo state)
         {
-            var stateInfo = state as StateInfo;
-            IChangeToken expired;
-            _activeChangeTokens.TryRemove(stateInfo.Input, out expired);
 
-            // Mark the input as changed.
-            var changeTime = DateTime.UtcNow;
-            _logger.LogInformation("Changed signalled @ {0} for {1}", changeTime, stateInfo.Input);
-            stateInfo.PipeContext.Input.LastChanged = changeTime;
-            // _changedSinceLastTime.Add(stateInfo);
-            // re-watch the input as token will have expired.
-            WatchChangeToken(stateInfo);
-            stateInfo.PipeContext.ProcessChanges(stateInfo.Pipeline);          
+            Guid key = Guid.NewGuid();
+            IChangeToken token = state.Pipeline.InputAndGeneratedFileProvider.Watch(state.Input);
 
-        }
-
-
-        private IChangeToken WatchChangeToken(StateInfo state)
-        {
-            IChangeToken changeToken;
-            changeToken = _activeChangeTokens.GetOrAdd(state.Input, (key) =>
+            IDisposable disposable = token.RegisterChangeCallback((s) =>
             {
-                var token = state.Pipeline.InputAndGeneratedFileProvider.Watch(key);
-                return token;
+                StateInfo stateInfo = s as StateInfo;
+                // Mark the input as changed.
+                DateTime changeTime = DateTime.UtcNow;
+                _logger.LogInformation("Changed signalled @ {0} for {1}", changeTime, stateInfo.Input);
+                stateInfo.PipeContext.Input.LastChanged = changeTime;
+
+                // dispose this delegate and re-watch          
+                IDisposable removed = null;
+                while (removed == null)
+                {
+                    _activeChangeTokens.TryRemove(key, out removed);
+                    if(removed != null)
+                    {
+                        removed.Dispose();
+                        var newHandler = WatchChangeToken(stateInfo);
+                    }                    
+                }
+
+                stateInfo.PipeContext.ProcessChanges(stateInfo.Pipeline);
+
+            }, state);
+
+            _activeChangeTokens.AddOrUpdate(key, disposable, (a,b)=> {
+                return b;
             });
+            //var changeToken = _activeChangeTokens.Add(state.Input, (key) =>
+            //{
+
+            //    return disposable;
+            //});
 
             // var pipeWithInclude = new Tuple<PipeConfiguration, string>(pipeConfig, key);
-            changeToken.RegisterChangeCallback(HandleChangeTokenExpired, state);
-            return changeToken;
+
+            return disposable;
         }
-     
+
+        //private void HandleChangeTokenExpired(object state)
+        //{
+        //    var stateInfo = state as StateInfo;
+        //    IChangeToken expired;
+
+        //    _activeChangeTokens.TryRemove(stateInfo.Input, out expired);
+
+        //    // Mark the input as changed.
+        //    var changeTime = DateTime.UtcNow;
+        //    _logger.LogInformation("Changed signalled @ {0} for {1}", changeTime, stateInfo.Input);
+        //    stateInfo.PipeContext.Input.LastChanged = changeTime;
+        //    // _changedSinceLastTime.Add(stateInfo);
+        //    // re-watch the input as token will have expired.
+        //    WatchChangeToken(stateInfo);
+        //    stateInfo.PipeContext.ProcessChanges(stateInfo.Pipeline);          
+
+        //}
+
+
+
+
     }
 }

@@ -5,5 +5,5 @@
     console.log("hi from module b");
     moduleA.addModuleToList("modules", "ModuleB");
     self.addModuleToList = moduleA.addModuleToList;
-    return self;
+    return self; 
 });
