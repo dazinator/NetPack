@@ -1,0 +1,128 @@
+﻿"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const rolluphost_1 = require("netpack-rollup");
+const RollupFileOptions_1 = require("netpack-rollup/dist/RollupFileOptions");
+const RollupOutputOptions_1 = require("netpack-rollup/dist/RollupOutputOptions");
+const hypothetical = require("rollup-plugin-hypothetical");
+const fs = require("fs");
+{{ for plugin in plugins }}
+const {{ plugin.default_export_name ?? "plugin" + for.index }} = require("{{ plugin.package_name }}");{{ end }}
+
+var allFiles = {};
+let cacheStore = {};
+
+function getInputOptions(dto, cachekey) {
+
+        var inputOptions = new RollupFileOptions_1.default();
+        inputOptions.input = dto.input;
+
+        var hypotheticalPlugin = hypothetical({
+            files: allFiles
+        });
+        hypotheticalPlugin.cwd = false;
+		var plugins = [hypotheticalPlugin];		
+		{{ for plugin in plugins }}{{ if plugin.import_only }}{{ else }}{{ if plugin.plugin_configuration_json }}		
+		var pluginConfig{{ for.index }} = {{ plugin.plugin_configuration_json }}
+		var newPlugin{{ for.index }} = {{ plugin.default_export_name ?? "plugin" + for.index }}(pluginConfig{{ for.index }});{{ else }}var newPlugin{{ for.index }} = {{ plugin.default_export_name ?? "plugin" + for.index }}();{{ end }}		
+		plugins.push(newPlugin{{ for.index }});
+		{{ end }}{{ end }}
+
+        inputOptions.plugins = plugins;
+		if(dto.external != null)
+		{
+		   inputOptions.external = dto.external;
+		}
+		if(cacheStore.hasOwnProperty(cachekey))
+		{
+		   inputOptions.cache = cacheStore[cachekey];
+        }	
+
+		return inputOptions;
+}
+
+function getOutputOptions(dto) {
+   
+        var outputOptions = new RollupOutputOptions_1.default();
+        outputOptions.format = dto.format;
+		if(dto.file !== null)
+		{
+		   outputOptions.file = dto.file;
+		}
+		if(dto.name != null)
+		{
+		   outputOptions.name = dto.name;
+		}
+		if(dto.globals != null)
+		{
+		   outputOptions.globals = dto.globals;
+		}
+		if(dto.paths != null)
+		{
+		   outputOptions.paths = dto.paths;
+		}	
+		if(dto.sourcemap != null)
+		{
+			if(dto.sourcemap == "inline")
+			{
+			   outputOptions.sourcemap = "inline";
+			}
+			else
+			{
+			   outputOptions.sourcemap = true;
+			}
+		}
+		if(dto.amd != null)
+		{
+		   outputOptions.amd = dto.amd;
+		}
+
+		return outputOptions;
+}
+
+
+
+module.exports = {
+
+    build: function (callback, requestDto) {
+        var files = requestDto.files;
+        for (var i = 0; i < requestDto.files.length; i++) {
+
+            var file = requestDto.files[i];
+            allFiles[file.path] = file.contents;
+        }
+
+        var inputOptionsDto = requestDto.inputOptions;
+		var outputOptionsArray = requestDto.outputOptions;
+		var outputsArrayLength = outputOptionsArray.length;	
+		var errorMessage = null;
+		var promises = [];
+
+		let sut = new rolluphost_1.default();		
+		var results = {};	
+
+		for (var i = 0; i < outputsArrayLength; i++) {
+		    var outputOptionsDto = outputOptionsArray[i];				
+			var outputOptions = getOutputOptions(outputOptionsDto);
+			var key = outputOptions.file;
+		    var inputOptions = getInputOptions(inputOptionsDto);
+		    results[key] = [];
+
+			
+		    var p = sut.build(inputOptions, outputOptions, key).then(result => {	
+			    cacheStore[result.Key] = result.Cache;
+			    results[result.Key].push(result.Output);
+				return result.Output;
+			});
+
+			promises.push(p);			
+	    }   
+
+		Promise.all(promises).then(function(values) {
+		   var response = { Results: results, EchoArray: values };
+		   callback(null, response); 
+		}).catch((reason) => {
+			    errorMessage = reason;				
+				callback(errorMessage, null);
+			}); 
+    }
+};

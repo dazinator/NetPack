@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NetPack.Node.Dto;
+using System.Collections.Generic;
 
 namespace NetPack.RequireJs
 {

@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Rollup Code Splitting";
+}
+
+<p>
+    As explained <a href="https://github.com/rollup/rollup-starter-code-splitting">here</a>
+
+    Notice that the seven modules in our /esm folder have been optimised into four modules — two for the 'entry points' on this page, and two more for code that is shared by multiple entry points or is loaded dynamically. Rollup will automatically create chunks in such a way that no code is duplicated between them.
+
+    You can read about code splitting <a href="https://medium.com/rollup/rollup-now-has-code-splitting-and-we-need-your-help-46defd901c82">here</a>
+</p>
+
+
+<h1>Rollup code-splitting demo</h1>
+
+<div id='a'>
+    <div data-used-by='a'></div>
+    <div data-used-by='both'></div>
+</div>
+
+<div id='b'>
+    <div data-used-by='b'></div>
+    <div data-used-by='both'></div>
+</div>
+
+
+@section scripts
+    {    
+
+    <script>
+        import("/netpack/rollup/module/main-a.js");
+        import("/netpack/rollup/module/main-b.js");
+        window.supportsDynamicImport = true;
+    </script>
+    <script>
+        if (!window.supportsDynamicImport) {
+            const systemJsLoaderTag = document.createElement('script');
+            systemJsLoaderTag.src = 'https://unpkg.com/systemjs@2.0.0-alpha.1/dist/s.min.js';
+            systemJsLoaderTag.addEventListener('load', function () {
+                System.import('/netpack/rollup/nomodule/main-a.js');
+                System.import('/netpack/rollup/nomodule/main-b.js');
+            });
+            document.head.appendChild(systemJsLoaderTag);
+        }
+    </script>
+
+
+}
+
+

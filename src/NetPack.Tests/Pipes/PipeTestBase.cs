@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using NetPack.File;
 using NetPack.Pipeline;
-using NetPack.RequireJs;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
-using Polly;
 using Microsoft.Extensions.Logging;
 
 namespace NetPack.Tests.Pipes

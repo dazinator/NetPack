@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using NetPack.RequireJs;
 using NetPack.Requirements;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.Logging;
@@ -122,16 +121,7 @@ namespace NetPack.Pipeline
         }
 
         public IPipelineBuilder UseBaseRequestPath(PathString baseRequestPath)
-        {
-
-            //if (baseRequestPath != null)
-            //{
-            //    if (!baseRequestPath.StartsWith("/"))
-            //    {
-            //        baseRequestPath = "/" + baseRequestPath;
-            //    }
-            //}
-
+        {      
             BaseRequestPath = baseRequestPath;
             return this;
         }

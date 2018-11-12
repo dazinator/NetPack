@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dazinator.AspNet.Extensions.FileProviders;
 using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Primitives;
-using NetPack;
-using NetPack.RequireJs;
 using NetPack.Requirements;
-using Polly;
-using NetPack.Pipeline;
 
 namespace NetPack.Pipeline
 {
@@ -157,7 +149,7 @@ namespace NetPack.Pipeline
                 var dirtyPipes = pipeContexts.Select(a => a.ProcessChanges(this));
                 await Task.WhenAll(dirtyPipes);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // retry?
                 throw;

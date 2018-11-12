@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
+using NetPack.Node.Dto;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
