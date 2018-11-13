@@ -68,6 +68,12 @@ namespace NetPack.Web.Controllers
             return View();
         }
 
+        public IActionResult BrowserReload()
+        {
+
+            return View();
+        }
+
         public IActionResult Error()
         {
             return View();

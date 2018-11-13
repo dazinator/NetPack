@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetPack.RequireJs;
+using NetPack.Web.WIP;
 using System.Collections.Generic;
 
 namespace NetPack.Web
@@ -167,6 +169,7 @@ namespace NetPack.Web
                 });
             });
             services.AddMvc();
+            services.AddSignalR();
 
         }
 
@@ -189,6 +192,11 @@ namespace NetPack.Web
             app.UseNetPack();
             app.UseStaticFiles();
 
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<BrowserReloadHub>("/reloadhub");
+            });
+
             app.UseMvc(routes =>
              {
                  routes.MapRoute(
@@ -203,7 +211,8 @@ namespace NetPack.Web
                 await next();
 
                 //  await context.Response.WriteAsync("Post Processing");
-            });
+            });           
+          
         }
 
     }

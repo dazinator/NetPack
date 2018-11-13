@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Rollup Code Splitting";
+}
+
+<p>
+    Demonstrates automatic browser reload when assets change.
+</p>
+
+
+<h1>Browser Reload Demo</h1>
+<input type="button" id="sendButton" value="Send Message" />
+
+@section scripts
+{
+
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/reload/reload.js"></script>
+}
