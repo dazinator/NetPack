@@ -10,9 +10,14 @@
 <h1>Browser Reload Demo</h1>
 <input type="button" id="sendButton" value="Send Message" />
 
+<ul id="modules"></ul>
+
 @section scripts
-{
+    {
 
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/reload/reload.js"></script>
+
+    <script src="/lib/require.js"></script>
+    <script src="~/netpack/built.js" asp-append-version="true"></script>
 }
