@@ -253,9 +253,7 @@ namespace NetPack.Pipeline
             {
                 PipelineContext.AddSourceOutput(item.Item1, item.Item2);
             }
-        }
-
-        
+        }        
 
         public void AddOutput(PathString directory, IFileInfo file)
         {

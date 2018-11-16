@@ -62,7 +62,6 @@ namespace NetPack.Pipeline
                 Watcher.WatchPipeline(pipeline);
             }
 
-
         }
 
         IPipeLine GetPipeline(string name)

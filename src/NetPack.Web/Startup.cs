@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetPack.RequireJs;
 using NetPack.Web.WIP;
@@ -16,7 +17,7 @@ namespace NetPack.Web
 
         private readonly List<IFileProvider> _fileProviders = new List<IFileProvider>();
 
-        public Startup(IHostingEnvironment env)
+        public Startup(Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -168,13 +169,15 @@ namespace NetPack.Web
 
                 });
             });
+
+            services.AddSingleton<IHostedService, BrowserReloadHostedService>();
             services.AddMvc();
             services.AddSignalR();
 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
