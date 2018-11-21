@@ -1,11 +1,9 @@
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using NetPack.Pipeline;
 using System;
-using Microsoft.Extensions.Logging;
 using System.Linq;
-using System.Threading;
-using NetPack.FileLocking;
+using System.Threading.Tasks;
 
 namespace NetPack
 {
@@ -16,7 +14,7 @@ namespace NetPack
         public RequestHaltingMiddlewareOptions()
         {
             Timeout = DefaultTimeout;
-        }      
+        }
 
         public TimeSpan Timeout { get; set; }
 
@@ -30,7 +28,7 @@ namespace NetPack
 
         private readonly RequestHaltingMiddlewareOptions _options;
 
-       
+
 
         public RequestHaltingMiddleware(RequestDelegate next, RequestHaltingMiddlewareOptions options)
         {
@@ -46,10 +44,29 @@ namespace NetPack
             // We do this by waiting on any existing lock with the path name if it exists.
             if (IsValidMethod(context.Request) && !PathEndsInSlash(context.Request.Path))
             {
-                logger.LogDebug("Waiting on locked file: " + context.Request.Path);
-                await FileLocks.WaitIfLockedAsync(context.Request.Path, _options.Timeout, context.RequestAborted);
+                bool wait = true;
+                while(wait)
+                {
+                    wait = pipelineManager.PipeLines.Any(a =>
+                    {
+                        if (!a.Value.IsBusy)
+                        {
+                            return false;
+                        }
+                        var file = a.Value.WebrootFileProvider.GetFileInfo(context.Request.Path);
+                        return file.Exists && !file.IsDirectory && a.Value.IsBusy;
+                    });
+
+                    if(wait)
+                    {
+                        logger.LogDebug("Waiting on busy pipeline for file: " + context.Request.Path);
+                        await Task.Delay(500);
+                    }
+                }               
+
+               // await FileLocks.WaitIfLockedAsync(context.Request.Path, _options.Timeout, context.RequestAborted);
                 //await FileRequestServices.WhenFileNotLocked(context.Request.Path, _options.Timeout, context.RequestAborted);
-                logger.LogDebug("File processing finished." + context.Request.Path);
+               // logger.LogDebug("File processing finished." + context.Request.Path);
             }
 
             await _next.Invoke(context);

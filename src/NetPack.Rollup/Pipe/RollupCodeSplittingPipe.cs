@@ -54,7 +54,7 @@ namespace NetPack.Rollup
         }
 
 
-        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
         {
             var optimiseRequest = new RollupRequest();
 
@@ -72,7 +72,9 @@ namespace NetPack.Rollup
             optimiseRequest.InputOptions = _inputOptions;
             optimiseRequest.OutputOptions = _outputOptions;
 
+            cancelationToken.ThrowIfCancellationRequested();
             var response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
+            cancelationToken.ThrowIfCancellationRequested();
 
             foreach (var output in _outputOptions)
             {

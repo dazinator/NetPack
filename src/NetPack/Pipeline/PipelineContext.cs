@@ -33,7 +33,9 @@ namespace NetPack.Pipeline
 
         public PipelineContext(
             IFileProvider fileProvider,
-            IDirectory sourceOutput, IDirectory directory, string baseRequestPath)
+            IDirectory sourceOutput,
+            IDirectory directory,
+            string baseRequestPath)
         {
             FileProvider = fileProvider;
             SourcesOutput = sourceOutput;
@@ -71,6 +73,9 @@ namespace NetPack.Pipeline
             return BaseRequestPath.Add(directory).Add("/" + fileInfo.Name);
         }
 
+        ///// <summary>
+        ///// Provides access too all generated output files only. These are files that were output as a result of file processing some input files.
+        ///// </summary>
         public IDirectory GeneratedOutput { get; set; }
 
         /// <summary>
@@ -82,9 +87,12 @@ namespace NetPack.Pipeline
         /// </summary>
         public IDirectory SourcesOutput { get; set; }
 
+        /// <summary>
+        /// Provides access to environment files and generated files.
+        /// </summary>
         public IFileProvider FileProvider { get; set; }
 
-        public PipeContext PipeContext { get; set; }
+        //public PipeProcessor PipeContext { get; set; }
 
         /// <summary>
         /// Any file added here will be able to be served up to the browser, but will not trigger
@@ -108,8 +116,6 @@ namespace NetPack.Pipeline
         {
             GeneratedOutput.AddOrUpdateFile(directory, file);
         }
-
-
 
     }
 }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace NetPack.Requirements
 {
@@ -42,47 +43,132 @@ namespace NetPack.Requirements
 
             using (Process p = ProcessUtils.CreateNpmProcess("list --depth 0"))
             {
-                p.Start();
 
-                // make sure it finished executing before proceeding 
-                p.WaitForExit();
 
-                var errors = new List<string>();
-                var warnings = new List<string>();
-                // reads the error output
-                while (!p.StandardError.EndOfStream)
+                List<string> errors = new List<string>();
+                List<string> warnings = new List<string>();
+
+                StringBuilder output = new StringBuilder();
+                // StringBuilder error = new StringBuilder();
+
+                using (AutoResetEvent outputWaitHandle = new AutoResetEvent(false))
                 {
-                    string line = p.StandardError.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(line))
+                    p.OutputDataReceived += (sender, e) =>
                     {
-                        if (line.Contains("WARN"))
+                        if (e.Data == null)
                         {
-                            warnings.Add(line);
-                            // WARNINGS ARE OK.
-                        }
-                        else if (line.StartsWith("npm ERR! extraneous"))
-                        {
-                            warnings.Add(line);
+                            outputWaitHandle.Set();
                         }
                         else
                         {
-                            errors.Add(line);
+                            output.AppendLine(e.Data);
                         }
-                    }
-                }
+                    };
 
-                if (errors.Any())
-                {
-                    string errorMessage = string.Join(Environment.NewLine, errors);
-                    // if there were errors, throw an exception
-                    if (!String.IsNullOrEmpty(errorMessage))
+                    p.ErrorDataReceived += (sender, e) =>
                     {
-                        throw new NodeJsNotInstalledException(errorMessage);
-                    }
+                        if (e.Data == null)
+                        {
+                            // outputWaitHandle.Set();
+                        }
+                        else
+                        {
+                            string line = e.Data;
+                            if (!string.IsNullOrWhiteSpace(line))
+                            {
+                                if (line.Contains("WARN"))
+                                {
+                                    warnings.Add(line);
+                                    // WARNINGS ARE OK.
+                                }
+                                else if (line.StartsWith("npm ERR! extraneous"))
+                                {
+                                    warnings.Add(line);
+                                }
+                                else
+                                {
+                                    errors.Add(line);
+                                }
+                            }
+
+                            // error.AppendLine(e.Data);
+                        }
+                    };
+
+                    p.Start();
+
+                    p.BeginOutputReadLine();
+                    p.BeginErrorReadLine();
+
+                    p.WaitForExit();
+
+                    outputWaitHandle.WaitOne();
                 }
 
-                string output = p.StandardOutput.ReadToEnd();
-                return ParsePackagesFromStdOut(output);
+                if (!errors.Any())
+                {
+                    string outputText = output.ToString();
+                    //p.StandardOutput.ReadToEnd();
+                    return ParsePackagesFromStdOut(outputText);
+                }
+                else
+                {
+                    //// reads the error output
+                    //while (!p.StandardError.EndOfStream)
+                    //{
+                    //    string line = p.StandardError.ReadLine();
+                    //    if (!string.IsNullOrWhiteSpace(line))
+                    //    {
+                    //        if (line.Contains("WARN"))
+                    //        {
+                    //            warnings.Add(line);
+                    //            // WARNINGS ARE OK.
+                    //        }
+                    //        else if (line.StartsWith("npm ERR! extraneous"))
+                    //        {
+                    //            warnings.Add(line);
+                    //        }
+                    //        else
+                    //        {
+                    //            errors.Add(line);
+                    //        }
+                    //    }
+                    //}
+                    string errorMessage = string.Join(Environment.NewLine, errors);
+                    throw new NodeJsNotInstalledException(errorMessage);
+
+
+                }
+
+
+
+
+
+
+
+                //try
+                //{
+
+                //    while (!p.StandardOutput.EndOfStream)
+                //    {
+                //        string line = p.StandardOutput.ReadLine();
+                //        if (!string.IsNullOrWhiteSpace(line))
+                //        {
+                //            builder.AppendLine(line);
+                //        }
+                //    }
+
+                //    string output = builder.ToString();
+                //    //p.StandardOutput.ReadToEnd();
+                //    return ParsePackagesFromStdOut(output);
+                //}
+                //catch (Exception e)
+                //{
+
+                //    throw;
+                //}
+
+
 
             }
 
@@ -204,7 +290,7 @@ namespace NetPack.Requirements
                         else if (line.StartsWith("npm notice"))
                         {
                             warnings.Add(line);
-                        }                       
+                        }
                         else
                         {
                             errors.Add(line);

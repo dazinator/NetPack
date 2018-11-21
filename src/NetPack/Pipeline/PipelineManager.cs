@@ -39,9 +39,9 @@ namespace NetPack.Pipeline
             //  var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
 
             var outputFileProvider = pipeline.WebrootFileProvider;
-            if (!string.IsNullOrWhiteSpace(pipeline.BaseRequestPath))
+            if (!string.IsNullOrWhiteSpace(pipeline.Context.BaseRequestPath))
             {
-                outputFileProvider = new RequestPathFileProvider(pipeline.BaseRequestPath, outputFileProvider);
+                outputFileProvider = new RequestPathFileProvider(pipeline.Context.BaseRequestPath, outputFileProvider);
             }
 
 

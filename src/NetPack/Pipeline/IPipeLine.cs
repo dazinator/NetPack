@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using Dazinator.AspNet.Extensions.FileProviders.Directory;
+using Microsoft.Extensions.FileProviders;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
-using Microsoft.Extensions.FileProviders;
 
 namespace NetPack.Pipeline
 {
     public interface IPipeLine
-    {
-        IDirectory GeneratedOutputDirectory { get; set; }
+    {     
 
-        List<PipeContext> Pipes { get; }
+        List<PipeProcessor> Pipes { get; }
 
         PipelineContext Context { get; set; }
 
@@ -27,7 +26,7 @@ namespace NetPack.Pipeline
         /// <param name="pipes"></param>
         /// <param name="none"></param>
         /// <returns></returns>
-        Task ProcessPipesAsync(IEnumerable<PipeContext> pipes, CancellationToken none);
+        Task ProcessPipesAsync(IEnumerable<PipeProcessor> pipes, CancellationToken none);
 
         /// <summary>
         /// Processes only the specified pipes.
@@ -35,25 +34,24 @@ namespace NetPack.Pipeline
         /// <param name="pipes"></param>
         /// <param name="none"></param>
         /// <returns></returns>
-        Task ProcessDirtyPipesAsync(CancellationToken none);
+        Task ProcessUninitialisedPipesAsync(CancellationToken none);
 
         IFileProvider EnvironmentFileProvider { get; set; }
 
-        IFileProvider GeneratedOutputFileProvider { get; set; }
-
-        IFileProvider InputAndGeneratedFileProvider { get; set; }
-
-        IDirectory SourcesOutputDirectory { get; set; }
+        IFileProvider GeneratedOutputFileProvider { get; set; }      
 
         IFileProvider SourcesFileProvider { get; set; }
 
-        IFileProvider WebrootFileProvider { get; set; }
-               
-        string BaseRequestPath { get; set; }
-      
+        IFileProvider WebrootFileProvider { get; set; }      
+
         void Initialise();
 
-        bool HasDirtyPipes();
-      
+        bool IsBusy
+        {
+            get;
+        }
+
+        //bool HasUninitialisedPipes();
+
     }
 }

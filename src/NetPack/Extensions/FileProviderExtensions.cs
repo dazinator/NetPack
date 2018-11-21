@@ -36,7 +36,7 @@ namespace NetPack
             }
         }
 
-        public static FileWithDirectory[] GetFiles(this IFileProvider fileProvider, PipelineInput inputs)
+        public static FileWithDirectory[] GetFiles(this IFileProvider fileProvider, PipeInput inputs)
         {
             var results = new Dictionary<string, FileWithDirectory>();
             var includes = inputs.GetIncludes().ToArray();

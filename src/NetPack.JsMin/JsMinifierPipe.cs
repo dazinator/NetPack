@@ -21,23 +21,21 @@ namespace NetPack.JsMin
 
         }
 
-        public override async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
+        public override async Task ProcessAsync(PipeState state, CancellationToken cancelationToken)
         {
-
-
             JsMin jsMin = new JsMin(_options);
-            foreach (FileWithDirectory item in context.InputFiles)
+            foreach (FileWithDirectory item in state.InputFiles)
             {
 
                 string outPutFileName = GetOutputFileName(item);
                 string subPath = item.Directory + outPutFileName;
-                context.AddBlock(subPath);
+               // state.AddBlock(subPath);
 
                 // preemptive block any map file until we have processed.
                 string mapFileName = outPutFileName + ".map";
-                context.AddBlock(subPath + ".map");
+               // state.AddBlock(subPath + ".map");
 
-                SourceMapBuilder mapBuilder = GetSourceMapBuilder(_options, outPutFileName, context.PipelineContext, item);
+                SourceMapBuilder mapBuilder = GetSourceMapBuilder(_options, outPutFileName, state, item);
 
                 System.IO.Stream stream = item.FileInfo.CreateReadStream();
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
@@ -45,7 +43,9 @@ namespace NetPack.JsMin
                 StringBuilder output = new StringBuilder((int)stream.Length); // minified file shouldnt be longer than the original
                                                                               //   mapBuilder.CurrentSourceFileContext.AdvanceColumnPosition(-1);
 
+                cancelationToken.ThrowIfCancellationRequested();
                 await jsMin.ProcessAsync(stream, output, mapBuilder, cancelationToken);
+                cancelationToken.ThrowIfCancellationRequested();
 
                 if (mapBuilder != null)
                 {
@@ -66,14 +66,14 @@ namespace NetPack.JsMin
                     {
                         // seperate file.
 
-                        context.AddOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
+                        state.AddOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
                         sourceMappingURL = $"//# sourceMappingURL={mapFileName.ToString()}";
                     }
 
                     output.Append(sourceMappingURL);
                 }
 
-                context.AddOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));
+                state.AddOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));
 
             }
 
@@ -90,7 +90,7 @@ namespace NetPack.JsMin
             return json;
         }
 
-        private SourceMapBuilder GetSourceMapBuilder(JsMinOptions options, string outputFileName, IPipelineContext context, FileWithDirectory item)
+        private SourceMapBuilder GetSourceMapBuilder(JsMinOptions options, string outputFileName, PipeState state, FileWithDirectory item)
         {
             if (!options.EnableSourceMaps)
             {
@@ -107,7 +107,7 @@ namespace NetPack.JsMin
             else
             {
                 // make sure the source file can be served up to the browser.
-                context.AddSourceOutput(item.Directory, item.FileInfo);
+                state.AddSource(item.Directory, item.FileInfo);
 
 
                 // Not sure if its necessary to create a relative path from min or map file to the source file:

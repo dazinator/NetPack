@@ -6,7 +6,7 @@
 
         var ul = document.getElementById(listId);
         var li = document.createElement("li");
-        li.appendChild(document.createTextNode(moduleName + " Loaded asswas"));
+        li.appendChild(document.createTextNode(moduleName + " Loaded..abdd!"));
         ul.appendChild(li);      
     };
           

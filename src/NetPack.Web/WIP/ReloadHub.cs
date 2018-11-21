@@ -44,7 +44,7 @@ namespace NetPack.Web.WIP
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            string pattern = "**/*";
+            string pattern = "/netpack/built.js";
             Watch(pattern);
             return Task.CompletedTask;
         }
@@ -52,7 +52,7 @@ namespace NetPack.Web.WIP
         private void Watch(string pattern)
         {
             _changeCallbackDisposable = ChangeToken.OnChange(() => _env.WebRootFileProvider.Watch(pattern), (s) =>
-             {
+             {                 
                  _logger.LogInformation("triggering browser reload");
                  using (IServiceScope scope = _serviceScopeFactory.CreateScope())
                  {
