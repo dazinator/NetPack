@@ -65,11 +65,11 @@ namespace NetPack.Tests
             // assert
             Assert.NotNull(pipeLine);
          //   Assert.False(pipeLine.HasFlushed);
-            Assert.NotNull(pipeLine.GeneratedOutputDirectory);
+            Assert.NotNull(pipeLine.Context.GeneratedOutput);
             Assert.NotNull(pipeLine.EnvironmentFileProvider);
-            Assert.NotNull(pipeLine.InputAndGeneratedFileProvider);
+            Assert.NotNull(pipeLine.Context.FileProvider);
             Assert.NotNull(pipeLine.GeneratedOutputFileProvider);
-            Assert.NotNull(pipeLine.SourcesOutputDirectory);
+            Assert.NotNull(pipeLine.Context.SourcesOutput);
             Assert.NotNull(pipeLine.SourcesFileProvider);
 
             Assert.NotNull(pipeLine.Pipes);

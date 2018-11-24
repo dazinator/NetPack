@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.4" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NetPack.BrowserReload\NetPack.BrowserReload.csproj" />
     <ProjectReference Include="..\NetPack.Rollup\NetPack.Rollup.csproj" />
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
     <ProjectReference Include="..\NetPack.Typescript\NetPack.Typescript.csproj" />
@@ -29,6 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Views\Home\BrowserReload.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Home\RollupCodeSplitting.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

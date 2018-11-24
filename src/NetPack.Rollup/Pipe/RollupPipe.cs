@@ -55,11 +55,11 @@ namespace NetPack.Rollup
         }
 
 
-        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(PipeState state, CancellationToken cancelationToken)
         {
             RollupRequest optimiseRequest = new RollupRequest();
 
-            foreach (FileWithDirectory file in context.InputFiles)
+            foreach (FileWithDirectory file in state.InputFiles)
             {
                 string fileContent = file.FileInfo.ReadAllContent();
 
@@ -74,8 +74,11 @@ namespace NetPack.Rollup
             optimiseRequest.InputOptions = _inputOptions;
             optimiseRequest.OutputOptions = _outputOptions;
 
+            cancelationToken.ThrowIfCancellationRequested();
+
             RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
             //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
+            cancelationToken.ThrowIfCancellationRequested();
 
             foreach (RollupOutputFileOptions output in _outputOptions)
             {
@@ -84,12 +87,12 @@ namespace NetPack.Rollup
                 PathStringUtils.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
 
                 foreach (var outputItem in outputResults)
-                {                   
-                    context.AddOutput(rootPath, new StringFileInfo(outputItem.Code.ToString(), outputFileName));
+                {
+                    state.AddOutput(rootPath, new StringFileInfo(outputItem.Code.ToString(), outputFileName));
                     if (outputItem.SourceMap != null)
                     {
                         string json = Newtonsoft.Json.JsonConvert.SerializeObject(outputItem.SourceMap);
-                        context.AddOutput(rootPath, new StringFileInfo(json, outputFileName + ".map"));
+                        state.AddOutput(rootPath, new StringFileInfo(json, outputFileName + ".map"));
                     }
                 }
 

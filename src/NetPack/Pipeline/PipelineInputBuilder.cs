@@ -14,7 +14,7 @@ namespace NetPack.Pipeline
         {
             //  _sourceFileProvider = sourceFileProvider;
             // _sources = new Sources();
-            Input = new PipelineInput();
+            Input = new PipeInput();
         }
 
         public PipelineInputBuilder Include(string pattern)
@@ -29,7 +29,7 @@ namespace NetPack.Pipeline
             return this;
         }
 
-        public PipelineInput Input { get; set; }
+        public PipeInput Input { get; set; }
 
     }
 }

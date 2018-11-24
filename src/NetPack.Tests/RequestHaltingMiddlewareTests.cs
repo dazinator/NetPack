@@ -14,7 +14,7 @@ namespace NetPack.Tests
     {
 
         [Fact]
-        public async Task Delays_Request_Whilst_File_Locked()
+        public async Task Delays_Request_Whilst_Pipeline_Busy()
         {
 
             InMemoryFileProvider inMemoryFileProvider = new InMemoryFileProvider();
@@ -40,7 +40,8 @@ namespace NetPack.Tests
                                 {
                                     // block requests for the file we are generating, until we have finished generating it.
                                     string generatedFilePath = "/wwwroot/foo.js";
-                                    context.AddBlock(generatedFilePath);
+
+                                    //  requestHalter.AddBlock(generatedFilePath);
 
                                     //using (var locker = new FileLocker().AddBlock(generatedFilePath))
                                     //{
@@ -53,6 +54,10 @@ namespace NetPack.Tests
                                     string inputFileContents = context.InputFiles[0].FileInfo.ReadAllContent();
                                     // output the generated file
                                     context.AddOutput("/wwwroot", new StringFileInfo(inputFileContents + " processed!", "foo.js"));
+                                    // }
+
+
+
 
                                     // } // lock freed on dispose, should allow any in progress request for file to continue.
                                 }))

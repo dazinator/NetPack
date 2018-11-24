@@ -10,7 +10,7 @@ namespace NetPack.Pipeline
         //    return new FileBlocker();
         //}
 
-        public abstract Task ProcessAsync(PipeContext context, CancellationToken cancelationToken);
+        public abstract Task ProcessAsync(PipeState context, CancellationToken cancelationToken);
 
     }
 }

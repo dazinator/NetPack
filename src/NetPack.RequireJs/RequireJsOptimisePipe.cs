@@ -41,7 +41,7 @@ namespace NetPack.RequireJs
         }
 
 
-        public async Task ProcessAsync(PipeContext context, CancellationToken cancelationToken)
+        public async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
         {
 
             // var pipeContext = context.PipeContext;
@@ -65,8 +65,8 @@ namespace NetPack.RequireJs
 
             optimiseRequest.Options = _options;
 
-            try
-            {
+           
+                cancelationToken.ThrowIfCancellationRequested();
                 RequireJsOptimiseResult result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
                 foreach (NodeInMemoryFile file in result.Files)
                 {
@@ -80,17 +80,7 @@ namespace NetPack.RequireJs
                 //{
                 //    throw new RequireJsOptimiseException(result.Error);
                 //}
-            }
-            catch (Exception e)
-            {
-
-                //var jsonRequest = Newtonsoft.Json.JsonConvert.SerializeObject(optimiseRequest, new JsonSerializerSettings()
-                //{
-                //    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                //});
-
-                throw;
-            }
+           
 
 
         }

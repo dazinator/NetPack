@@ -1,23 +1,17 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.FileProviders;
-using NetPack.File;
-using Dazinator.AspNet.Extensions.FileProviders;
 using System.Linq;
-using System.Collections;
 
 namespace NetPack.Pipeline
 {
-    public class PipelineInput
+    public class PipeInput
     {
-        public PipelineInput()
+        public PipeInput()
         {
-            //  FileProvider = fileProvider;
             IncludeList = new List<string>();
             ExcludeList = new List<string>();
         }
 
-        //  public IFileProvider FileProvider { get; set; }
         protected List<string> IncludeList { get; }
 
         protected List<string> ExcludeList { get; }

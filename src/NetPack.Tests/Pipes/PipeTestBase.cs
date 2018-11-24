@@ -41,23 +41,25 @@ namespace NetPack.Tests.Pipes
             //  var sourceFilesList = new List<IFileInfo>(files);
             var provider = new InMemoryFileProvider(_directory);
             //  PipelineContext = new PipelineContext(provider, _sourcesdirectory);
-            var input = new PipelineInput();
+            var input = new PipeInput();
             foreach (var item in files)
             {
                 input.AddInclude(item.UrlPath);
             }
             Sut = pipeFactory();
-            var pipeContext = new PipeContext(input, Sut, new LoggerFactory().AddConsole().CreateLogger<PipeContext>());
-            var pipes = new List<PipeContext>() { pipeContext };
+            var loggerFactory = new LoggerFactory().AddConsole();
 
-            Pipeline = new Pipeline.Pipeline(provider, pipes, null, _sourcesdirectory);
+            var pipeContext = new PipeProcessor(input, Sut, loggerFactory.CreateLogger<PipeProcessor>());
+            var pipes = new List<PipeProcessor>() { pipeContext };
+
+            Pipeline = new Pipeline.Pipeline(provider, pipes, null, _sourcesdirectory, loggerFactory.CreateLogger<Pipeline.Pipeline>());
             await Pipeline.ProcessPipesAsync(pipes, CancellationToken.None);
 
         }
 
         protected IFileInfo ThenTheProcessedOutputDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var outputFile = Pipeline.GeneratedOutputDirectory.GetFile(filePath);
+            var outputFile = Pipeline.Context.GeneratedOutput.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(outputFile?.FileInfo);
@@ -66,7 +68,7 @@ namespace NetPack.Tests.Pipes
 
         protected IFileInfo ThenTheSourcesDirectoryFile(string filePath, Action<IFileInfo> assertions)
         {
-            var sourceFile = Pipeline.SourcesOutputDirectory.GetFile(filePath);
+            var sourceFile = Pipeline.Context.SourcesOutput.GetFile(filePath);
             //_directory.FirstOrDefault(
             //    a => SubPathInfo.Parse(a.ToString()).Equals(SubPathInfo.Parse(filePath)));
             assertions(sourceFile?.FileInfo);

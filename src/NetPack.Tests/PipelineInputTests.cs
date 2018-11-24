@@ -19,7 +19,7 @@ namespace NetPack.Tests
             fileProvider.Directory.AddFile("wwwroot", new StringFileInfo("hi", "somefile.js"));
             fileProvider.Directory.AddFile("wwwroot", new StringFileInfo("there", "someOtherfile.js.map"));
 
-            var input = new PipelineInput();
+            var input = new PipeInput();
             input.AddInclude("wwwroot/*.js");
             var results = fileProvider.GetFiles(input);
 

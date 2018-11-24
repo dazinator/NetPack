@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NetPack
 {
@@ -36,6 +33,19 @@ namespace NetPack
             {
                 return (Directory.GetHashCode()*397) ^ FileInfo.GetHashCode();
             }
+        }
+
+        public bool IsNewerThan(FileWithDirectory file)
+        {           
+            if (file == null)
+            {
+                // We don't have a previous version of this file, so the file must be a new version.
+                return true;
+            }
+
+            // Return whether this version of the file has a gretaer modified date than the last version of this file.
+            bool changed = FileInfo.LastModified > file.FileInfo.LastModified;
+            return changed;
         }
 
       

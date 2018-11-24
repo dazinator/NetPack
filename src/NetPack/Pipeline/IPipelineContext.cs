@@ -25,24 +25,7 @@ namespace NetPack.Pipeline
 
         IFileProvider FileProvider { get; set; }
 
-        //  PathString GetRequestPath(PathString path);
-        PathString GetRequestPath(string directory, IFileInfo fileInfo);
-
-       // PipeContext PipeContext { get; }
-
-        ///// <summary>
-        ///// Returns whether the file is different from the version that was processed last time.
-        ///// </summary>
-        ///// <param name="fileWithDirectory"></param>
-        ///// <returns></returns>
-        //bool IsDifferentFromLastTime(FileWithDirectory fileWithDirectory);
-
-
-
-
-
-
-        //  SourceFile[] GetFilesByExtension(string fileExtensionIncludingDotPrefix);
+        PathString GetRequestPath(string directory, IFileInfo fileInfo);       
 
     }
 }
