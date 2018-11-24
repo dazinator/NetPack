@@ -1,21 +1,15 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetPack.RequireJs;
-using NetPack.Web.WIP;
-using System.Collections.Generic;
 
 namespace NetPack.Web
 {
     public class Startup
     {
-
-        private readonly List<IFileProvider> _fileProviders = new List<IFileProvider>();
 
         public Startup(Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
@@ -24,7 +18,7 @@ namespace NetPack.Web
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = builder.Build();          
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -163,14 +157,19 @@ namespace NetPack.Web
 
                       })
 
-
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
 
                 });
             });
 
-            services.AddSingleton<IHostedService, BrowserReloadHostedService>();
+            services.AddBrowserReload((options) =>
+            {
+                // trigger browser reload when our bundle file changes.
+                options.WatchWebRoot("/netpack/built.js");
+                options.WatchContentRoot("/Views/**/*.cshtml");
+            });
+
             services.AddMvc();
             services.AddSignalR();
 
@@ -195,10 +194,14 @@ namespace NetPack.Web
             app.UseNetPack();
             app.UseStaticFiles();
 
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<BrowserReloadHub>("/reloadhub");
-            });
+            app.UseBrowserReload();
+
+            // UseBrowserReload() calls UseSignalR() under the hood with default options.
+            // If you want full control of singlar setup, use the following instead:
+            //app.UseSignalR(routes =>
+            //{
+            //    routes.MapBrowserReloadHub();
+            //});
 
             app.UseMvc(routes =>
              {

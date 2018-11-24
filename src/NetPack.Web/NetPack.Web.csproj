@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NetPack.BrowserReload\NetPack.BrowserReload.csproj" />
     <ProjectReference Include="..\NetPack.Rollup\NetPack.Rollup.csproj" />
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
     <ProjectReference Include="..\NetPack.Typescript\NetPack.Typescript.csproj" />
