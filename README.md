@@ -27,6 +27,9 @@ All generated files, are held in memory, and accessible by your applications IHo
 
 # Stay in ASP.NET Core land.
 
+During development, when I start my website, I want it to be watching source files for changes, and I want it to be responsive to those changes so that I get a quick feedback loop.
+I don't want to have to switch to start up another dev server or external npm process, I just want stuff to start when I click the "play" button in visual studio, and stop when I click the stop button.
+
 Gulp, Webpack, Grunt etc are all great tools, but they also shift you somewhat into a new paradigm of config files, and javascript build processes that not all asp.net core developers would be immediatley productive with, but perhaps would be fine for more seasoned `NPM` developers. I personally would much rather have an API for file pre-processing that is closer to the C# / ASP.NET paradigm of my ASP.NET Core application - and not have to switch hats into the land of gulp or webpack to get things done. 
 
 # How does it work?
