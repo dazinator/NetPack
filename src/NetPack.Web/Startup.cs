@@ -151,7 +151,7 @@ namespace NetPack.Web
                           });
 
                           options.AddOutput((output) => {
-                              output.Format = Rollup.RollupOutputFormat.System;
+                              output.Format = Rollup.RollupOutputFormat.Esm;
                               output.Dir = "/rollup/multi/module/";
                           });
 
