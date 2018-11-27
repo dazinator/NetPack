@@ -156,6 +156,22 @@ namespace NetPack.Web
                           });
 
                       })
+                      // rollup code splitting example - produces multiple rollup builds (different output formats)
+                      // from same set of input files sent to nodejs side once.
+                      .AddRollupPipe(input =>
+                      {
+                          input.Include("hmr/**/*.js");
+                      }, options =>
+                      {
+
+                          options.InputOptions.Input = "/hmr/mod-a.js";
+
+                          options.AddOutput((output) => {
+                              output.Format = Rollup.RollupOutputFormat.System;
+                              output.File = "hmrbundle.js";
+                          });
+
+                      })
 
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.

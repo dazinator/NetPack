@@ -9,5 +9,7 @@
         public int Length { get; set; }
 
         public string[] Exports { get; set; }
+
+        public string Id { get; set; }
     }
 }

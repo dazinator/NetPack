@@ -35,6 +35,9 @@
     <Content Update="Views\Home\BrowserReload.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+    <Content Update="Views\Home\SystemHmr.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Home\RollupCodeSplitting.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

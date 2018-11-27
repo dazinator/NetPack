@@ -79,15 +79,26 @@ namespace NetPack.Rollup
             RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
             //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
             cancelationToken.ThrowIfCancellationRequested();
-
+            
             foreach (RollupOutputFileOptions output in _outputOptions)
             {
                 var outputResults = response.Results[output.File];
-
+                
                 PathStringUtils.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
-
+                
                 foreach (var outputItem in outputResults)
                 {
+                    if(outputItem.Modules != null)
+                    {
+                        foreach (var module in outputItem.Modules)
+                        {
+                            foreach (var export in module.Exports)
+                            {
+
+                            }
+                        }
+                    }
+                   
                     state.AddOutput(rootPath, new StringFileInfo(outputItem.Code.ToString(), outputFileName));
                     if (outputItem.SourceMap != null)
                     {

@@ -6,6 +6,23 @@
       "provider": "unpkg",
       "library": "@aspnet/signalr@1",
       "destination": "wwwroot/lib/signalr"
+    },
+    {
+      "provider": "unpkg",
+      "library": "systemjs-hmr@2.0.9",
+      "destination": "wwwroot/lib/systemjs-hmr/"
     }
-  ]
+  ,
+{
+  "provider": "unpkg",
+  "library": "systemjs-hot-reloader@1.1.0",
+  "destination": "wwwroot/lib/systemjs-hot-reloader/"
+}
+,
+{
+  "provider": "cdnjs",
+  "library": "systemjs@0.21.5",
+  "destination": "wwwroot/lib/systemjs/"
+}
+]
 }

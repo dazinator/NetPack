@@ -17,5 +17,7 @@ namespace NetPack.Rollup
         public bool IsEntry { get; set; }
 
         public RollupModuleResult[] Modules { get; set; }
+
+        public string Id { get; set; }
     }
 }
