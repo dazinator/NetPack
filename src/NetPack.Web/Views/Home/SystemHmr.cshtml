@@ -14,6 +14,8 @@
     <div data-used-by='both'></div>
 </div>
 
+<p>Modules loaded from optimised file:</p>
+<ul id="modules"></ul>
 <div id='a'>
     <div data-used-by='a'></div>
 </div>
@@ -22,19 +24,21 @@
     {
 
     <script src="~/lib/systemjs/system.js" type="text/javascript"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.21.5/system.js" type="text/javascript"></script>*@
+    
     <script src="~/lib/systemjs-hmr/dist/systemjs-hmr.js" type="text/javascript"></script>
-
 
     <script>
         SystemJS.config({
-            baseURL: '/netpack',
             "map": {
                 "@@hot": "@@empty"
             }
         });
-        System.import('hmrbundle.js');
-        //System.import('/netpack/rollup/nomodule/main-b.js');
-    </script>  
+        SystemJS.import('../hmr/ModuleA.js').then(function (m) {
+        });
+                    //System.import('hmrbundle.js');
+                    //System.import('/netpack/rollup/nomodule/main-b.js');
+    </script>
 
 
 }

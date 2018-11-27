@@ -19,8 +19,8 @@ const System = SystemJS
 const version = System.version.split(' ')[0].split('.')[1]
 
 const
-  is19 = version == '19',
-  is20 = version == '20';
+    is19 = version == '19',
+    is20 = version >= '20';
 
 if (!System._reloader) {
 

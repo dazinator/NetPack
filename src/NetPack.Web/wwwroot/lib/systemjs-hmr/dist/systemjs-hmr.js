@@ -12111,11 +12111,11 @@ var System = SystemJS;
 var version = System.version.split(' ')[0].split('.')[1];
 
 var is19 = version == '19';
-var is20 = version == '20';
+var is20 = version >= '20';
 
 if (!System._reloader) {
 
-  if (!(is19 || is20)) console.warn('Only support for SystemJS 0.19 and 0.20 has been tested. You are using', System.version, '. If you are having success with this version, please let us know so we can add it to the list of known working versions');
+  if (!(is19 || is20)) console.warn('Only support for SystemJS 0.19, 0.20 and 0.21 has been tested. You are using', System.version, '. If you are having success with this version, please let us know so we can add it to the list of known working versions');
 
   // Make sure System.trace is set (needed for trace to be fully populated)
   System.trace = true;
@@ -12336,7 +12336,11 @@ if (!System._reloader) {
     if (System.has(moduleName)) {
       var module = System.get(moduleName);
 
-      if (typeof module.__unload == 'function') module.__unload();
+        var unloadFunc = module.__unload || (module.default ? module.default.__unload : undefined);
+        if (typeof unloadFunc == 'function')
+            unloadFunc();
+
+      //if (typeof module.__unload == 'function') module.__unload();
     }
 
     System.delete(moduleName);
