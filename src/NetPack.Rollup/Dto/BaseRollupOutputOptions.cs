@@ -26,6 +26,10 @@ namespace NetPack.Rollup
         /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Configure Object of id: name pairs, used for umd/iife bundles.
+        /// Used to tell Rollup which module ids are mapped to global variables.
+        /// </summary>
         public void ConfigureGlobals(Action<dynamic> globals)
         {
             if (Globals == null)
@@ -41,6 +45,9 @@ namespace NetPack.Rollup
         /// </summary>
         public JObject Globals { get; set; }
 
+        /// <summary>
+        ///  Configure Object of id: path pairs. Where supplied, these paths will be used in the generated bundle instead of the module ID, allowing you to (for example) load dependencies from a CDN
+        /// </summary>
         public void ConfigurePaths(Action<dynamic> paths)
         {
             if (Paths == null)
@@ -55,6 +62,9 @@ namespace NetPack.Rollup
         /// </summary>
         public JObject Paths { get; set; }
 
+        /// <summary>
+        ///  Configure options for when the bundle output format is AMD.
+        /// </summary>
         public void ConfigureAmd(Action<dynamic> amd)
         {
             if (Amd == null)

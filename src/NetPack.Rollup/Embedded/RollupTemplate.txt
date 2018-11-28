@@ -24,7 +24,7 @@ function getInputOptions(dto, cachekey) {
 		{{ for plugin in plugins }}{{ if plugin.import_only }}{{ else }}{{ if plugin.plugin_configuration_json }}		
 		var pluginConfig{{ for.index }} = {{ plugin.plugin_configuration_json }}
 		var newPlugin{{ for.index }} = {{ plugin.default_export_name ?? "plugin" + for.index }}(pluginConfig{{ for.index }});{{ else }}var newPlugin{{ for.index }} = {{ plugin.default_export_name ?? "plugin" + for.index }}();{{ end }}		
-		plugins.push(newPlugin{{ for.index }});
+		{{ if plugin.add_before_virtual_file_system }}plugins.unshift(newPlugin{{ for.index }});{{ else }}plugins.push(newPlugin{{ for.index }});{{ end }}	
 		{{ end }}{{ end }}
 
         inputOptions.plugins = plugins;

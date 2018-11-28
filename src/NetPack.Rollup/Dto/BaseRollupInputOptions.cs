@@ -11,9 +11,9 @@ namespace NetPack.Rollup
             External = new List<string>();
         }
 
-        public void AddPlugin(string name, JObject configuration, string defaultExportName = null, bool importOnly = false)
+        public void AddPlugin(string name, object configuration, string defaultExportName = null, bool importOnly = false, bool addBeforeVirtualFileSystem = false)
         {
-            Plugins.Add(new RollupPlugin(name, configuration, defaultExportName, importOnly));
+            Plugins.Add(new RollupPlugin(name, configuration, defaultExportName, importOnly, addBeforeVirtualFileSystem));
         }
 
         /// <summary>

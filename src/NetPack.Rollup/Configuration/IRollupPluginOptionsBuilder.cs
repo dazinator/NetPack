@@ -11,4 +11,11 @@ namespace NetPack
         IRollupPluginStepConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement);
       //  RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
     }
+
+    public interface IRollupImportOptionsBuilder
+    {
+        IRollupImportConfigurationBuilder RequiresNpmModule(string name, string version, bool installAutomatically = true);
+        IRollupImportConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement);
+        //  RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
+    }
 }

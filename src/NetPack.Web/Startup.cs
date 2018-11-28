@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Dazinator.AspNet.Extensions.FileProviders;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,7 @@ namespace NetPack.Web
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
-            Configuration = builder.Build();          
+            Configuration = builder.Build();
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -26,6 +27,8 @@ namespace NetPack.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            StringFileInfo emptyFile = new StringFileInfo("", "@hot.js");
             // Add framework services.
             services.AddNetPack((setup) =>
             {
@@ -83,30 +86,30 @@ namespace NetPack.Web
                      {
                          // we add a rollup plugin which converts AMD files to ES2016 modules, so they can be included in a rollup bundle.
                          // https://www.npmjs.com/package/rollup-plugin-amd
-                         options.AddPlugin((a) =>
+                         options.AddImport((a) =>
                          {
                              a.RequiresNpmModule("module-lookup-amd", "5.0.1")
-                              .ImportOnly()   // only imported into the script as default export name, won't be included in rollupjs plugins list, but other plugin config could reference it.
-                              .DefaultExportName("lookup");                           
+                              .HasDefaultExportName("lookup");   // only imported into the script as default export name, won't be included in rollupjs plugins list, but other plugin config could reference it.                                       
                          })
                          .AddPlugin((a) =>
                          {
                              a.RequiresNpmModule("rollup-plugin-amd", "3.0.0")
-                             .Register((amdPluginOptions) =>
-                             {
-                                 amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: {baseUrl: '/amd'} }); }FUNC";
-                              //   amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: './js/requireConfig.js' }); }FUNC";
+                             .HasOptionsOfKind(OptionsKind.Object, (amdPluginOptions) =>
+                            {
+                                amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: {baseUrl: '/amd'} }); }FUNC";
+                                 //   amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: './js/requireConfig.js' }); }FUNC";
                              });
                              // a.WithConfiguration();
                          });
                          options.InputOptions.Input = "/amd/SomePage.js";
 
-                         options.AddOutput((output) => {
+                         options.AddOutput((output) =>
+                         {
                              output.Format = Rollup.RollupOutputFormat.Iife;
-                             output.File = "rollupbundle.js";                           
-                         });                       
+                             output.File = "rollupbundle.js";
+                         });
                      })
-                     // rollup code splitting example.
+                      // rollup code splitting example.
                       .AddRollupCodeSplittingPipe(input =>
                       {
                           input.Include("esm/**/*.js");
@@ -115,10 +118,11 @@ namespace NetPack.Web
                           options.InputOptions.AddEntryPoint("/esm/main-a.js")
                                               .AddEntryPoint("/esm/main-b.js");
 
-                          options.AddOutput((output) => {
+                          options.AddOutput((output) =>
+                          {
                               output.Format = Rollup.RollupOutputFormat.Esm;
                               output.Dir = "/rollup/module/";
-                          });                        
+                          });
                       })
                       // rollup code splitting example - for browsers that don't support native modules we use systemjs.
                       .AddRollupCodeSplittingPipe(input =>
@@ -129,11 +133,12 @@ namespace NetPack.Web
                           options.InputOptions.AddEntryPoint("/esm/main-a.js")
                                               .AddEntryPoint("/esm/main-b.js");
 
-                          options.AddOutput((output) => {
+                          options.AddOutput((output) =>
+                          {
                               output.Format = Rollup.RollupOutputFormat.System;
                               output.Dir = "/rollup/nomodule/";
                           });
-                         
+
                       })
                       // rollup code splitting example - produces multiple rollup builds (different output formats)
                       // from same set of input files sent to nodejs side once.
@@ -145,12 +150,14 @@ namespace NetPack.Web
                           options.InputOptions.AddEntryPoint("/esm/main-a.js")
                                               .AddEntryPoint("/esm/main-b.js");
 
-                          options.AddOutput((output) => {
+                          options.AddOutput((output) =>
+                          {
                               output.Format = Rollup.RollupOutputFormat.System;
                               output.Dir = "/rollup/multi/nomodule/";
                           });
 
-                          options.AddOutput((output) => {
+                          options.AddOutput((output) =>
+                          {
                               output.Format = Rollup.RollupOutputFormat.Esm;
                               output.Dir = "/rollup/multi/module/";
                           });
@@ -158,21 +165,40 @@ namespace NetPack.Web
                       })
                       // rollup code splitting example - produces multiple rollup builds (different output formats)
                       // from same set of input files sent to nodejs side once.
-                      .AddRollupPipe(input =>
+                      .AddRollupCodeSplittingPipe(input =>
                       {
                           input.Include("hmr/**/*.js");
                       }, options =>
                       {
+                          // This can be used to replace the @hot import with an empty object. Could be useful if you want a mechanism to disable hmr?
+                          //options.AddPlugin((a) =>
+                          // {
+                          //     a.RequiresNpmModule("rollup-plugin-ignore", "1.0.4")
+                          //     .HasOptionsOfKind(OptionsKind.Array, (pluginOptions) =>
+                          //     {
+                          //         pluginOptions.Add("@hot");
+                          //     })
+                          //     .RunsBeforeSystemPlugins(); // this plugin needs to run before the "hypothetical" plugin, which is added by netpack as the first plugin by default and is what acts as the in-memory file system.
+                          // });
 
-                          options.InputOptions.Input = "/hmr/mod-a.js";
+                          options.InputOptions.AddEntryPoint("/hmr/entry-a.js");
+                          //.AddEntryPoint("/esm/main-b.js");
+                          options.InputOptions.External.Add("@hot");
 
-                          options.AddOutput((output) => {
+                          options.AddOutput((output) =>
+                          {
                               output.Format = Rollup.RollupOutputFormat.System;
-                              output.File = "hmrbundle.js";
+                              output.Dir = "/rollup/hmr/nomodule/";
+                              
+                          });
+
+                          options.AddOutput((output) =>
+                          {
+                              output.Format = Rollup.RollupOutputFormat.Esm;
+                              output.Dir = "/rollup/hmr/module/";
                           });
 
                       })
-
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
 
@@ -233,8 +259,8 @@ namespace NetPack.Web
                 await next();
 
                 //  await context.Response.WriteAsync("Post Processing");
-            });           
-          
+            });
+
         }
 
     }

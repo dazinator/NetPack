@@ -37,7 +37,16 @@ namespace NetPack
             RollupPluginOptionsBuilder builder = new RollupPluginOptionsBuilder();
             configurePlugin(builder);
             IPipelineBuilder.IncludeRequirement(builder.ModuleRequirement);
-            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, builder.Options, builder.DefaultExportName1, builder.IsImportOnly);
+            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, builder.GetJsonConfigurationObject(), builder.DefaultExportName, builder.IsImportOnly, builder.PluginRunsBeforeSystemPlugins);
+            return (TBuilder)this;
+        }
+
+        public TBuilder AddImport(Action<IRollupImportOptionsBuilder> configurePlugin)
+        {
+            RollupImportOptionsBuilder builder = new RollupImportOptionsBuilder();
+            configurePlugin(builder);
+            IPipelineBuilder.IncludeRequirement(builder.ModuleRequirement);
+            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, null, builder.DefaultExportName, true);
             return (TBuilder)this;
         }
 
