@@ -5,6 +5,6 @@
     }
 };
 
-var another = new Another("xmasses greetings!");
+var another = new Another("awd de");
 document.body.querySelector(".message").innerHTML += another.greet();  
 

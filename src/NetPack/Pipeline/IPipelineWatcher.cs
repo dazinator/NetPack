@@ -2,6 +2,6 @@ namespace NetPack.Pipeline
 {
     public interface IPipelineWatcher
     {
-        void WatchPipeline(IPipeLine pipeline);
+        void WatchPipeline(IPipeLine pipeline, int watchTriggerDelay);
     }
 }

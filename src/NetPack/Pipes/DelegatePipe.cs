@@ -10,7 +10,7 @@ namespace NetPack.Pipeline
 
         private readonly Func<PipeState, CancellationToken, Task> _processAsync;
 
-        public DelegatePipe(Func<PipeState, CancellationToken, Task> processAsync)
+        public DelegatePipe(Func<PipeState, CancellationToken, Task> processAsync, string name = "Delegate"):base(name)
         {
             _processAsync = processAsync;
         }

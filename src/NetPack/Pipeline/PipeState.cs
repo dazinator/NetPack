@@ -2,6 +2,7 @@
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NetPack.Pipeline
 {
@@ -10,17 +11,26 @@ namespace NetPack.Pipeline
 
         public PipeState(FileWithDirectory[] inputs, IFileProvider fileProvider)
         {
-            InputFiles = inputs;
+            InputFiles = new Dictionary<PathString, Tuple<FileWithDirectory, DateTimeOffset>>();
+            foreach (FileWithDirectory item in inputs)
+            {
+                InputFiles.Add(item.UrlPath, new Tuple<FileWithDirectory, DateTimeOffset>(item, item.FileInfo.LastModified));
+            }
             FileProvider = fileProvider;
             OutputFiles = new HashSet<Tuple<PathString, IFileInfo>>();
-            SourceFiles = new HashSet<Tuple<PathString, IFileInfo>>();            
+            SourceFiles = new HashSet<Tuple<PathString, IFileInfo>>();
         }
 
-        public FileWithDirectory[] InputFiles { get; set; }
+        public Dictionary<PathString, Tuple<FileWithDirectory, DateTimeOffset>> InputFiles { get; set; }
         public IFileProvider FileProvider { get; }
         public HashSet<Tuple<PathString, IFileInfo>> OutputFiles { get; set; }
 
         public HashSet<Tuple<PathString, IFileInfo>> SourceFiles { get; set; }
+
+        public FileWithDirectory[] GetInputFiles()
+        {
+            return InputFiles.Values.Select(a => a.Item1).ToArray();
+        }
 
         /// <summary>
         ///   /// <summary>
@@ -31,23 +41,32 @@ namespace NetPack.Pipeline
         /// </summary>
         /// <param name="fileWithDirectory"></param>
         /// <returns></returns>
-        public FileWithDirectory GetInputFile(FileWithDirectory fileWithDirectory)
+        public FileWithDirectory GetInputFile(PathString path)
         {
             if (InputFiles == null)
             {
                 return null;
             }
 
-            foreach (FileWithDirectory item in InputFiles)
+            bool fileInfo = InputFiles.TryGetValue(path, out Tuple<FileWithDirectory, DateTimeOffset> info);
+            return info.Item1;
+        }
+
+        public bool HasFileChanged(PathString path, DateTimeOffset currentLastModifiedDate)
+        {
+            if (InputFiles == null)
             {
-                if (item.UrlPath == fileWithDirectory.UrlPath)
-                {
-                    return item;
-                }
+                return true;
             }
 
-            return null;
-        }              
+            if (!InputFiles.TryGetValue(path, out Tuple<FileWithDirectory, DateTimeOffset> info))
+            {
+                return true;
+            }
+
+            return info.Item2 < currentLastModifiedDate;
+
+        }
 
 
         public bool HasChanged(PipeState previousState)
@@ -59,16 +78,27 @@ namespace NetPack.Pipeline
             }
             else
             {
-
-                foreach (FileWithDirectory item in InputFiles)
+                var allKeys = InputFiles.Keys;
+                foreach (var item in allKeys)
                 {
-                    FileWithDirectory oldFile = previousState.GetInputFile(item);
-                    if (item.IsNewerThan(oldFile))
+                    var currentItem = InputFiles[item];
+                    var hasChangedSinePrevious = previousState.HasFileChanged(item, currentItem.Item2);
+                    if (hasChangedSinePrevious)
                     {
                         return true;
                         // yield return item;
                     }
                 }
+
+                //foreach (FileWithDirectory item in InputFiles)
+                //{
+                //    FileWithDirectory oldFile = previousState.GetInputFileLastModified(item.UrlPath);
+                //    if (item.IsNewerThan(oldFile))
+                //    {
+                //        return true;
+                //        // yield return item;
+                //    }
+                //}
             }
 
             return false;
@@ -78,21 +108,50 @@ namespace NetPack.Pipeline
         {
             if (InputFiles == null)
             {
-               // return true;
                 yield break;
             }
             else
             {
-
-                foreach (FileWithDirectory item in InputFiles)
+                var allKeys = InputFiles.Keys;
+                foreach (var item in allKeys)
                 {
-                    FileWithDirectory oldFile = previousState.GetInputFile(item);
-                    if (item.IsNewerThan(oldFile))
-                    {                       
-                        yield return item;
+                    var currentItem = InputFiles[item];
+                    var hasChangedSinePrevious = previousState.HasFileChanged(item, currentItem.Item2);
+                    if (hasChangedSinePrevious)
+                    {
+                        yield return currentItem.Item1;
+                        // yield return item;
                     }
                 }
+
+                //foreach (FileWithDirectory item in InputFiles)
+                //{
+                //    FileWithDirectory oldFile = previousState.GetInputFileLastModified(item.UrlPath);
+                //    if (item.IsNewerThan(oldFile))
+                //    {
+                //        return true;
+                //        // yield return item;
+                //    }
+                //}
             }
+
+            //if (InputFiles == null)
+            //{
+            //    // return true;
+            //    yield break;
+            //}
+            //else
+            //{
+
+            //    foreach (FileWithDirectory item in InputFiles)
+            //    {
+            //        FileWithDirectory oldFile = previousState.GetInputFile(item);
+            //        if (item.IsNewerThan(oldFile))
+            //        {
+            //            yield return item;
+            //        }
+            //    }
+            //}
 
             yield break;
         }

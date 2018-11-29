@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace NetPack.RequireJs
 {
-    public class RequireJsOptimisePipe : IPipe
+    public class RequireJsOptimisePipe : BasePipe
     {
         private INetPackNodeServices _nodeServices;
         private readonly RequireJsOptimisationPipeOptions _options;
@@ -26,7 +26,7 @@ namespace NetPack.RequireJs
 
         }
 
-        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger, RequireJsOptimisationPipeOptions options)
+        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger, RequireJsOptimisationPipeOptions options, string name = "RequireJs Optimise"):base(name)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -41,7 +41,7 @@ namespace NetPack.RequireJs
         }
 
 
-        public async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
+        public override async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
         {
 
             // var pipeContext = context.PipeContext;
@@ -49,7 +49,8 @@ namespace NetPack.RequireJs
 
             RequireJsOptimiseRequestDto optimiseRequest = new RequireJsOptimiseRequestDto();
 
-            foreach (FileWithDirectory file in context.InputFiles)
+            var inputFiles = context.GetInputFiles();
+            foreach (FileWithDirectory file in inputFiles)
             {
                 string fileContent = file.FileInfo.ReadAllContent();
                 //  var dir = file.Directory;

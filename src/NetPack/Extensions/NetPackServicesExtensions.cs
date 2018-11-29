@@ -42,7 +42,7 @@ namespace NetPack
                     processorBuilder(builder);
                     var pipeline = builder.BuildPipeLine();
                     var pipeLineManager = sp.GetService<PipelineManager>();
-                    pipeLineManager.AddPipeLine(builder.Name, pipeline, builder.WachInput);
+                    pipeLineManager.AddPipeLine(builder.Name, pipeline, builder.WatchInput, builder.WatchTriggerDelay);
                     return new PipelineSetup() { Pipeline = pipeline };
                 });
 

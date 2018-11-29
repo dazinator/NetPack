@@ -26,7 +26,7 @@ namespace NetPack.JsCombine
 
         }
 
-        public JsCombinePipe(JsCombinePipeOptions options)
+        public JsCombinePipe(JsCombinePipeOptions options, string name = "JS Combine") : base(name)
         {
             _options = options;
         }
@@ -46,14 +46,18 @@ namespace NetPack.JsCombine
 
             bool hasSourceMappingDirectives = false;
             ScriptCombiner combiner = new ScriptCombiner();
-            List<CombinedScriptInfo> scriptInfos = new List<CombinedScriptInfo>(state.InputFiles.Length);
+
+            var inputFiles = state.GetInputFiles();
+            List<CombinedScriptInfo> scriptInfos = new List<CombinedScriptInfo>(inputFiles.Length);
 
             MemoryStream ms = new MemoryStream();
 
             int totalLineCount = 0;
             Encoding encoding = Encoding.UTF8;
 
-            foreach (FileWithDirectory fileWithDirectory in state.InputFiles)
+           
+
+            foreach (FileWithDirectory fileWithDirectory in inputFiles)
             {
                 IFileInfo fileInfo = fileWithDirectory.FileInfo;
                 if (fileInfo.Exists && !fileInfo.IsDirectory)
@@ -118,7 +122,7 @@ namespace NetPack.JsCombine
 
             //ensure it's reset
             ms.Position = 0;
-            MemoryStreamFileInfo bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
+            var bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
             // Output the new combines file.
             state.AddOutput(outputFilePath.Directory, bundleJsFile);
 

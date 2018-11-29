@@ -47,11 +47,14 @@ namespace NetPack.Pipeline
             sourcesOutputDirectory = sourcesOutputDirectory ?? new InMemoryDirectory();           
             SourcesFileProvider = new InMemoryFileProvider(sourcesOutputDirectory);
 
-            var inputAndGeneratedFileProvider = new CompositeFileProvider(EnvironmentFileProvider, GeneratedOutputFileProvider);
+            // let in memory generated netpack files override files from environment..
+            // i.e if you have a physical js file on disc and a new one is generated in memory by netpack processing
+            // then netpack's will take precedence.
+            var generatedAndEnvironmentFileProvider = new CompositeFileProvider(GeneratedOutputFileProvider, EnvironmentFileProvider);
             WebrootFileProvider = new CompositeFileProvider(GeneratedOutputFileProvider, SourcesFileProvider);
 
             Context = new PipelineContext(
-                inputAndGeneratedFileProvider,
+                generatedAndEnvironmentFileProvider,
                 sourcesOutputDirectory, generatedOutputDirectory, baseRequestPath);
             // Name = Guid.NewGuid().ToString();
         }

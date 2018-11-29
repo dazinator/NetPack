@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace NetPack.Rollup
 {
-    public class RollupPipe : IPipe
+    public class RollupPipe : BasePipe
     {
         private INetPackNodeServices _nodeServices;
         private readonly RollupInputOptions _inputOptions;
@@ -33,7 +33,7 @@ namespace NetPack.Rollup
         {
         }
 
-        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputFileOptions[] outputOptions)
+        public RollupPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupPipe> logger, RollupInputOptions inputOptions, RollupOutputFileOptions[] outputOptions, string name = "Rollup") : base(name)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -55,11 +55,11 @@ namespace NetPack.Rollup
         }
 
 
-        public async Task ProcessAsync(PipeState state, CancellationToken cancelationToken)
+        public override async Task ProcessAsync(PipeState state, CancellationToken cancelationToken)
         {
             RollupRequest optimiseRequest = new RollupRequest();
-
-            foreach (FileWithDirectory file in state.InputFiles)
+            var inputFiles = state.GetInputFiles();
+            foreach (FileWithDirectory file in inputFiles)
             {
                 string fileContent = file.FileInfo.ReadAllContent();
 

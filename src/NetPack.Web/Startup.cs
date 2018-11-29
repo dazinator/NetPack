@@ -191,7 +191,6 @@ namespace NetPack.Web
                           {
                               output.Format = Rollup.RollupOutputFormat.System;
                               output.Dir = "/rollup/hmr/nomodule/";
-
                           });
 
                           options.HasOutput((output) =>
@@ -202,7 +201,7 @@ namespace NetPack.Web
 
                       })
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
-                    .Watch(); // Inputs are monitored, and when changes occur, pipes will automatically re-process.
+                    .Watch(500); // Inputs are monitored, and when changes occur, pipes will automatically re-process, with a delay of 500ms to consolidate duplicate file change token signalling into a single trigger.
 
                 });
             });
