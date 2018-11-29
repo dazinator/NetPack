@@ -50,7 +50,7 @@ namespace NetPack
             return (TBuilder)this;
         }
 
-        public TBuilder AddOutput(Action<TOutputOptions> configureOutput)
+        public TBuilder HasOutput(Action<TOutputOptions> configureOutput)
         {
             var output = new TOutputOptions();
             configureOutput(output);
@@ -58,9 +58,15 @@ namespace NetPack
             return (TBuilder)this;
         }
 
-        public IPipelineBuilder IPipelineBuilder => _builder;
+        public IPipelineBuilder IPipelineBuilder => _builder;       
 
         public TInputOptions InputOptions => _inputOptions;
+
+        public TBuilder HasInput(Action<TInputOptions> inputOptions)
+        {
+            inputOptions?.Invoke(InputOptions);
+            return (TBuilder)this;
+        }       
 
         public List<TOutputOptions> OutputOptions => _outputOptions;
 

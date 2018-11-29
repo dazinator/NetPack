@@ -26,6 +26,12 @@ namespace NetPack.Rollup
         /// </summary>
         public List<string> External { get; set; }
 
+        public BaseRollupInputOptions AddExternal(string externalModuleName)
+        {
+            External.Add(externalModuleName);
+            return this;
+        }
+
     }
 
 }

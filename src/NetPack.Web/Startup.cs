@@ -1,5 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,8 +26,6 @@ namespace NetPack.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            StringFileInfo emptyFile = new StringFileInfo("", "@hot.js");
             // Add framework services.
             services.AddNetPack((setup) =>
             {
@@ -86,28 +83,21 @@ namespace NetPack.Web
                      {
                          // we add a rollup plugin which converts AMD files to ES2016 modules, so they can be included in a rollup bundle.
                          // https://www.npmjs.com/package/rollup-plugin-amd
-                         options.AddImport((a) =>
-                         {
-                             a.RequiresNpmModule("module-lookup-amd", "5.0.1")
-                              .HasDefaultExportName("lookup");   // only imported into the script as default export name, won't be included in rollupjs plugins list, but other plugin config could reference it.                                       
-                         })
-                         .AddPlugin((a) =>
-                         {
-                             a.RequiresNpmModule("rollup-plugin-amd", "3.0.0")
-                             .HasOptionsOfKind(OptionsKind.Object, (amdPluginOptions) =>
+                         options
+                            .ImportModuleLookupAmd()  // imports lookup-amd into rollup script so plugins can use lookup() to lookup amd modules.   
+                            .AddPluginAmd((amdPluginOptions) =>
                             {
-                                amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: {baseUrl: '/amd'} }); }FUNC";
-                                 //   amdPluginOptions.rewire = "FUNCfunction (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: './js/requireConfig.js' }); }FUNC";
-                             });
-                             // a.WithConfiguration();
-                         });
-                         options.InputOptions.Input = "/amd/SomePage.js";
-
-                         options.AddOutput((output) =>
-                         {
-                             output.Format = Rollup.RollupOutputFormat.Iife;
-                             output.File = "rollupbundle.js";
-                         });
+                                amdPluginOptions.RewireFunction("function (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: {baseUrl: '/amd'} }); }");
+                            })
+                            .HasInput((inputOptions) =>
+                            {
+                                inputOptions.Input = "/amd/SomePage.js";
+                            })
+                            .HasOutput((output) =>
+                            {
+                                output.Format = Rollup.RollupOutputFormat.Iife;
+                                output.File = "rollupbundle.js";
+                            });
                      })
                       // rollup code splitting example.
                       .AddRollupCodeSplittingPipe(input =>
@@ -115,10 +105,13 @@ namespace NetPack.Web
                           input.Include("esm/**/*.js");
                       }, options =>
                       {
-                          options.InputOptions.AddEntryPoint("/esm/main-a.js")
-                                              .AddEntryPoint("/esm/main-b.js");
+                          options.HasInput((inputOptions) =>
+                          {
+                              inputOptions.AddEntryPoint("/esm/main-a.js")
+                                          .AddEntryPoint("/esm/main-b.js");
+                          });
 
-                          options.AddOutput((output) =>
+                          options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.Esm;
                               output.Dir = "/rollup/module/";
@@ -130,10 +123,13 @@ namespace NetPack.Web
                           input.Include("esm/**/*.js");
                       }, options =>
                       {
-                          options.InputOptions.AddEntryPoint("/esm/main-a.js")
-                                              .AddEntryPoint("/esm/main-b.js");
+                          options.HasInput((inputOptions) =>
+                          {
+                              inputOptions.AddEntryPoint("/esm/main-a.js")
+                                          .AddEntryPoint("/esm/main-b.js");
+                          });
 
-                          options.AddOutput((output) =>
+                          options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.System;
                               output.Dir = "/rollup/nomodule/";
@@ -147,16 +143,19 @@ namespace NetPack.Web
                           input.Include("esm/**/*.js");
                       }, options =>
                       {
-                          options.InputOptions.AddEntryPoint("/esm/main-a.js")
-                                              .AddEntryPoint("/esm/main-b.js");
+                          options.HasInput((inputOptions) =>
+                          {
+                              inputOptions.AddEntryPoint("/esm/main-a.js")
+                                          .AddEntryPoint("/esm/main-b.js");
+                          });
 
-                          options.AddOutput((output) =>
+                          options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.System;
                               output.Dir = "/rollup/multi/nomodule/";
                           });
 
-                          options.AddOutput((output) =>
+                          options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.Esm;
                               output.Dir = "/rollup/multi/module/";
@@ -181,18 +180,21 @@ namespace NetPack.Web
                           //     .RunsBeforeSystemPlugins(); // this plugin needs to run before the "hypothetical" plugin, which is added by netpack as the first plugin by default and is what acts as the in-memory file system.
                           // });
 
-                          options.InputOptions.AddEntryPoint("/hmr/entry-a.js");
-                          //.AddEntryPoint("/esm/main-b.js");
-                          options.InputOptions.External.Add("@hot");
+                          options.HasInput((inputOptions) =>
+                          {
+                              inputOptions.AddEntryPoint("/hmr/entry-a.js")
+                                          .AddExternal("@hot");
 
-                          options.AddOutput((output) =>
+                          });
+
+                          options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.System;
                               output.Dir = "/rollup/hmr/nomodule/";
-                              
+
                           });
 
-                          options.AddOutput((output) =>
+                          options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.Esm;
                               output.Dir = "/rollup/hmr/module/";

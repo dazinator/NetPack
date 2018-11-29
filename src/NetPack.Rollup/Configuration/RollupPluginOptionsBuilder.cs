@@ -18,6 +18,8 @@ namespace NetPack
         IRollupPluginStepConfigurationBuilder HasDefaultExportName(string name);
         IRollupPluginStepConfigurationBuilder HasOptionsOfKind(OptionsKind kind, Action<dynamic> configureOptions);
         IRollupPluginStepConfigurationBuilder RunsBeforeSystemPlugins();
+        IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JObject> configureOptions);
+        IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JArray> configureOptions);     
     }
 
     public class RollupPluginOptionsBuilder : IRollupPluginOptionsBuilder, IRollupPluginStepConfigurationBuilder
@@ -68,6 +70,31 @@ namespace NetPack
         public OptionsKind OptionsKind { get; set; }
 
         public bool PluginRunsBeforeSystemPlugins { get; set; }
+
+        public IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JObject> configureOptions)
+        {
+            OptionsKind =  OptionsKind.Object;
+            if (configureOptions != null)
+            {
+              
+                    JObject options = new JObject();
+                    configureOptions?.Invoke(options);
+                    Options = options;   
+            }
+            return this;
+        }
+
+        public IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JArray> configureOptions)
+        {
+            OptionsKind = OptionsKind.Array;
+            if (configureOptions != null)
+            {
+                JArray options = new JArray();
+                configureOptions?.Invoke(options);
+                OptionsArray = options;
+            }
+            return this;
+        }
 
         public IRollupPluginStepConfigurationBuilder HasOptionsOfKind(OptionsKind kind, Action<dynamic> configureOptions)
         {

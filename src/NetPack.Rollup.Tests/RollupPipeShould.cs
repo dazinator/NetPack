@@ -248,7 +248,7 @@ classA.doSomething();
                             }, options =>
                             {
                                 options.InputOptions.Input = "/wwwroot/ModuleB.js";
-                                options.AddOutput((output) =>
+                                options.HasOutput((output) =>
                                 {
                                     output.Format = Rollup.RollupOutputFormat.Esm;
                                     output.File = "bundle.js";
@@ -263,7 +263,7 @@ classA.doSomething();
                              {                               
 
                                  options.InputOptions.Input = "/wwwroot/ModuleB.js";
-                                 options.AddOutput((output) =>
+                                 options.HasOutput((output) =>
                                  {
                                      output.Format = Rollup.RollupOutputFormat.Iife;
                                      output.File = "iifebundle.js";
@@ -280,7 +280,7 @@ classA.doSomething();
                                   options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalDependency.js";
                                   options.InputOptions.External.Add("SomeExternalLib");
 
-                                  options.AddOutput((output) =>
+                                  options.HasOutput((output) =>
                                   {
                                       output.Format = Rollup.RollupOutputFormat.System;
                                       output.File = "/external/bundlewithexternal.js";
@@ -296,7 +296,7 @@ classA.doSomething();
                                {
                                    options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalGlobalDependency.js";
                                    options.InputOptions.External.Add("jjj");
-                                   options.AddOutput((output) =>
+                                   options.HasOutput((output) =>
                                    {
                                        output.Format = Rollup.RollupOutputFormat.Iife;
                                        output.File = "/external/bundlewithexternalglobal.js";
@@ -326,7 +326,7 @@ classA.doSomething();
                                     options.InputOptions.Input = "/wwwroot/external/ModuleWithExternalGlobalDependency.js";
                                     options.InputOptions.External.Add("jjj");
 
-                                    options.AddOutput((output) =>
+                                    options.HasOutput((output) =>
                                     {
                                         output.Format = Rollup.RollupOutputFormat.Amd;
                                         output.File = "/externalcdn/bundlewithexternalglobalcdn.js";
@@ -355,13 +355,13 @@ classA.doSomething();
                                 }, options =>
                                 {
                                     options.InputOptions.Input = "/wwwroot/ModuleB.js";
-                                    options.AddOutput((output) =>
+                                    options.HasOutput((output) =>
                                     {
                                         output.Format = Rollup.RollupOutputFormat.Esm;
                                         output.File = "modulesbundle.js";
                                         output.Sourcemap = SourceMapType.File;
                                     });
-                                    options.AddOutput((output) =>
+                                    options.HasOutput((output) =>
                                     {
                                         output.Format = Rollup.RollupOutputFormat.System;
                                         output.File = "nomodulesbundle.js";
