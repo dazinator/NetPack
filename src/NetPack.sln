@@ -47,6 +47,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.Rollup.Tests", "Net
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.BrowserReload", "NetPack.BrowserReload\NetPack.BrowserReload.csproj", "{EFA93BE2-4535-47C4-B7AB-52CCCFD1BD6C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetPack.HotModuleReload", "NetPack.HotModuleReload\NetPack.HotModuleReload.csproj", "{63FDD53F-2C0B-4337-B85A-8517BAECCD28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,10 @@ Global
 		{EFA93BE2-4535-47C4-B7AB-52CCCFD1BD6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFA93BE2-4535-47C4-B7AB-52CCCFD1BD6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFA93BE2-4535-47C4-B7AB-52CCCFD1BD6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63FDD53F-2C0B-4337-B85A-8517BAECCD28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63FDD53F-2C0B-4337-B85A-8517BAECCD28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63FDD53F-2C0B-4337-B85A-8517BAECCD28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63FDD53F-2C0B-4337-B85A-8517BAECCD28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -138,6 +144,7 @@ Global
 		{159A2AC0-2E7E-48CD-8B4E-99F030A5ECC7} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 		{1EA9AD3B-25F8-4251-981D-7E61A66CE915} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 		{EFA93BE2-4535-47C4-B7AB-52CCCFD1BD6C} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
+		{63FDD53F-2C0B-4337-B85A-8517BAECCD28} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F97B401-084D-46B4-A4FD-53F4E50B4048}

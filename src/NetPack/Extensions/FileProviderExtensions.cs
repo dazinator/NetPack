@@ -4,6 +4,7 @@ using NetPack.Pipeline;
 using System.Collections.Generic;
 using Dazinator.AspNet.Extensions.FileProviders;
 using System.Linq;
+using System;
 
 namespace NetPack
 {
@@ -55,9 +56,7 @@ namespace NetPack
             }
 
             return results.Values.ToArray();
-        }
-
-
+        }      
 
 
     }

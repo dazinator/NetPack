@@ -213,6 +213,16 @@ namespace NetPack.Web
                 options.WatchContentRoot("/Views/**/*.cshtml");
             });
 
+
+            services.AddHotModuleReload((options) =>
+            {
+                // trigger browser reload when our bundle file changes.
+                options.WatchWebRoot((patterns) =>
+                {
+                    patterns.Include("/netpack/rollup/hmr/nomodule/entry-a.js");
+                });               
+            });
+
             services.AddMvc();
             services.AddSignalR();
 
@@ -238,7 +248,7 @@ namespace NetPack.Web
             app.UseStaticFiles();
 
             app.UseBrowserReload();
-
+            app.UseHotModuleReload();
             // UseBrowserReload() calls UseSignalR() under the hood with default options.
             // If you want full control of singlar setup, use the following instead:
             //app.UseSignalR(routes =>

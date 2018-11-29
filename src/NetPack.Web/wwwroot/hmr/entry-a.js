@@ -14,7 +14,7 @@ self.addModuleToList = function (listId, moduleName) {
 
     var ul = document.getElementById(listId);
     var li = document.createElement("li");
-    li.appendChild(document.createTextNode(moduleName + " Loaded.. I am still productive...."));
+    li.appendChild(document.createTextNode(moduleName + " Loaded.. This is awesome.!"));
     ul.appendChild(li);
     self._state.oldChild = li;
 };
