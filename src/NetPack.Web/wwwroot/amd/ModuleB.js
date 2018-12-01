@@ -2,7 +2,7 @@
     "use strict";
 
     var self = {};
-    console.log("hi from module b");
+    console.log("hi from module bb");
     moduleA.addModuleToList("modules", "ModuleB");
     self.addModuleToList = moduleA.addModuleToList;
     return self; 

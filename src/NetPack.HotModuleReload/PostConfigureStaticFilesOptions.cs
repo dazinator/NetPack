@@ -31,8 +31,12 @@ namespace NetPack.HotModuleReload
 
 
             // Add our provider
-            var filesProvider = new ManifestEmbeddedFileProvider(GetType().Assembly, "resources");
-            options.FileProvider = new CompositeFileProvider(options.FileProvider, filesProvider);
+            var filesProvider = new ManifestEmbeddedFileProvider(GetType().Assembly);
+
+            // add netpack provider as we also need to serve files from there.
+            var netpackProvider = new EmbeddedFileProvider(typeof(NetPack.IPipe).Assembly, "NetPack");
+
+            options.FileProvider = new CompositeFileProvider(options.FileProvider, filesProvider, netpackProvider);
         }
     }
 }

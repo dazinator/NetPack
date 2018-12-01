@@ -97,13 +97,6 @@ namespace NetPack.HotModuleReload
 
 
                     var modifiedFilePaths = modified.ToArray();
-                    // return modifiedFiles;
-
-
-                    //GetChangedFiles(state.FileStamps, newFiles);
-
-                    //  string[] filePaths = modified.Select(f => $"{f.Item1}/{f.Item2.Name}").ToArray();
-                    // notify hub
                     using (IServiceScope scope = _serviceScopeFactory.CreateScope())
                     {
                         IHubContext<HotModuleReloadHub, IHotModuleReloadClient> hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<HotModuleReloadHub, IHotModuleReloadClient>>();
@@ -111,46 +104,12 @@ namespace NetPack.HotModuleReload
                     }
                 }, state, _options.Value.Delay));
 
-            }
-            // var composite = new CompositeChangeToken(allChangeTokens);
-            // return composite;
+            }          
 
             CompositeDisposable compositeDisposable = new CompositeDisposable(allDisposables);
             _changeCallbackDisposable = compositeDisposable;
 
-            //_changeCallbackDisposable = ChangeTokenHelper.OnChangeDelayed(() =>
-            //{
-            //    List<IChangeToken> allChangeTokens = new List<IChangeToken>();
-            //    foreach (string item in watchPatterns.IncludePatterns)
-            //    {
-            //        allChangeTokens.Add(fileProvider.Watch(item));
-            //    }
-            //    CompositeChangeToken composite = new CompositeChangeToken(allChangeTokens);
-            //    return composite;
-
-            //}, (s) =>
-            //{
-            //    _logger.LogInformation("detected watch pattern has changed: " + s);
-
-            //    // now need to work out exactly which files have changed.
-
-
-            //    // Then filter out if matches exclude pattern.
-
-
-            //    using (IServiceScope scope = _serviceScopeFactory.CreateScope())
-            //    {
-            //        IHubContext<HotModuleReloadHub, IHotModuleReloadClient> hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<HotModuleReloadHub, IHotModuleReloadClient>>();
-            //        hubContext.Clients.All.Reload();
-            //    }
-            //}, state, _options.Value.Delay);
-        }
-
-        //private IEnumerable<Tuple<string, IFileInfo>> GetChangedFiles(IEnumerable<Tuple<string, IFileInfo>> oldFiles, IEnumerable<Tuple<string, IFileInfo>> newFiles)
-        //{
-
-
-        //}
+        }       
 
         public Task StopAsync(CancellationToken cancellationToken)
         {

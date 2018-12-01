@@ -1,5 +1,5 @@
 
-using System;
+using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.NodeServices;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
+using System;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -35,19 +35,20 @@ namespace NetPack
                 _services.AddTransient<PipelineSetup>((sp) =>
                 {
 
-                    var sourcesDirectory = sp.GetService<IDirectory>();
-                    var builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
+                    IDirectory sourcesDirectory = sp.GetService<IDirectory>();
+                    PipelineConfigurationBuilder builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
 
                     //var builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
                     processorBuilder(builder);
-                    var pipeline = builder.BuildPipeLine();
-                    var pipeLineManager = sp.GetService<PipelineManager>();
+                    IPipeLine pipeline = builder.BuildPipeLine();
+                    PipelineManager pipeLineManager = sp.GetService<PipelineManager>();
                     pipeLineManager.AddPipeLine(builder.Name, pipeline, builder.WatchInput, builder.WatchTriggerDelay);
                     return new PipelineSetup() { Pipeline = pipeline };
                 });
 
                 return this;
-            }
+            }         
+
 
         }
 
@@ -68,11 +69,11 @@ namespace NetPack
             {
                 //var nodeServices = serviceProvider.GetRequiredService<INodeServices>();
 
-                var options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
+                NodeServicesOptions options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
                 // otherwise node services restarts automatically when file changes are made, losing state - we want to handle watch on netcore side.
                 options.WatchFileExtensions = null;
 
-                var nodeServices = NodeServicesFactory.CreateNodeServices(options);
+                INodeServices nodeServices = NodeServicesFactory.CreateNodeServices(options);
 #if NODESERVICESASYNC
                  var lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
                  return new NetPackNodeServices(nodeServices, lifetime);
@@ -92,7 +93,7 @@ namespace NetPack
 
             if (configureOptions != null)
             {
-                var opts = new FileProcessingOptions(services);
+                FileProcessingOptions opts = new FileProcessingOptions(services);
                 configureOptions(opts);
             }
 
@@ -109,7 +110,7 @@ namespace NetPack
         /// <returns></returns>
         public static IApplicationBuilder UseNetPack(this IApplicationBuilder appBuilder, TimeSpan? requestTimeout = null)
         {
-            var pipeLineManager = appBuilder.ApplicationServices.GetService<PipelineManager>();
+            PipelineManager pipeLineManager = appBuilder.ApplicationServices.GetService<PipelineManager>();
             if (pipeLineManager == null)
             {
                 throw new Exception(
@@ -117,9 +118,9 @@ namespace NetPack
             }
 
             // Triggers all pipeline to be initialised and registered with pipeline manager.
-            var initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();            
+            System.Collections.Generic.IEnumerable<PipelineSetup> initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();            
 
-            var middlewareOptions = new RequestHaltingMiddlewareOptions();
+            RequestHaltingMiddlewareOptions middlewareOptions = new RequestHaltingMiddlewareOptions();
             if (requestTimeout != null)
             {
                 middlewareOptions.Timeout = requestTimeout.Value;

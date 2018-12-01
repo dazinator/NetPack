@@ -5,7 +5,7 @@
 <p>
     Netpack offers a RequireJS TagHelper for optimising AMD modules into a bundle using r.js optimiser, within your Razor pages directly:
     <pre>
-        &lt;require-js-optimise in=&quot;amd/*.js&quot;
+        &lt;require-js-optimise include=&quot;amd/*.js&quot;, &quot;js/requireConfig.js&quot;
                          main=&quot;SomePage&quot;
                          out-name=&quot;built.js&quot;
                          out-path=&quot;/netpack&quot;&gt;
@@ -16,13 +16,16 @@
 
 <ul>
     <li>
-        in = the files containing the AMD modules to be included in the optimisation process for the page.
+        include = A comma separated list of glob file patterns for the AMD format javascript files to be included in the requireJS optimisation build process.
     </li>
     <li>
-        main = the AMD module that is the entry point for the page.
+        exclude = A comma separated list of glob file patterns for the AMD format javascript files to be excluded if they have been included by a greedy include glob pattern.
+    </li>   
+    <li>
+        main = the AMD module that is the entry point to be loaded on the page.
     </li>
     <li>
-        out-name = the name of the optimised js file that is produced as the output.
+        out-name = the name of the optimised js file that is produced as the output of the build.
     </li>
     <li>
         out-path = the path where the optimised file (as specified by out-name) can be served.
@@ -35,17 +38,16 @@
 <ul id="modules"></ul>
 
 
-
 @section scripts
     {
 
 
     <script data-main="/netpack/built.js" src="/lib/require.js"></script>
-    <require-js-optimise in="amd/*.js"
+    <require-js-optimise include="amd/*.js, js/requireConfig.js"
                          main="SomePage"
                          out-name="built.js"
                          out-path="/netpack">
-    </require-js-optimise>
+   </require-js-optimise>
     @*<script type="text/javascript" asp-src-include="/netpack/built.js"></script>*@
 
     @*<script type="text/javascript" src="/netpack/ts/Greeter.js"></script>

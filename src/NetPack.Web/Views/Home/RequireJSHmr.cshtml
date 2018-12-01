@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "RequireJS HMR";
+}
+
+<h1>RequireJS Hot Module Replacement</h1>
+
+<div id='a'>
+    <div data-used-by='a'></div>
+    <div data-used-by='both'></div>
+</div>
+
+<div id='b'>
+    <div data-used-by='b'></div>
+    <div data-used-by='both'></div>
+</div>
+
+<p>Modules loaded from optimised file:</p>
+<ul id="modules"></ul>
+<div id='a'>
+    <div data-used-by='a'></div>
+</div>
+
+@section scripts
+    {
+
+
+    @*Following needed for hmr*@
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+
+    <script src="~/embedded/netpack/js/pubsub.min.js"></script> @*This is embedded, you don't have to source it yourself*@
+    <script src="~/embedded/netpack/js/publisher.js"></script> @*This is embedded, you don't have to source it yourself*@
+    <script src="~/js/reloader-require.js"></script> @*This is embedded, you don't have to source it yourself*@
+
+    <script data-main="/js/requireConfig.js" src="/lib/require.js"></script>
+    <script src="/netpack/built.js"></script>
+
+    @*<script>
+            SystemJS.config({
+                "map": {
+                    "@@hot": "@@empty"
+                }
+            });
+            SystemJS.import('/netpack/rollup/hmr/nomodule/entry-a.js').then(function (m) {
+            });
+                                                            //System.import('hmrbundle.js');
+                                                            //System.import('/netpack/rollup/nomodule/main-b.js');
+        </script>*@
+
+
+}

@@ -29,7 +29,7 @@ namespace NetPack.Pipeline
         public Dictionary<string, IPipeLine> PipeLines { get; set; }
 
         public void AddPipeLine(string key, IPipeLine pipeline, bool watch, int watchTriggerDelay)
-        {
+        {           
             PipeLines.Add(key, pipeline);
             SetupPipeline(pipeline, watch, watchTriggerDelay);
         }

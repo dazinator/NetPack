@@ -58,6 +58,7 @@ namespace NetPack.Web
                         .Include("js/requireConfig.js");
                     }, options =>
                     {
+                        options.MainConfigFile = "js/requireConfig.js";
                         options.GenerateSourceMaps = true;
                         options.Optimizer = Optimisers.none;
                         options.BaseUrl = "amd";
@@ -220,6 +221,7 @@ namespace NetPack.Web
                 options.WatchWebRoot((patterns) =>
                 {
                     patterns.Include("/netpack/rollup/hmr/nomodule/entry-a.js");
+                    patterns.Include("/netpack/built.js");
                 });               
             });
 
