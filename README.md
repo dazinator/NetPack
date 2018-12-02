@@ -92,7 +92,7 @@ public class Startup
 
 ```
 
-The call to `.UseBaseRequestPath("/netpack")` means that all of the generated outputs from the pipes that NetPack produces will have "/netpack" prepended to their request path (the path they will be served to the browser on). So the output file `built.js` will become `/netpack/bundle.js` 
+The call to `.UseBaseRequestPath("/netpack")` means that all of the generated outputs from the pipes that NetPack produces will have "/netpack" prepended to their request path (the path they will be served to the browser on). So the output file `built.js` will become `/netpack/built.js` 
 
 So we can now do this on our page:
 
