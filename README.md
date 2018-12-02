@@ -105,7 +105,7 @@ The outputs of a pipeline are not actually written to disk. If you look for a `/
 Lastly, by calling `Watch()` we ensure that when any of the inputs to a pipeline change, it will automatically re-process.  
 
 
-Now whenever we edit `amd/ModuleA.js` or `md/ModuleB.j` with our application running, netpack will automatically process the files to produce an updated `build.js` file, which will be made accessbile to the browser on `/netpack/built.js`. Because we have configured browser reload to trigger a reload when `/netpack/built.js` changes, if we have a browser open and the page has our browser reload script loaded, it will just automatically refresh for us.
+Now whenever we edit `amd/ModuleA.js` or `amd/ModuleB.js` with our application running, netpack will automatically process the files to produce an updated `build.js` file, which will be made accessbile to the browser on `/netpack/built.js`. Because we have configured browser reload to trigger a reload when `/netpack/built.js` changes, if we have a browser open and the page has our browser reload script loaded, it will just automatically refresh for us.
 
 The following shows a page with the script tags for this scenario:
 The top two scripts are required for automatic browser refresh (signalr script you have to source yourself, the `reload` script is embedded from netpack assembly, so you don't have to worry about sourcing that one.
