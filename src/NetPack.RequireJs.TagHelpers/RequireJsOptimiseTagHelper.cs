@@ -41,9 +41,8 @@ namespace NetPack.RequireJs
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
 
-            // todo
+            // todo           
             IPipeLine pipeLine = _pipeLine.Value;
-
 
             output.TagName = "script";    // Replaces <RequireJsOptimise> with <script> tag
 
@@ -51,10 +50,10 @@ namespace NetPack.RequireJs
 
             output.Attributes.SetAttribute("src", RequireJsSrc);
 
-            var baseRequestpath = BaseRequestPath ?? new PathString("/");
+            string baseRequestpath = BaseRequestPath ?? new PathString("/");
 
-            var outFile = new PathString(baseRequestpath);
-            if(!string.IsNullOrWhiteSpace(outFile))
+            PathString outFile = new PathString(baseRequestpath);
+            if (!string.IsNullOrWhiteSpace(outFile))
             {
                 outFile = outFile.Add(OutPath);
             }
@@ -63,22 +62,15 @@ namespace NetPack.RequireJs
             {
                 outFile = $"{outFile}/{OutName}";
             }
-           
-            output.Attributes.SetAttribute("data-main", outFile);
 
-
-
+            output.Attributes.SetAttribute("data-main", outFile);       
             //  pipeLine.
-
-
             //   / netpack / built.js
-
-
         }
 
         private IPipeLine EnsurePipeline()
         {
-
+          
             IPipeLine pipeline;
             if (PipelineManager.PipeLines.ContainsKey(PipelineName))
             {
@@ -94,23 +86,23 @@ namespace NetPack.RequireJs
 
             IPipelineBuilder pipeBuilder = builder.WithHostingEnvironmentWebrootProvider()
              .AddRequireJsOptimisePipe(input =>
-             {     
+             {
                  if (!string.IsNullOrWhiteSpace(InInclude))
                  {
                      string[] patterns = InInclude.Split(_splitChars, StringSplitOptions.RemoveEmptyEntries);
-                     foreach (var item in patterns)
+                     foreach (string item in patterns)
                      {
                          input.Include(item);
-                     }                    
+                     }
                  }
 
                  if (!string.IsNullOrWhiteSpace(InExclude))
                  {
                      string[] patterns = InExclude.Split(_splitChars, StringSplitOptions.RemoveEmptyEntries);
-                     foreach (var item in patterns)
+                     foreach (string item in patterns)
                      {
                          input.Exclude(item);
-                     }                   
+                     }
                  }
 
              }, o =>
@@ -137,7 +129,7 @@ namespace NetPack.RequireJs
 
             pipeline = pipeBuilder.BuildPipeLine();
             return pipeline;
-        }       
+        }
 
         public string PipelineName { get; set; }
 
@@ -166,6 +158,8 @@ namespace NetPack.RequireJs
         /// </summary>
         [Microsoft.AspNetCore.Razor.TagHelpers.HtmlAttributeName("exclude")]
         public string InExclude { get; set; }
+
+        public bool Enabled { get; set; }
 
 
     }

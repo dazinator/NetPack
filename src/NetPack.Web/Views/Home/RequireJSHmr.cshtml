@@ -29,10 +29,101 @@
 
     <script src="~/embedded/netpack/js/pubsub.min.js"></script> @*This is embedded, you don't have to source it yourself*@
     <script src="~/embedded/netpack/js/publisher.js"></script> @*This is embedded, you don't have to source it yourself*@
-    <script src="~/js/reloader-require.js"></script> @*This is embedded, you don't have to source it yourself*@
+    @*<script src="~/js/reloader-require.js"></script> @*This is embedded, you don't have to source it yourself*@
 
-    <script data-main="/js/requireConfig.js" src="/lib/require.js"></script>
-    <script src="/netpack/built.js"></script>
+    <script src="/requireConfig.js"></script>
+
+       
+    <script src="/lib/require.js"></script>   
+       
+
+    <script type="text/javascript">
+
+        requirejs.onResourceLoad = function (context, map, depArray) {
+
+        }
+
+        define("@@hot", [], function () { return {}; });
+
+        require(["SomePage"], function (somePage) {
+
+
+            var onFileChanged = function (msg, filename) {
+                var allModules = Object.keys(require.s.contexts._.defined);
+                var fileExtension = filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+
+                var foundModuleId = allModules.find(function (moduleName) {
+                    var moduleNameWithExtension = moduleName;
+                    if (fileExtension) {
+                        moduleNameWithExtension = moduleName + "." + fileExtension;
+                    }
+                    var moduleUrl = require.toUrl(moduleNameWithExtension);
+                    return moduleUrl == filename;
+                });
+
+
+                if (foundModuleId) {
+                    // first allow the current instance of module to unload.
+                    var oldInstance = require.s.contexts._.defined[foundModuleId];
+                    if (oldInstance) {
+                        if (typeof oldInstance.__unload === "function") {
+                            oldInstance.__unload();
+                        };
+                    }
+
+                    require.undef(foundModuleId);
+                    require.undef("@@hot");
+                    define("@@hot", [], function () { return oldInstance; });
+                    // the module is reloaidng properly.
+                    // maybe try fetching the js myself and then eval() ing it?
+                    var hot = require(['require', '@@hot'], function (require, hot) {
+                        require(['require', foundModuleId], function (require, foundModuleId) {
+                            // PubSub.publishSync('ModuleReloaded', { Id: foundModuleId, old: oldInstance, new: mod });
+                        });
+                    });
+
+
+                    //require([foundModuleId, "@@hot"], (mod) => {                                         
+                    //    //  define("@@hot", [], function () { return {}; });
+
+                    //});
+
+                }
+            };
+
+            var token = PubSub.subscribe('FileChanged', onFileChanged);
+
+
+        });           
+
+       
+
+    </script>
+
+    @*<script type="text/javascript">
+                require.config({
+            //By default load any module IDs from amd
+            baseUrl: '/amd',
+            //except, if the module ID starts with "app",
+            //load it from the js/app directory. paths
+            //config is relative to the baseUrl, and
+            //never includes a ".js" extension since
+            //the paths config could be for a directory.
+            paths: {
+                '@@hot': 'empty:'
+            }
+        });*@
+
+    @*</script>*@
+
+    @*<script src="/netpack/built.js"></script>*@
+    @*<script type="text/javascript">
+            require(['SomePage'], function (foo) {
+                //SomePage is now loaded.
+
+            });
+
+        </script>*@
 
     @*<script>
             SystemJS.config({

@@ -62,9 +62,7 @@ namespace NetPack.HotModuleReload
 
                 string[] excludePatterns = watchPatterns.ExcludePatterns.ToArray();
                 IEnumerable<Tuple<string, IFileInfo>> watchedFiles = fileProvider.Search(new string[1] { item }, excludePatterns);
-
-                var timestamps = watchedFiles.Select(a => new { Path = $"{a.Item1}/{a.Item2.Name}", Modified = a.Item2.LastModified }).ToArray();
-
+                var timestamps = watchedFiles.Select(a => new { Path = $"{a.Item1}/{a.Item2.Name}", Modified = a.Item2.LastModified }).ToDictionary(a=>a.Path, b=>b.Modified);
                 var state = new { IncludePattern = item, ExcludePatterns = excludePatterns, FileStamps = timestamps };
 
                 allDisposables.Add(ChangeTokenHelper.OnChangeDelayed(() =>
@@ -87,20 +85,53 @@ namespace NetPack.HotModuleReload
                     // now need to work out exactly which files have changed.
                     IEnumerable<Tuple<string, IFileInfo>> newFiles = fileProvider.Search(new string[1] { state.IncludePattern }, state.ExcludePatterns);
 
-                    var modified = from n in newFiles
-                                   join w in state.FileStamps
-                                   on $"{n.Item1}/{n.Item2.Name}" equals w.Path
-                                                                        into ps
-                                   from p in ps.DefaultIfEmpty()
-                                   where p == null || n.Item2.LastModified > p.Modified
-                                   select $"{n.Item1}/{n.Item2.Name}";
+                    var changedFiles = new List<string>();
+
+                    foreach (var maybeNewFile in newFiles)
+                    {
+                        var maybeNewFilePath = $"{maybeNewFile.Item1}/{maybeNewFile.Item2.Name}";
+                        if (s.FileStamps.ContainsKey(maybeNewFilePath))
+                        {
+                            var previousLastModified = s.FileStamps[maybeNewFilePath];
+                            if(maybeNewFile.Item2.LastModified > previousLastModified)
+                            {
+                                // file has changed.
+                                changedFiles.Add(maybeNewFilePath);
+                                s.FileStamps[maybeNewFilePath] = maybeNewFile.Item2.LastModified;
+                            }
+                        }
+                        else
+                        {
+                            // new file added to file system.
+                            changedFiles.Add(maybeNewFilePath);
+                            s.FileStamps[maybeNewFilePath] = maybeNewFile.Item2.LastModified;
+                        }
+                    }
+
+                   
+                    //var modified = from n in newFiles
+                    //               join w in state.FileStamps
+                    //               on $"{n.Item1}/{n.Item2.Name}" equals w.Key
+                    //                                                    into ps
+                    //               from p in ps.DefaultIfEmpty()
+                    //               where 
+                    //               n.Item2.LastModified > p.Value
+                    //               select new { Path= $"{n.Item1}/{n.Item2.Name}", Modified= n.Item2.LastModified } ;
+
+                    //  update timestamps in state.
+                 //   var modifiedFilePaths = modified.ToArray();
+                   
+                  //  Array.ForEach(modifiedFilePaths, x => s.FileStamps[x.Path] = x.Modified);
+                   // var fileNames = modifiedFilePaths.Select(a => a.Path).ToArray();
+
+                   // var timestamps = newFiles.Select(a => new { Path = $"{a.Item1}/{a.Item2.Name}", Modified = a.Item2.LastModified }).ToArray();
 
 
-                    var modifiedFilePaths = modified.ToArray();
+
                     using (IServiceScope scope = _serviceScopeFactory.CreateScope())
                     {
                         IHubContext<HotModuleReloadHub, IHotModuleReloadClient> hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<HotModuleReloadHub, IHotModuleReloadClient>>();
-                        hubContext.Clients.All.FilesChanged(modifiedFilePaths);
+                        hubContext.Clients.All.FilesChanged(changedFiles.ToArray());
                     }
                 }, state, _options.Value.Delay));
 

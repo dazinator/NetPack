@@ -222,6 +222,7 @@ namespace NetPack.Web
                 {
                     patterns.Include("/netpack/rollup/hmr/nomodule/entry-a.js");
                     patterns.Include("/netpack/built.js");
+                    patterns.Include("/amd/**/*.js");
                 });               
             });
 
