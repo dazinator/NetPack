@@ -21,6 +21,8 @@ You can use NetPack for:
 - [x] rollupjs processing (Define your processing workflow with rollup, including use of rollup plugins). Using rollup there is probably nothing you can't achieve, thanks to it's wide array of plugins. You can configure rollupjs piepline purely through `c#` thanks to NetPack.
 - [x] rjs optimisation. (Optimises your AMD javascript files, into bundles, using the rjs optimiser.)
 - [x] Browser Reload - Automatically triggers your browser window to `reload()` when desired files are changed.
+- [x] Hot Module Reload (for SystemJS) - Automatically reloads a SystemJS module as you make changes. Allows a quicker feedback loop than a full browser reload/
+- [ ] Hot Module Reload (for RequireJS) - WIP. This might not be possible as RequireJS doesn't have as much support for HMR as SystemJS it seems, but still investigating.
 
 
 All generated files, are held in memory, and accessible by your applications IHotingEnvironment.WebRootFileProvider. This means all of the standard asp.net mvc TagHelpers will resolve any generated scripts that NetPack produces..
