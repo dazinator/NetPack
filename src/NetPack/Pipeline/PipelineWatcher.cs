@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
 using NetPack.Utils;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace NetPack.Pipeline
 {
-
     public class PipelineWatcher : IPipelineWatcher
     {
         private readonly CancellationTokenSource _tokenSource;
@@ -30,37 +28,29 @@ namespace NetPack.Pipeline
             {
                 foreach (string include in pipe.Input.GetIncludes())
                 {
-                    StateInfo state = new StateInfo() { Input = include, PipeContext = pipe, Pipeline = pipeline };      
-                    var token = WatchInput(state, watchTriggerDelay);
+                    StateInfo state = new StateInfo() { Input = include, PipeContext = pipe, Pipeline = pipeline };
+                    WatchInput(state, watchTriggerDelay);
                 }
             }
         }
 
-        private IChangeToken WatchInput(StateInfo state, int watchTriggerDelay)
+        private IDisposable WatchInput(StateInfo state, int watchTriggerDelay)
         {
 
             Guid key = Guid.NewGuid();
-            var fileProvider = state.Pipeline.Context.FileProvider;
+            Microsoft.Extensions.FileProviders.IFileProvider fileProvider = state.Pipeline.Context.FileProvider;
 
-            IChangeToken token = fileProvider.Watch(state.Input);
+            IDisposable disposable = ChangeTokenHelper.OnChangeDebounce<StateInfo>(() => fileProvider.Watch(state.Input), (s) =>
+              {
+                  // Mark the input as changed.
+                  DateTime changeTime = DateTime.UtcNow;
+                  _logger.LogInformation("Changed signalled @ {0} for {1}, key: {2}, name: {name}", changeTime, s.Input, key, s.PipeContext.Pipe?.Name ?? string.Empty);
+                  //  s.PipeContext.Input.LastChanged = changeTime;
+                  IEnumerable<PipeProcessor> targetPipes = new[] { s.PipeContext }.AsEnumerable();
+                  s.Pipeline.ProcessPipesAsync(targetPipes, CancellationToken.None);
+              }, state, watchTriggerDelay);
 
-            ChangeTokenHelper.OnChangeDelayed(() => fileProvider.Watch(state.Input), (s)=> {
-
-                // Mark the input as changed.
-                DateTime changeTime = DateTime.UtcNow;
-                _logger.LogInformation("Changed signalled @ {0} for {1}, key: {2}", changeTime, s.Input, key);
-                //  s.PipeContext.Input.LastChanged = changeTime;
-                var targetPipes = new[] { s.PipeContext }.AsEnumerable();
-                s.Pipeline.ProcessPipesAsync(targetPipes, CancellationToken.None);
-            }, state, watchTriggerDelay);
-
-            //IDisposable disposable = ChangeToken.OnChange(() => fileProvider.Watch(state.Input), (s) =>
-            //{
-               
-
-            //}, state);
-
-            return token;            
+            return disposable;
         }
 
         protected class StateInfo

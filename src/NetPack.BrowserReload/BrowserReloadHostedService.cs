@@ -58,7 +58,7 @@ namespace NetPack.BrowserReload
 
         private void Watch(string pattern, IFileProvider fileProvider)
         {
-            _changeCallbackDisposable = ChangeTokenHelper.OnChangeDelayed(() => fileProvider.Watch(pattern), (s) =>
+            _changeCallbackDisposable = ChangeTokenHelper.OnChangeDebounce(() => fileProvider.Watch(pattern), (s) =>
             {
                 _logger.LogInformation("triggering browser reload for pattern " + s);
                 using (IServiceScope scope = _serviceScopeFactory.CreateScope())

@@ -65,7 +65,7 @@ namespace NetPack.HotModuleReload
                 var timestamps = watchedFiles.Select(a => new { Path = $"{a.Item1}/{a.Item2.Name}", Modified = a.Item2.LastModified }).ToDictionary(a=>a.Path, b=>b.Modified);
                 var state = new { IncludePattern = item, ExcludePatterns = excludePatterns, FileStamps = timestamps };
 
-                allDisposables.Add(ChangeTokenHelper.OnChangeDelayed(() =>
+                allDisposables.Add(ChangeTokenHelper.OnChangeDebounce(() =>
                 {
                     return fileProvider.Watch(item);
 
@@ -107,26 +107,6 @@ namespace NetPack.HotModuleReload
                             s.FileStamps[maybeNewFilePath] = maybeNewFile.Item2.LastModified;
                         }
                     }
-
-                   
-                    //var modified = from n in newFiles
-                    //               join w in state.FileStamps
-                    //               on $"{n.Item1}/{n.Item2.Name}" equals w.Key
-                    //                                                    into ps
-                    //               from p in ps.DefaultIfEmpty()
-                    //               where 
-                    //               n.Item2.LastModified > p.Value
-                    //               select new { Path= $"{n.Item1}/{n.Item2.Name}", Modified= n.Item2.LastModified } ;
-
-                    //  update timestamps in state.
-                 //   var modifiedFilePaths = modified.ToArray();
-                   
-                  //  Array.ForEach(modifiedFilePaths, x => s.FileStamps[x.Path] = x.Modified);
-                   // var fileNames = modifiedFilePaths.Select(a => a.Path).ToArray();
-
-                   // var timestamps = newFiles.Select(a => new { Path = $"{a.Item1}/{a.Item2.Name}", Modified = a.Item2.LastModified }).ToArray();
-
-
 
                     using (IServiceScope scope = _serviceScopeFactory.CreateScope())
                     {

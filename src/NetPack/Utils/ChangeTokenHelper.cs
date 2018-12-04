@@ -1,17 +1,11 @@
 ﻿using Microsoft.Extensions.Primitives;
 using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NetPack.Utils
 {
     public static class ChangeTokenHelper
-    {
-        private static readonly ConcurrentDictionary<object, CancellationTokenSource> Tokens
-            = new ConcurrentDictionary<object, CancellationTokenSource>();
-
-        private const int DefaultDelay = 1000;      
+    {     
+        private const int DefaultDelayInMilliseconds = 500;
 
         /// <summary>
         /// Handle <see cref="ChangeToken.OnChange{TState}(Func{IChangeToken}, Action{TState}, TState)"/> after a delay that discards any duplicate invocations within that period of time.
@@ -23,48 +17,12 @@ namespace NetPack.Utils
         /// <param name="state"></param>
         /// <param name="delay"></param>
         /// <returns></returns>
-        public static IDisposable OnChangeDelayed<T>(Func<IChangeToken> changeTokenFactory, Action<T> listener, T state, int delay = DefaultDelay)
+        public static IDisposable OnChangeDebounce<T>(Func<IChangeToken> changeTokenFactory, Action<T> listener, T state, int delayInMilliseconds = DefaultDelayInMilliseconds)
         {
-            var token = ChangeToken.OnChange<T>(changeTokenFactory, (s) => ChangeHandler(listener, s), state);
-            return token;          
-        }
+            var debouncer = new Debouncer<T>(TimeSpan.FromMilliseconds(delayInMilliseconds));
+            var token = ChangeToken.OnChange<T>(changeTokenFactory, s => debouncer.Debounce(listener, s), state);
+            return token;
+        }       
 
-        private static void ChangeHandler<T>(Action<T> listener, T obj)
-        {
-            var tokenSource = GetCancellationTokenSource(obj);
-            var token = tokenSource.Token;
-            var delay = Task.Delay(DefaultDelay, token);
-
-            delay.ContinueWith(
-                _ => ListenerInvoker(obj, listener, obj),
-                token
-                );
-        }
-
-        private static CancellationTokenSource GetCancellationTokenSource<T>(T key)
-        {
-            return Tokens.AddOrUpdate(key, CreateTokenSource, ReplaceTokenSource);
-        }
-
-        private static CancellationTokenSource CreateTokenSource(object key)
-        {
-            return new CancellationTokenSource();
-        }
-
-        private static CancellationTokenSource ReplaceTokenSource(object key, CancellationTokenSource existing)
-        {
-            existing.Cancel();
-            existing.Dispose();
-            return new CancellationTokenSource();
-        }
-
-        private static void ListenerInvoker<T>(T key, Action<T> listener, T obj)
-        {
-            listener(obj);
-            if (Tokens.TryRemove(key, out var tokenSource))
-            {
-                tokenSource.Dispose();
-            }
-        }
     }
 }
