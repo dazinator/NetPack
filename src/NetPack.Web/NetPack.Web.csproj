@@ -6,6 +6,7 @@
     <AssemblyName>NetPack.Web</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>NetPack.Web</PackageId>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
   </PropertyGroup>
 
   <ItemGroup>
