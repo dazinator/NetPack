@@ -24,7 +24,7 @@ namespace NetPack.HotModuleReload
 
 
 
-        public HotModuleReloadPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<HotModuleReloadPipe> logger, IOptions<HotModuleReloadOptions> options, string name = "RequireJs Optimise"):base(name)
+        public HotModuleReloadPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<HotModuleReloadPipe> logger, IOptions<HotModuleReloadOptions> options, string name = "Hot Module Reload"):base(name)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -42,44 +42,14 @@ namespace NetPack.HotModuleReload
         public override async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
         {
 
-            // var pipeContext = context.PipeContext;
+            // get all changed inputs, we expect them to be modules of some kind.
+            // then send them, and the options, to madge.
+            // get back module and dependents for the changed module.
+            // then publish a hmr reload event for changed module, with its dependant information.
 
+            // browser implementation can take care of reloading the module including it's dependants.
 
-            //RequireJsOptimiseRequestDto optimiseRequest = new RequireJsOptimiseRequestDto();
-
-            //var inputFiles = context.GetInputFiles();
-            //foreach (FileWithDirectory file in inputFiles)
-            //{
-            //    string fileContent = file.FileInfo.ReadAllContent();
-            //    //  var dir = file.Directory;
-            //    // var name = file.FileInfo.Name;
-
-            //    // expose all input files to the node process, so r.js can see them using fs.
-            //    optimiseRequest.Files.Add(new NodeInMemoryFile()
-            //    {
-            //        Contents = fileContent,
-            //        Path = file.UrlPath.ToString().TrimStart(new char[] { '/' })
-            //    });
-            //}
-
-            //optimiseRequest.Options = _options;
-
-           
-            //    cancelationToken.ThrowIfCancellationRequested();
-            //    RequireJsOptimiseResult result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
-            //    foreach (NodeInMemoryFile file in result.Files)
-            //    {
-            //        string filePath = file.Path.Replace('\\', '/');
-            //        SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
-            //        PathString dir = subPathInfo.Directory.ToPathString();
-            //        context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
-            //    }
-
-            //    //if (!string.IsNullOrWhiteSpace(result.Error))
-            //    //{
-            //    //    throw new RequireJsOptimiseException(result.Error);
-            //    //}
-           
+          
 
 
         }

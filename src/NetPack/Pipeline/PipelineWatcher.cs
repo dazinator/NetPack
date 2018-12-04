@@ -24,6 +24,7 @@ namespace NetPack.Pipeline
         public void WatchPipeline(IPipeLine pipeline, int watchTriggerDelay)
         {
             _pipelines.Add(pipeline);
+
             foreach (PipeProcessor pipe in pipeline.Pipes)
             {
                 foreach (string include in pipe.Input.GetIncludes())
@@ -42,12 +43,11 @@ namespace NetPack.Pipeline
 
             IDisposable disposable = ChangeTokenHelper.OnChangeDebounce<StateInfo>(() => fileProvider.Watch(state.Input), (s) =>
               {
-                  // Mark the input as changed.
                   DateTime changeTime = DateTime.UtcNow;
                   _logger.LogInformation("Changed signalled @ {0} for {1}, key: {2}, name: {name}", changeTime, s.Input, key, s.PipeContext.Pipe?.Name ?? string.Empty);
-                  //  s.PipeContext.Input.LastChanged = changeTime;
-                  IEnumerable<PipeProcessor> targetPipes = new[] { s.PipeContext }.AsEnumerable();
-                  s.Pipeline.ProcessPipesAsync(targetPipes, CancellationToken.None);
+
+                  // process the pipe with changed inputs.                 
+                  s.Pipeline.ProcessPipe(s.PipeContext, CancellationToken.None);
               }, state, watchTriggerDelay);
 
             return disposable;
