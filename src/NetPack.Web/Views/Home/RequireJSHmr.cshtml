@@ -74,8 +74,7 @@
                     require.undef(foundModuleId);
                     require.undef("@@hot");
                     define("@@hot", [], function () { return oldInstance; });
-                    // the module is reloaidng properly.
-                    // maybe try fetching the js myself and then eval() ing it?
+                   
                     var hot = require(['require', '@@hot', foundModuleId], function (require, oldInstance, newInstance) {
                      //   require(['require', foundModuleId], function (require, foundModuleId) {
                         PubSub.publishSync('ModuleReloaded', { Id: foundModuleId, old: oldInstance, new: newInstance });
