@@ -94,11 +94,20 @@ namespace NetPack.Pipeline
             return fileProvider;
         }
 
-        public bool WachInput { get; protected set; }
+        public bool WatchInput { get; protected set; }
 
-        public IPipelineBuilder Watch()
+        public int WatchTriggerDelay { get; protected set; }
+
+        /// <summary>
+        /// Watch the inputs to the pipeline and re-process any pipes if inputs change.
+        /// </summary>
+        /// <param name="triggerDelay">Number of milliseconds to delay after initial trigger of a file change token, in case file change token is triggered multiple times in quick succession.
+        /// This is necessary to workaround issue with IFileProvider.Watch() signalling multiple change tokens in quick succession when a file is changed. See https://github.com/aspnet/AspNetCore/issues/2542 for info.</param>
+        /// <returns></returns>
+        public IPipelineBuilder Watch(int triggerDelay = 200)
         {
-            this.WachInput = true;
+            this.WatchTriggerDelay = triggerDelay;
+            this.WatchInput = true;
             return this;
         }
 

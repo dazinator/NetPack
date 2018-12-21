@@ -69,15 +69,18 @@ namespace NetPack.Pipeline
             try
             {
 
-                _logger.LogInformation("Processing changes..");
+                _logger.LogInformation("Detecting changes for pipe: {pipe}", Pipe.Name);
 
                 PipeState state = LoadState(parentPipeline.Context.FileProvider);
                 bool hasChanges = _previousState == null || state.HasChanged(_previousState);
 
                 if (!hasChanges)
                 {
+                    _logger.LogInformation("No changes for pipe: {pipe}", Pipe.Name);
                     return;
                 }
+
+                _logger.LogInformation("Processing changes for pipe: {pipe}", Pipe.Name);
 
                 LastProcessStartTime = DateTime.UtcNow;
                 IsProcessing = true;
@@ -86,13 +89,13 @@ namespace NetPack.Pipeline
                 //using (Blocker = new FileLocker())
                 //{
                 // todo: concurrent access to OutputFiles might be a problem here..
-                if (_previousState != null && _previousState.OutputFiles.Count > 0)
-                {
-                    //foreach (Tuple<PathString, IFileInfo> item in _previousState.OutputFiles)
-                    //{
-                    //    AddBlock(item.Item1);
-                    //}
-                }
+                //if (_previousState != null && _previousState.OutputFiles.Count > 0)
+                //{
+                //    //foreach (Tuple<PathString, IFileInfo> item in _previousState.OutputFiles)
+                //    //{
+                //    //    AddBlock(item.Item1);
+                //    //}
+                //}
 
 
                 await Policy.ExecuteAsync(ct => Pipe.ProcessAsync(state, ct), token);

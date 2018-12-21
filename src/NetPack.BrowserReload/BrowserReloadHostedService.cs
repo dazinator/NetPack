@@ -4,7 +4,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
+using NetPack.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -45,7 +45,7 @@ namespace NetPack.BrowserReload
 
         private void WatchFiles(IFileProvider fileProvider, IEnumerable<string> enumerable)
         {
-            if( fileProvider == null || enumerable == null)
+            if (fileProvider == null || enumerable == null)
             {
                 return;
             }
@@ -58,15 +58,15 @@ namespace NetPack.BrowserReload
 
         private void Watch(string pattern, IFileProvider fileProvider)
         {
-            _changeCallbackDisposable = ChangeToken.OnChange(() => fileProvider.Watch(pattern), (s) =>
-             {
-                 _logger.LogInformation("triggering browser reload for pattern " + s);
-                 using (IServiceScope scope = _serviceScopeFactory.CreateScope())
-                 {
-                     IHubContext<BrowserReloadHub, IBrowserReloadClient> hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<BrowserReloadHub, IBrowserReloadClient>>();
-                     hubContext.Clients.All.Reload();
-                 }
-             }, pattern);
+            _changeCallbackDisposable = ChangeTokenHelper.OnChangeDebounce(() => fileProvider.Watch(pattern), (s) =>
+            {
+                _logger.LogInformation("triggering browser reload for pattern " + s);
+                using (IServiceScope scope = _serviceScopeFactory.CreateScope())
+                {
+                    IHubContext<BrowserReloadHub, IBrowserReloadClient> hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<BrowserReloadHub, IBrowserReloadClient>>();
+                    hubContext.Clients.All.Reload();
+                }
+            }, pattern, _options.Value.Delay);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

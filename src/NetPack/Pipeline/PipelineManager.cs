@@ -28,13 +28,13 @@ namespace NetPack.Pipeline
 
         public Dictionary<string, IPipeLine> PipeLines { get; set; }
 
-        public void AddPipeLine(string key, IPipeLine pipeline, bool watch)
-        {
+        public void AddPipeLine(string key, IPipeLine pipeline, bool watch, int watchTriggerDelay)
+        {           
             PipeLines.Add(key, pipeline);
-            SetupPipeline(pipeline, watch);
+            SetupPipeline(pipeline, watch, watchTriggerDelay);
         }
 
-        private void SetupPipeline(IPipeLine pipeline, bool watch)
+        private void SetupPipeline(IPipeLine pipeline, bool watch, int watchTriggerDelay)
         {
             //  var pipeLineWatcher = appBuilder.ApplicationServices.GetService<IPipelineWatcher>();
 
@@ -59,7 +59,7 @@ namespace NetPack.Pipeline
 
             if (watch)
             {
-                Watcher.WatchPipeline(pipeline);
+                Watcher.WatchPipeline(pipeline, watchTriggerDelay);
             }
 
         }

@@ -150,7 +150,7 @@ export default function () {
                             options.InputOptions.AddEntryPoint("/wwwroot/Main.js")
                                                 .AddEntryPoint("/wwwroot/Second.js");
 
-                            options.AddOutput((output) => {
+                            options.HasOutput((output) => {
                                 output.Format = Rollup.RollupOutputFormat.Esm;
                                 output.Sourcemap = SourceMapType.File;
                                 output.Dir = "/rollup";                                
@@ -166,13 +166,13 @@ export default function () {
                              options.InputOptions.AddEntryPoint("/wwwroot/Main.js")
                                                  .AddEntryPoint("/wwwroot/Second.js");
 
-                             options.AddOutput((output) => {
+                             options.HasOutput((output) => {
                                  output.Format = Rollup.RollupOutputFormat.Esm;
                                  output.Sourcemap = SourceMapType.File;
                                  output.Dir = "/rollup/modules";
                              });
 
-                             options.AddOutput((output) => {
+                             options.HasOutput((output) => {
                                  output.Format = Rollup.RollupOutputFormat.System;
                                  output.Sourcemap = SourceMapType.File;
                                  output.Dir = "/rollup/nomodules";

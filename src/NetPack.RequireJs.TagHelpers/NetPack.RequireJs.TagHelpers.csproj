@@ -7,7 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Embedded\**" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <EmbeddedResource Include="embedded\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="embedded\netpack\js\require.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="embedded\netpack\js\require.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="embedded\netpack\js\require.js">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

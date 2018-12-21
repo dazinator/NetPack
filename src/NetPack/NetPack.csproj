@@ -4,7 +4,12 @@
     <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <AssemblyName>NetPack</AssemblyName>
     <PackageId>NetPack</PackageId>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="embedded\**\*" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dazinator.AspNet.Extensions.FileProviders" Version="1.5.0-unstable0014" />

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace NetPack.Rollup
 {
-    public class RollupCodeSplittingPipe : IPipe
+    public class RollupCodeSplittingPipe : BasePipe
     {
         private INetPackNodeServices _nodeServices;
         private readonly RollupCodeSplittingInputOptions _inputOptions;
@@ -32,7 +32,7 @@ namespace NetPack.Rollup
         {
         }
 
-        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions inputOptions, RollupOutputDirOptions[] outputOptions)
+        public RollupCodeSplittingPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RollupCodeSplittingPipe> logger, RollupCodeSplittingInputOptions inputOptions, RollupOutputDirOptions[] outputOptions, string name = "Rollup Code Splitting") : base(name)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -54,11 +54,11 @@ namespace NetPack.Rollup
         }
 
 
-        public async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
+        public override async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
         {
             var optimiseRequest = new RollupRequest();
-
-            foreach (FileWithDirectory file in context.InputFiles)
+            var inputFiles = context.GetInputFiles();
+            foreach (FileWithDirectory file in inputFiles)
             {
                 string fileContent = file.FileInfo.ReadAllContent();
                 // expose all input files to the node process, so r.js can see them using fs.

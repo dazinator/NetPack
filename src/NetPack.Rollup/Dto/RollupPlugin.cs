@@ -5,12 +5,13 @@ namespace NetPack.Rollup
     public class RollupPlugin
     {
         private readonly string _packageName;
-        private readonly JObject _pluginConfiguration;
+        private readonly object _pluginConfiguration;
         private readonly bool _importOnly;
+        private readonly bool _addBeforeVirtualFileSystem;
         private readonly string _defaultExportName;
         
 
-        public RollupPlugin(string packageName, JObject configuration, string defaultExportName, bool importOnly)
+        public RollupPlugin(string packageName, object configuration, string defaultExportName, bool importOnly, bool addBeforeVirtualFileSystem)
         {
             if (defaultExportName == null)
             {
@@ -19,12 +20,13 @@ namespace NetPack.Rollup
             _packageName = packageName;
             _pluginConfiguration = configuration;
             _importOnly = importOnly;
+            _addBeforeVirtualFileSystem = addBeforeVirtualFileSystem;
             _defaultExportName = defaultExportName;
         }
 
         public string PackageName => _packageName;
 
-        public JObject PluginConfiguration => _pluginConfiguration;
+        public object PluginConfiguration => _pluginConfiguration;
 
         public string PluginConfigurationJson
         {
@@ -42,6 +44,8 @@ namespace NetPack.Rollup
         }
 
         public bool ImportOnly => _importOnly;
+
+        public bool AddBeforeVirtualFileSystem => _addBeforeVirtualFileSystem;
 
         public string DefaultExportName => _defaultExportName;
     }

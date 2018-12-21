@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "RequireJS HMR";
+}
+
+<h1>RequireJS Hot Module Replacement</h1>
+
+<div id='a'>
+    <div data-used-by='a'></div>
+    <div data-used-by='both'></div>
+</div>
+
+<div id='b'>
+    <div data-used-by='b'></div>
+    <div data-used-by='both'></div>
+</div>
+
+<p>Modules loaded from optimised file:</p>
+<ul id="modules"></ul>
+<div id='a'>
+    <div data-used-by='a'></div>
+</div>
+
+@section scripts
+    {
+
+
+    @*Following needed for hmr*@
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+
+    <script src="~/embedded/netpack/js/pubsub.min.js"></script> @*This is embedded, you don't have to source it yourself*@
+    <script src="~/embedded/netpack/js/publisher-filechange.js"></script> @*This is embedded, you don't have to source it yourself*@
+    @*<script src="~/js/reloader-require.js"></script> @*This is embedded, you don't have to source it yourself*@
+
+    <script src="/requireConfig.js"></script>
+
+       
+    <script src="/lib/require.js"></script>   
+       
+
+    <script type="text/javascript">
+
+        requirejs.onResourceLoad = function (context, map, depArray) {
+
+        }
+
+        define("@@hot", [], function () { return {}; });
+
+        require(["SomePage"], function (somePage) {
+
+
+            var onFileChanged = function (msg, filename) {
+                var allModules = Object.keys(require.s.contexts._.defined);
+                var fileExtension = filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+
+                var foundModuleId = allModules.find(function (moduleName) {
+                    var moduleNameWithExtension = moduleName;
+                    if (fileExtension) {
+                        moduleNameWithExtension = moduleName + "." + fileExtension;
+                    }
+                    var moduleUrl = require.toUrl(moduleNameWithExtension);
+                    return moduleUrl == filename;
+                });
+
+
+                if (foundModuleId) {
+                    // first allow the current instance of module to unload.
+                    var oldInstance = require.s.contexts._.defined[foundModuleId];
+                    if (oldInstance) {
+                        if (typeof oldInstance.__unload === "function") {
+                            oldInstance.__unload();
+                        };
+                    }
+
+                    require.undef(foundModuleId);
+                    require.undef("@@hot");
+                    define("@@hot", [], function () { return oldInstance; });
+                   
+                    var hot = require(['require', '@@hot', foundModuleId], function (require, oldInstance, newInstance) {
+                     //   require(['require', foundModuleId], function (require, foundModuleId) {
+                        PubSub.publishSync('ModuleReloaded', { Id: foundModuleId, old: oldInstance, new: newInstance });
+                      //  });
+                    });
+
+
+                    //require([foundModuleId, "@@hot"], (mod) => {                                         
+                    //    //  define("@@hot", [], function () { return {}; });
+
+                    //});
+
+                }
+            };
+
+            var token = PubSub.subscribe('FileChanged', onFileChanged);
+
+
+        });           
+
+       
+
+    </script>
+
+    @*<script type="text/javascript">
+                require.config({
+            //By default load any module IDs from amd
+            baseUrl: '/amd',
+            //except, if the module ID starts with "app",
+            //load it from the js/app directory. paths
+            //config is relative to the baseUrl, and
+            //never includes a ".js" extension since
+            //the paths config could be for a directory.
+            paths: {
+                '@@hot': 'empty:'
+            }
+        });*@
+
+    @*</script>*@
+
+    @*<script src="/netpack/built.js"></script>*@
+    @*<script type="text/javascript">
+            require(['SomePage'], function (foo) {
+                //SomePage is now loaded.
+
+            });
+
+        </script>*@
+
+    @*<script>
+            SystemJS.config({
+                "map": {
+                    "@@hot": "@@empty"
+                }
+            });
+            SystemJS.import('/netpack/rollup/hmr/nomodule/entry-a.js').then(function (m) {
+            });
+                                                            //System.import('hmrbundle.js');
+                                                            //System.import('/netpack/rollup/nomodule/main-b.js');
+        </script>*@
+
+
+}

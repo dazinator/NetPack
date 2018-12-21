@@ -9,9 +9,9 @@ namespace NetPack.Pipeline
 
         IServiceProvider ServiceProvider { get; set; }
 
-        IPipelineBuilder Watch();
+        IPipelineBuilder Watch(int triggerDelay = 200);
 
-        IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);      
+        IPipelineBuilder AddPipe(Action<PipelineInputBuilder> inputBuilder, IPipe pipe);
 
         IPipelineBuilder UseBaseRequestPath(PathString path);
 
@@ -26,6 +26,6 @@ namespace NetPack.Pipeline
         /// <param name="requiement"></param>
         /// <returns></returns>
         IPipelineBuilder IncludeRequirement(IRequirement requiement);
-       
+
     }
 }

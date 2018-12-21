@@ -15,7 +15,7 @@ namespace NetPack.JsMin
 
         private JsMinOptions _options;
 
-        public JsMinifierPipe(JsMinOptions options)
+        public JsMinifierPipe(JsMinOptions options, string name = "JS Min") : base(name)
         {
             _options = options;
 
@@ -24,7 +24,8 @@ namespace NetPack.JsMin
         public override async Task ProcessAsync(PipeState state, CancellationToken cancelationToken)
         {
             JsMin jsMin = new JsMin(_options);
-            foreach (FileWithDirectory item in state.InputFiles)
+            var inputFiles = state.GetInputFiles();
+            foreach (FileWithDirectory item in inputFiles)
             {
 
                 string outPutFileName = GetOutputFileName(item);

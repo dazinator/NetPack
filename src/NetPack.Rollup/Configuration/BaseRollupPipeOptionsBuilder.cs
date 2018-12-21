@@ -37,11 +37,20 @@ namespace NetPack
             RollupPluginOptionsBuilder builder = new RollupPluginOptionsBuilder();
             configurePlugin(builder);
             IPipelineBuilder.IncludeRequirement(builder.ModuleRequirement);
-            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, builder.Options, builder.DefaultExportName1, builder.IsImportOnly);
+            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, builder.GetJsonConfigurationObject(), builder.DefaultExportName, builder.IsImportOnly, builder.PluginRunsBeforeSystemPlugins);
             return (TBuilder)this;
         }
 
-        public TBuilder AddOutput(Action<TOutputOptions> configureOutput)
+        public TBuilder AddImport(Action<IRollupImportOptionsBuilder> configurePlugin)
+        {
+            RollupImportOptionsBuilder builder = new RollupImportOptionsBuilder();
+            configurePlugin(builder);
+            IPipelineBuilder.IncludeRequirement(builder.ModuleRequirement);
+            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, null, builder.DefaultExportName, true);
+            return (TBuilder)this;
+        }
+
+        public TBuilder HasOutput(Action<TOutputOptions> configureOutput)
         {
             var output = new TOutputOptions();
             configureOutput(output);
@@ -49,9 +58,15 @@ namespace NetPack
             return (TBuilder)this;
         }
 
-        public IPipelineBuilder IPipelineBuilder => _builder;
+        public IPipelineBuilder IPipelineBuilder => _builder;       
 
         public TInputOptions InputOptions => _inputOptions;
+
+        public TBuilder HasInput(Action<TInputOptions> inputOptions)
+        {
+            inputOptions?.Invoke(InputOptions);
+            return (TBuilder)this;
+        }       
 
         public List<TOutputOptions> OutputOptions => _outputOptions;
 

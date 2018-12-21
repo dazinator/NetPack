@@ -6,7 +6,6 @@ using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -30,7 +29,7 @@ namespace NetPack.Typescript
 
         public TypeScriptCompilePipe(INetPackNodeServices nodeServices,
             IEmbeddedResourceProvider embeddedResourceProvider,
-            TypeScriptPipeOptions options)
+            TypeScriptPipeOptions options, string name = "Typescript") : base(name)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -70,19 +69,22 @@ namespace NetPack.Typescript
             //  //  context.AddBlock(outFilePath);
             //}
 
+            FileWithDirectory[] inputFiles = null;
+
             if (context.InputFiles != null)
             {
 
                 // get modified files.
-                FileWithDirectory[] modifiedInputs = _previousState != null ? context.GetModifiedInputs(_previousState).ToArray() : context.InputFiles;
+                inputFiles = context.GetInputFiles();
 
-                foreach (var item in context.InputFiles)
+                FileWithDirectory[] modifiedInputs = _previousState != null ? context.GetModifiedInputs(_previousState).ToArray() : inputFiles;
+
+                foreach (FileWithDirectory item in inputFiles)
                 {
                     requestDto.Inputs.Add(item.UrlPath);
-                    
                 }
 
-                foreach (var item in modifiedInputs)
+                foreach (FileWithDirectory item in modifiedInputs)
                 {
                     //if (!isSingleOutput)
                     //{
@@ -137,7 +139,7 @@ namespace NetPack.Typescript
                     foreach (KeyValuePair<string, string> output in result.Sources)
                     {
                         SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
-                        StringFileInfo outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+                        var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
 
                         context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
 
@@ -149,7 +151,7 @@ namespace NetPack.Typescript
                 // source file needs to be output so it can be served up to the browser.              
                 if (_options.SourceMap.GetValueOrDefault() && !_options.InlineSources)
                 {
-                    foreach (FileWithDirectory inputFileInfo in context.InputFiles)
+                    foreach (FileWithDirectory inputFileInfo in inputFiles)
                     {
                         //  context.AllowServe(inputFileInfo);
                         //if (context.SourcesOutput.GetFile(inputFileInfo.FileSubPath) == null)

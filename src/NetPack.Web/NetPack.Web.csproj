@@ -6,7 +6,16 @@
     <AssemblyName>NetPack.Web</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>NetPack.Web</PackageId>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\js\reloader-require.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\js\reloader-require.js" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.4" />
@@ -22,6 +31,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NetPack.BrowserReload\NetPack.BrowserReload.csproj" />
+    <ProjectReference Include="..\NetPack.HotModuleReload.TagHelpers\NetPack.HotModuleReload.TagHelpers.csproj" />
+    <ProjectReference Include="..\NetPack.HotModuleReload\NetPack.HotModuleReload.csproj" />
     <ProjectReference Include="..\NetPack.Rollup\NetPack.Rollup.csproj" />
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
     <ProjectReference Include="..\NetPack.Typescript\NetPack.Typescript.csproj" />
@@ -33,6 +44,15 @@
 
   <ItemGroup>
     <Content Update="Views\Home\BrowserReload.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Home\RequireJsHmr.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Home\SystemHmrTagHelper.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Home\SystemHmr.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
     <Content Update="Views\Home\RollupCodeSplitting.cshtml">

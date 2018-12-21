@@ -1,16 +1,12 @@
-﻿using ApprovalTests;
-using ApprovalTests.Reporters;
-using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
-using Scriban;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace NetPack.Rollup.Tests
 {
-    
+
     public class RollupPipelineTests
     {
 
@@ -30,7 +26,7 @@ namespace NetPack.Rollup.Tests
             InMemoryFileProvider fileProvider = new InMemoryFileProvider();
 
             services.AddNetPack((setup) =>
-            {               
+            {
                 setup.AddPipeline(a =>
                 {
                     a.WithFileProvider(fileProvider)
@@ -40,13 +36,13 @@ namespace NetPack.Rollup.Tests
                         }, options =>
                         {
                             options.AddPlugin((plugin) => plugin.RequiresNpmModule("foo", "1.0.0")
-                                                                .Register((dynamic c) =>
-                                                                 {
-                                                                     c.Prop = true;
-                                                                 }));
+                                                                .HasOptionsOfKind(OptionsKind.Object, (c) =>
+                                                                {
+                                                                    c.Prop = true;
+                                                                }));
                         });
                 });
             });
-        }  
+        }
     }
 }

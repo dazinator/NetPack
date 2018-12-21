@@ -39,7 +39,7 @@ namespace NetPack.Tests
                                 .AddPipe(inputs => inputs.Input.AddInclude("wwwroot/foo.ts"), new DelegatePipe(async (context, token) =>
                                 {
                                     // block requests for the file we are generating, until we have finished generating it.
-                                    string generatedFilePath = "/wwwroot/foo.js";
+                                  //  string generatedFilePath = "/wwwroot/foo.js";
 
                                     //  requestHalter.AddBlock(generatedFilePath);
 
@@ -51,7 +51,8 @@ namespace NetPack.Tests
                                         await Task.Delay(new TimeSpan(0, 0, 10));
                                     }
 
-                                    string inputFileContents = context.InputFiles[0].FileInfo.ReadAllContent();
+                                    var inputFiles = context.GetInputFiles();
+                                    string inputFileContents = inputFiles[0].FileInfo.ReadAllContent();
                                     // output the generated file
                                     context.AddOutput("/wwwroot", new StringFileInfo(inputFileContents + " processed!", "foo.js"));
                                     // }

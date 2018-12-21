@@ -74,6 +74,22 @@ namespace NetPack.Web.Controllers
             return View();
         }
 
+        public IActionResult SystemHmr()
+        {
+            return View();
+        }
+
+        public IActionResult SystemHmrTagHelper()
+        {
+            return View();
+        }
+
+        public IActionResult RequireJsHmr()
+        {
+            return View();
+        }
+
+
         public IActionResult Error()
         {
             return View();

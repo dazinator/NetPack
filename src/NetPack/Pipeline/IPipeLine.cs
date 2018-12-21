@@ -29,6 +29,12 @@ namespace NetPack.Pipeline
         Task ProcessPipesAsync(IEnumerable<PipeProcessor> pipes, CancellationToken none);
 
         /// <summary>
+        /// Processes only the specified pipe.
+        /// </summary>       
+        /// <returns></returns>
+        Task ProcessPipe(PipeProcessor pipe, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Processes only the specified pipes.
         /// </summary>
         /// <param name="pipes"></param>

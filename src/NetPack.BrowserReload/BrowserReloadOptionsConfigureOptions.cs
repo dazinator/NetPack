@@ -31,7 +31,7 @@ namespace NetPack.BrowserReload
 
 
             // Add our provider
-            var filesProvider = new ManifestEmbeddedFileProvider(GetType().Assembly, "resources");
+            var filesProvider = new ManifestEmbeddedFileProvider(GetType().Assembly);
             options.FileProvider = new CompositeFileProvider(options.FileProvider, filesProvider);
         }
     }

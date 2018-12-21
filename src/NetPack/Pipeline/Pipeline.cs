@@ -3,8 +3,8 @@ using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetPack.Requirements;
+using NetPack.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,7 +16,7 @@ namespace NetPack.Pipeline
     public class Pipeline : IPipeLine
     {
 
-        public static TimeSpan DefaultFlushTimeout = new TimeSpan(0, 5, 0);
+        public static TimeSpan DefaultInitialiseTimeout = new TimeSpan(0, 5, 0);
 
         /// <summary>
         /// Constructor.
@@ -39,7 +39,7 @@ namespace NetPack.Pipeline
             EnvironmentFileProvider = environmentFileProvider;
             Pipes = pipes;
             Requirements = requirements;            
-            Logger = logger;
+            Logger = logger;           
 
             generatedOutputDirectory = generatedOutputDirectory ?? new InMemoryDirectory();
             GeneratedOutputFileProvider = new InMemoryFileProvider(generatedOutputDirectory);
@@ -47,16 +47,19 @@ namespace NetPack.Pipeline
             sourcesOutputDirectory = sourcesOutputDirectory ?? new InMemoryDirectory();           
             SourcesFileProvider = new InMemoryFileProvider(sourcesOutputDirectory);
 
-            var inputAndGeneratedFileProvider = new CompositeFileProvider(EnvironmentFileProvider, GeneratedOutputFileProvider);
+            // let in memory generated netpack files override files from environment..
+            // i.e if you have a physical js file on disc and a new one is generated in memory by netpack processing
+            // then netpack's will take precedence.
+            var generatedAndEnvironmentFileProvider = new CompositeFileProvider(GeneratedOutputFileProvider, EnvironmentFileProvider);
             WebrootFileProvider = new CompositeFileProvider(GeneratedOutputFileProvider, SourcesFileProvider);
 
             Context = new PipelineContext(
-                inputAndGeneratedFileProvider,
+                generatedAndEnvironmentFileProvider,
                 sourcesOutputDirectory, generatedOutputDirectory, baseRequestPath);
             // Name = Guid.NewGuid().ToString();
         }
 
-        public PipelineContext Context { get; set; }
+        public PipelineContext Context { get; set; }      
 
         /// <summary>
         /// Provides access to files that need to be processed from the environment. 
@@ -107,7 +110,7 @@ namespace NetPack.Pipeline
             // we want to block becausewe dont want the app to finish starting
             // before all assets have been processed..
             //todo: exception handling here.
-            ProcessUninitialisedPipesAsync(CancellationToken.None).Wait(DefaultFlushTimeout);
+            ProcessUninitialisedPipesAsync(CancellationToken.None).Wait(DefaultInitialiseTimeout);
 
         }
 
@@ -128,29 +131,34 @@ namespace NetPack.Pipeline
             return ProcessPipesAsync(Pipes, cancelationToken);
         }
 
-        public bool IsBusy => _taskCount > 0;
-
-        private int _taskCount = 0;
+        public bool IsBusy => Pipes.Any(a => a.IsProcessing);     
 
         public async Task ProcessPipesAsync(IEnumerable<PipeProcessor> pipes, CancellationToken cancellationToken)
         {          
-            Interlocked.Increment(ref _taskCount);
             try
             {
-                IEnumerable<Task> processTasks = pipes.Select(a => a.ProcessChanges(this));
+                IEnumerable<Task> processTasks = pipes.Select(p=>ProcessPipe(p, cancellationToken));
                 Task task = Task.WhenAll(processTasks);
                 await task;
             }
             catch (Exception e)
             {
                 Logger.LogError(new EventId(1001), e, "Error occurred processing pipeline");               
-            }
-            finally
-            {
-                Interlocked.Decrement(ref _taskCount);
-            }          
+            }               
           
-        }      
+        }
+
+        public async Task ProcessPipe(PipeProcessor pipe, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await pipe.ProcessChanges(this);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(new EventId(1001), e, "Error occurred processing pipe: {name}", pipe.Pipe?.Name ?? string.Empty);
+            }
+        }
 
         public async Task ProcessUninitialisedPipesAsync(CancellationToken cancellationToken)
         {
