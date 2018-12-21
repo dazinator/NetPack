@@ -3,7 +3,7 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['signalR'], factory);
+        //  define(['signalR'], factory); // This causes a problem when requirejs is on page and script tag included rather than require()d.
     } else {
         // Browser globals
         root.publisher = factory(root.signalR);
