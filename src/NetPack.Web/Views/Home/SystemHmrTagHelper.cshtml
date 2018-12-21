@@ -1,8 +1,8 @@
 ﻿@{
-    ViewData["Title"] = "SystemJS HMR";
+    ViewData["Title"] = "SystemJS HMR";    
 }
 
-<h1>SystemJS Hot Module Replacement</h1>
+<h1>SystemJS Hot Module Replacement - Tag Helper</h1>
 
 <div id='a'>
     <div data-used-by='a'></div>
@@ -29,11 +29,11 @@
     <script src="~/lib/systemjs-hmr/dist/systemjs-hmr.js" type="text/javascript"></script>
 
     @*Following needed for hmr*@
-
-    <script src="~/embedded/netpack/js/pubsub.min.js"></script> @*This is embedded, you don't have to source it yourself*@
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
-    <script src="~/embedded/netpack/js/publisher-filechange.js"></script> @*This is embedded, you don't have to source it yourself*@
-    <script src="~/embedded/netpack/js/reloader-system.js"></script> @*This is embedded, you don't have to source it yourself*@
+    <Hmr></Hmr>
+    @*<script src="~/embedded/netpack/js/pubsub.min.js"></script> @*This is embedded, you don't have to source it yourself*@
+    @*<script src="~/embedded/netpack/js/publisher-filechange.js"></script> @*This is embedded, you don't have to source it yourself*@
+    @*<script src="~/embedded/netpack/js/reloader-system.js"></script> @*This is embedded, you don't have to source it yourself*@
 
     <script>
         SystemJS.config({
@@ -43,8 +43,8 @@
         });
         SystemJS.import('/netpack/rollup/hmr/nomodule/entry-a.js').then(function (m) {
         });
-                                        //System.import('hmrbundle.js');
-                                        //System.import('/netpack/rollup/nomodule/main-b.js');
+                                                //System.import('hmrbundle.js');
+                                                //System.import('/netpack/rollup/nomodule/main-b.js');
     </script>
 
 

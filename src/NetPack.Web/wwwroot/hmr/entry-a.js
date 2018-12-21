@@ -14,7 +14,7 @@ self.addModuleToList = function (listId, moduleName) {
 
     var ul = document.getElementById(listId);
     var li = document.createElement("li");
-    li.appendChild(document.createTextNode(moduleName + " Loaded..."));
+    li.appendChild(document.createTextNode(moduleName + " Loaded entry-a.js.."));
     ul.appendChild(li);
     self._state.oldChild = li;
 };
@@ -22,7 +22,7 @@ self.addModuleToList = function (listId, moduleName) {
 
 self._state.oldChild = null;
 
-self.addModuleToList("modules", "ModuleA");
+self.addModuleToList("modules", "ModuleA..");
 var unload = () => {
     var ul = document.getElementById("modules");
     var child = self._state.oldChild;

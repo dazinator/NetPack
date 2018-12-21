@@ -19,7 +19,7 @@ namespace NetPack.RequireJs
             _serviceProvider = serviceProvider;
             //Builder = builder;
             PipelineManager = pipelineManager;
-            RequireJsSrc = "/lib/require.js";
+            RequireJsSrc = "/embedded/netpack/js/require.js";
             PipelineName = Guid.NewGuid().ToString();
             _pipeLine = new Lazy<IPipeLine>(() =>
             {

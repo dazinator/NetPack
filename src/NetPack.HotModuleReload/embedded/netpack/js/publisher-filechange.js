@@ -17,12 +17,8 @@
 
     var connection = new signalR.HubConnectionBuilder().withUrl("/hmrhub").build();
     connection.on("FilesChanged", function (filePaths) {
-
         filePaths.forEach(function (filePath) {
-            // publish a topic asynchronously
-            PubSub.publishSync('FileChanged', filePath);
-            // PubSub.publish('MY TOPIC', 'hello world!');      
-            //  SystemJS.reload(filePath);
+            PubSub.publishSync('FileChanged', filePath);           
             console.log(filePath + " changed!");
         });
     });

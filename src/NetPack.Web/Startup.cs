@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NetPack.HotModuleReload;
 using NetPack.RequireJs;
 
 namespace NetPack.Web
@@ -213,6 +215,8 @@ namespace NetPack.Web
                 options.WatchWebRoot("/netpack/built.js");
                 options.WatchContentRoot("/Views/**/*.cshtml");
             });
+
+          //  services.AddTransient<ITagHelperComponent, BodyTagHelperComponent>();
 
 
             services.AddHotModuleReload((options) =>
