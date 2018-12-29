@@ -14,7 +14,7 @@ self.addModuleToList = function (listId, moduleName) {
 
     var ul = document.getElementById(listId);
     var li = document.createElement("li");
-    li.appendChild(document.createTextNode(moduleName + " Loaded entry-a"));
+    li.appendChild(document.createTextNode(moduleName + " Please make a change to /hmr/es6/entry-a.js and watch what happens.."));
     ul.appendChild(li);
     self._state.oldChild = li;
 };

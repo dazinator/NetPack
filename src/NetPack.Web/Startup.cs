@@ -33,8 +33,8 @@ namespace NetPack.Web
             {
                 setup.AddPipeline(pipelineBuilder =>
                 {
-                    pipelineBuilder.WithHostingEnvironmentWebrootProvider()
-                    // Simple processor, that compiles typescript files into js files.
+                    var builder = pipelineBuilder.WithHostingEnvironmentWebrootProvider()
+                    // Simple processor, that compiles typescript files into js files.                  
                     .AddTypeScriptPipe(input =>
                     {
                         input.Include("ts/*.ts");
@@ -46,13 +46,7 @@ namespace NetPack.Web
                         options.InlineSourceMap = false;
                         options.NoImplicitAny = true;
                         options.SourceMap = true;
-
-                    })
-                    // Another processor that combines multiple js files into a single "bundle" file.
-                    .AddJsCombinePipe(input =>
-                    {
-                        input.Include("ts/*.js");
-                    }, () => "bundle.js")
+                    })                  
                     // Add a require js processor that takes all AMD format javascript files and optimises them using rjs optimiser.
                     .AddRequireJsOptimisePipe(input =>
                     {
@@ -60,19 +54,13 @@ namespace NetPack.Web
                         .Include("js/requireConfig.js");
                     }, options =>
                     {
-                        options.MainConfigFile = "js/requireConfig.js";
+                        options.MainConfigFile = "/js/requireConfig.js";
                         options.GenerateSourceMaps = true;
                         options.Optimizer = Optimisers.none;
-                        options.BaseUrl = "amd";
-                        // options.
+                        options.BaseUrl = "amd";                    
                         //  options.AppDir = "amd";
                         options.Name = "SomePage"; // The name of the AMD module to optimise.
-                        options.Out = "built.js"; // The name of the output file.
-
-                        // Here we list the module names
-                        //options.Modules.Add(new ModuleInfo() { Name = "ModuleA" });
-                        //options.Modules.Add(new ModuleInfo() { Name = "ModuleB" });
-                        //  options.Modules.Add(new ModuleInfo() { Name = "SomePage" });
+                        options.Out = "built.js"; // The name of the output file.                        
                     })
                      .AddJsMinPipe(input =>
                      {
@@ -165,11 +153,10 @@ namespace NetPack.Web
                           });
 
                       })
-                      // rollup code splitting example - produces multiple rollup builds (different output formats)
-                      // from same set of input files sent to nodejs side once.
+                      // rollup hmr example using es6
                       .AddRollupCodeSplittingPipe(input =>
                       {
-                          input.Include("hmr/**/*.js");
+                          input.Include("hmr/es6/**/*.js");
                       }, options =>
                       {
                           // This can be used to replace the @hot import with an empty object. Could be useful if you want a mechanism to disable hmr?
@@ -185,7 +172,7 @@ namespace NetPack.Web
 
                           options.HasInput((inputOptions) =>
                           {
-                              inputOptions.AddEntryPoint("/hmr/entry-a.js")
+                              inputOptions.AddEntryPoint("/hmr/es6/entry-a.js")
                                           .AddExternal("@hot");
 
                           });
@@ -193,16 +180,43 @@ namespace NetPack.Web
                           options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.System;
-                              output.Dir = "/rollup/hmr/nomodule/";
+                              output.Dir = "/rollup/hmr/es6/nomodule/";
                           });
 
                           options.HasOutput((output) =>
                           {
                               output.Format = Rollup.RollupOutputFormat.Esm;
-                              output.Dir = "/rollup/hmr/module/";
+                              output.Dir = "/rollup/hmr/es6/module/";
                           });
 
                       })
+                       // add hmr exampler using AMD
+                       .AddRollupPipe(input =>
+                       {
+                           input.Include("hmr/amd/**/*.js");
+                       }, options =>
+                       {
+                           // we add a rollup plugin which converts AMD files to ES2016 modules, so they can be included in a rollup bundle.
+                           // https://www.npmjs.com/package/rollup-plugin-amd
+                           options
+                              .ImportModuleLookupAmd()  // imports lookup-amd into rollup script so plugins can use lookup() to lookup amd modules.   
+                              .AddPluginAmd((amdPluginOptions) =>
+                              {
+                                  amdPluginOptions.RewireFunction("function (moduleId, parentPath) { return lookup({ partial: moduleId, filename: parentPath, config: {baseUrl: '/hmr/amd'} }); }");
+                              })
+                              .HasInput((inputOptions) =>
+                              {
+                                  inputOptions.Input = "/hmr/amd/SomePage.js";
+                              })
+                              .HasOutput((output) =>
+                              {
+                                  output.Format = Rollup.RollupOutputFormat.Iife;
+                                  //  output. = "/rollup/hmr/es6/module/";
+                                 // output.File = "SomePage.js";
+                                  output.File = "/rollup/hmr/amd/module/SomePage.js";
+                              });
+                       })
+
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(500); // Inputs are monitored, and when changes occur, pipes will automatically re-process, with a delay of 500ms to consolidate duplicate file change token signalling into a single trigger.
 
@@ -221,12 +235,14 @@ namespace NetPack.Web
 
             services.AddHotModuleReload((options) =>
             {
-                // trigger browser reload when our bundle file changes.
+                // trigger hmr event when outputs change.
                 options.WatchWebRoot((patterns) =>
                 {
-                    patterns.Include("/netpack/rollup/hmr/nomodule/entry-a.js");
-                    patterns.Include("/netpack/built.js");
-                    patterns.Include("/amd/**/*.js");
+                    patterns.Include("/netpack/rollup/hmr/es6/nomodule/entry-a.js")
+                            .Include("/netpack/rollup/hmr/amd/**/*.js")
+                            .Include("/netpack/built.js")
+                            .Include("/amd/**/*.js")
+                            .Include("/hmr/amd/**/*.js");
                 });               
             });
 

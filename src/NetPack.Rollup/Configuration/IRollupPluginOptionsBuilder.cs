@@ -7,15 +7,15 @@ namespace NetPack
 {
     public interface IRollupPluginOptionsBuilder
     {
-        IRollupPluginStepConfigurationBuilder RequiresNpmModule(string name, string version, bool installAutomatically = true);
-        IRollupPluginStepConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement);
+        IRollupPluginStepConfigurationBuilder HasNpmDependency(string name, string version);
+        IRollupPluginStepConfigurationBuilder HasNpmDependency(Action<NpmDependencyBuilder> configureNpmModuleRequirement);
       //  RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
     }
 
     public interface IRollupImportOptionsBuilder
     {
-        IRollupImportConfigurationBuilder RequiresNpmModule(string name, string version, bool installAutomatically = true);
-        IRollupImportConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement);
+        IRollupImportConfigurationBuilder HasNpmDependency(string name, string version);
+        IRollupImportConfigurationBuilder HasNpmDependency(Action<NpmDependencyBuilder> configureNpmModuleRequirement);
         //  RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
     }
 }

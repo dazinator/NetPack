@@ -14,17 +14,34 @@
     <li>
         Optimizes CSS by inlining CSS files referenced by @@import and removing comments.
     </li>
-</ul>  
+</ul>
 <p>Modules loaded from optimised file:</p>
-<ul id="modules">
-   
-</ul> 
+<ul id="modules"></ul>
 
 
 
 @section scripts
-{      
-    <script data-main="/netpack/built.js" src="/lib/require.js"></script>  
+    {
+
+    <script>
+        // you can register settings like this before require.js is loaded
+        var require = {
+            baseUrl: '/amd'           
+        };
+      
+    </script>
+
+    <script src="~/lib/require.js/require.min.js"></script>
+
+    <script>     
+
+        //The below define is only necessary because our built modules (in the /amd folder) have a dependency on '@@hot' which is for hot module reload functionality.
+        //For this demo page, we just define that dependency as null as we aren't demoing hot module reload here. Usually an additional hmr script would handle this for us.
+        //define("@@hot", function () {
+        //    return null;
+        //});
+
+        require(["/netpack/built.js"]);
+    </script>
+
 }
-
-

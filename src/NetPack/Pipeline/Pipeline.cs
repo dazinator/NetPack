@@ -118,7 +118,7 @@ namespace NetPack.Pipeline
         {
             foreach (IRequirement requirement in Requirements)
             {
-                requirement.Check();
+                requirement.Check(this);
             }
         }
 

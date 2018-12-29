@@ -1,7 +1,9 @@
+using NetPack.Pipeline;
+
 namespace NetPack.Requirements
 {
     public interface IRequirement
     {
-        void Check();
+        void Check(IPipeLine pipeline);
     }
 }

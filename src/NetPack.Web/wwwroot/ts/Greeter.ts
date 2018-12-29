@@ -1,13 +1,13 @@
-﻿import {Another} from "../ts/Another";
+﻿import { Another } from "../ts/Another";
 
-class Greeter {
-    constructor(public greeting: string) { }
+export class Greeter {
+    constructor() { }
     greet() {
-        return this.greeting;
+        return "Hi!!!!"
     }
 };
 
-var y = new Another("foo bare");
+var y = new Another();
 
-var greeter = new Greeter("Hi dazd!!!!");
+var greeter = new Greeter();
 document.body.querySelector(".message").innerHTML += greeter.greet();  

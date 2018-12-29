@@ -27,11 +27,11 @@ namespace NetPack
         private JObject _options = null;
         private JArray _optionsArray = null;
         // private RollupPipeOptionsBuilder _builder;
-        private NpmModuleRequirement _moduleRequirement = null;
+        private NpmDependency _npmDependency = null;
         private bool _importOnly = false;
         private string _defaultExportName = null;
 
-        public NpmModuleRequirement ModuleRequirement { get => _moduleRequirement; set => _moduleRequirement = value; }
+        public NpmDependency NpmDependency { get => _npmDependency; set => _npmDependency = value; }
         public JObject Options { get => _options; set => _options = value; }
         public JArray OptionsArray { get => _optionsArray; set => _optionsArray = value; }
 
@@ -45,18 +45,18 @@ namespace NetPack
             OptionsArray = null;
         }
 
-        public IRollupPluginStepConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement)
+        public IRollupPluginStepConfigurationBuilder HasNpmDependency(Action<NpmDependencyBuilder> configureNpmModuleRequirement)
         {
-            NpmModuleRequirementBuilder builder = new NpmModuleRequirementBuilder();
+            NpmDependencyBuilder builder = new NpmDependencyBuilder();
             configureNpmModuleRequirement?.Invoke(builder);
-            ModuleRequirement = builder.BuildRequirement();
+            NpmDependency = builder.BuildRequirement();
             return this;
         }
 
-        public IRollupPluginStepConfigurationBuilder RequiresNpmModule(string packageName, string version, bool installAutomatically = true)
+        public IRollupPluginStepConfigurationBuilder HasNpmDependency(string packageName, string version)
         {
-            NpmModuleRequirement module = new NpmModuleRequirement(packageName, installAutomatically, version);
-            ModuleRequirement = module;
+            NpmDependency module = new NpmDependency(packageName, version);
+            NpmDependency = module;
             return this;
         }       
 
@@ -159,10 +159,10 @@ namespace NetPack
     public class RollupImportOptionsBuilder : IRollupImportOptionsBuilder, IRollupImportConfigurationBuilder
     {
        
-        private NpmModuleRequirement _moduleRequirement = null;       
+        private NpmDependency _npmDependency = null;       
         private string _defaultExportName = null;
 
-        public NpmModuleRequirement ModuleRequirement { get => _moduleRequirement; set => _moduleRequirement = value; }       
+        public NpmDependency NpmDependency { get => _npmDependency; set => _npmDependency = value; }       
 
         public string DefaultExportName { get => _defaultExportName; set => _defaultExportName = value; }       
 
@@ -170,18 +170,18 @@ namespace NetPack
         {           
         }
 
-        public IRollupImportConfigurationBuilder RequiresNpmModule(Action<NpmModuleRequirementBuilder> configureNpmModuleRequirement)
+        public IRollupImportConfigurationBuilder HasNpmDependency(Action<NpmDependencyBuilder> configureNpmModuleRequirement)
         {
-            NpmModuleRequirementBuilder builder = new NpmModuleRequirementBuilder();
+            NpmDependencyBuilder builder = new NpmDependencyBuilder();
             configureNpmModuleRequirement?.Invoke(builder);
-            ModuleRequirement = builder.BuildRequirement();
+            NpmDependency = builder.BuildRequirement();
             return this;
         }
 
-        public IRollupImportConfigurationBuilder RequiresNpmModule(string packageName, string version, bool installAutomatically = true)
+        public IRollupImportConfigurationBuilder HasNpmDependency(string packageName, string version)
         {
-            NpmModuleRequirement module = new NpmModuleRequirement(packageName, installAutomatically, version);
-            ModuleRequirement = module;
+            NpmDependency module = new NpmDependency(packageName, version);
+            NpmDependency = module;
             return this;
         }       
 

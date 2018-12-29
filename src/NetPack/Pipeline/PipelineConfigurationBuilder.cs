@@ -119,7 +119,8 @@ namespace NetPack.Pipeline
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
 
-        }
+        }     
+        
 
         public IPipelineBuilder IncludeRequirement(IRequirement requirement)
         {
@@ -129,6 +130,7 @@ namespace NetPack.Pipeline
             }
             return this;
         }
+        
 
         public IPipelineBuilder UseBaseRequestPath(PathString baseRequestPath)
         {      

@@ -18,14 +18,8 @@ namespace NetPack
             var nodeServices = (INetPackNodeServices)appServices.GetRequiredService(typeof(INetPackNodeServices));
 
             // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.
-            var nodeJsRequirement = new NodeJsRequirement();
-            builder.IncludeRequirement(nodeJsRequirement);
-
-            var typescriptPackageRequriement = new NpmModuleRequirement("typescript", true, "3.1.1");
-            builder.IncludeRequirement(typescriptPackageRequriement);
-
-            var typescriptSimplePackageRequirement = new NpmModuleRequirement("netpack-typescript-compiler", true, "0.0.7");
-            builder.IncludeRequirement(typescriptSimplePackageRequirement);
+            builder.DependsOnNode((deps) => deps.AddDependency("typescript", "3.1.1")
+                                                .AddDependency("netpack-typescript-compiler", "0.0.7"));
 
             var embeddedResourceProvider = (IEmbeddedResourceProvider)appServices.GetRequiredService(typeof(IEmbeddedResourceProvider));
 

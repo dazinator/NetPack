@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "typescript": "3.1.1",
+    "netpack-typescript-compiler": "0.0.7",
+    "netpack-requirejs": "0.0.2",
+    "rollup": "0.66.2",
+    "rollup-plugin-hypothetical": "2.1.0",
+    "netpack-rollup": "1.0.18",
+    "module-lookup-amd": "5.0.1",
+    "rollup-plugin-amd": "3.0.0"
+  }
+}

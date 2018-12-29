@@ -18,10 +18,10 @@
 <code>
     <pre>
     &#x3C;script src=&#x22;~/lib/signalr/dist/browser/signalr.js&#x22;&#x3E;&#x3C;/script&#x3E;
-    &#x3C;script src=&#x22;~/js/reload.js&#x22;&#x3E;&#x3C;/script&#x3E;
+    &#x3C;script src=&#x22;~/embedded/netpack/js/reload.js&#x22;&#x3E;&#x3C;/script&#x3E;
 </pre>
 </code>
-<p><strong>Note: the /js/reload.js file is automatically served as an embedded resource from the Netpack.BrowserReload assembly - you do not have to add this script yourself to your project. However the signalr script you do have to source yourself, use signalr documentation for guidance on obtaining it and adding it to your project.</strong></p>
+<p><strong>Note: the ~/embedded/netpack/js/reload.js file is automatically served as an embedded resource from the Netpack.BrowserReload assembly - you do not have to add this script yourself to your project. However the signalr script you do have to source yourself, use signalr documentation for guidance on obtaining it and adding it to your project.</strong></p>
 <p>
     In the example above we want to trigger a reload if our javascript bundle file is changed. We have configured a NetPack pipeline to build this bundle for us from the input files under `/wwwroot/amd/*.js`.
     Therefore to trigger a browser reload, change a file under `/wwwroot/amd/` folder. This will cause netpack to rebuild the bundle file `/netpack/built.js`, which will then trigger a browser reload!
@@ -41,6 +41,6 @@
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script src="~/embedded/netpack/js/reload.js"></script> @*This is embedded, you don't have to source it yourself*@
 
-    <script src="/lib/require.js"></script>
+    <script src="~/lib/require.js/require.min.js"></script>
     <script src="~/netpack/built.js" asp-append-version="true"></script>
 }

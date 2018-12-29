@@ -14,7 +14,7 @@
     <div data-used-by='both'></div>
 </div>
 
-<p>Modules loaded from optimised file:</p>
+<p>Modules loaded from wwwroot/hmr/amd/ folder using require js. Edit one of the files in that directory and see what happens:</p>
 <ul id="modules"></ul>
 <div id='a'>
     <div data-used-by='a'></div>
@@ -36,51 +36,22 @@
 
         </script>*@
 
-    <script src="/requireConfig.js"></script>
+    <script>
+        // you can register settings like this before require.js is loaded
+        var require = {
+            baseUrl: '/hmr/amd'
+        };
+
+    </script>
+
+
+    @*<script src="/requireConfig.js"></script>*@
     <script src="~/lib/require.js/require.min.js"></script>
+    @*<script src="~/lib/require.js/require.min.js"></script>*@
     <script src="~/embedded/netpack/js/reloader-require.js">
     </script>
 
-    <script type="text/javascript">    
-                require(["SomePage"]);
+    <script type="text/javascript">
+        require(["SomePage"]);
     </script>
-
-    @*<script type="text/javascript">
-                require.config({
-            //By default load any module IDs from amd
-            baseUrl: '/amd',
-            //except, if the module ID starts with "app",
-            //load it from the js/app directory. paths
-            //config is relative to the baseUrl, and
-            //never includes a ".js" extension since
-            //the paths config could be for a directory.
-            paths: {
-                '@@hot': 'empty:'
-            }
-        });*@
-
-    @*</script>*@
-
-    @*<script src="/netpack/built.js"></script>*@
-    @*<script type="text/javascript">
-            require(['SomePage'], function (foo) {
-                //SomePage is now loaded.
-
-            });
-
-        </script>*@
-
-    @*<script>
-            SystemJS.config({
-                "map": {
-                    "@@hot": "@@empty"
-                }
-            });
-            SystemJS.import('/netpack/rollup/hmr/nomodule/entry-a.js').then(function (m) {
-            });
-                                                            //System.import('hmrbundle.js');
-                                                            //System.import('/netpack/rollup/nomodule/main-b.js');
-        </script>*@
-
-
 }

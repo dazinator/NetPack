@@ -47,7 +47,7 @@ namespace NetPack
                 });
 
                 return this;
-            }         
+            }
 
 
         }
@@ -75,21 +75,24 @@ namespace NetPack
 
                 INodeServices nodeServices = NodeServicesFactory.CreateNodeServices(options);
 #if NODESERVICESASYNC
-                 var lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
-                 return new NetPackNodeServices(nodeServices, lifetime);
+                IApplicationLifetime lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
+                return new NetPackNodeServices(nodeServices, lifetime);
 #else
                 return new NetPackNodeServices(nodeServices);
 #endif
 
             });
 
-            services.AddSingleton(new NodeJsRequirement());
-            services.AddSingleton<IRequirement>(new NodeJsRequirement());
+            services.AddSingleton(new NodeJsIsInstalledRequirement());
+            services.AddSingleton<IRequirement, NpmDependenciesRequirement>();
+            services.AddSingleton<NpmDependencyList>();
+
             services.AddSingleton<PipelineManager>();
             // services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
             services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
             services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
             services.AddTransient<IDirectory, InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
+
 
             if (configureOptions != null)
             {
@@ -118,7 +121,7 @@ namespace NetPack
             }
 
             // Triggers all pipeline to be initialised and registered with pipeline manager.
-            System.Collections.Generic.IEnumerable<PipelineSetup> initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();            
+            System.Collections.Generic.IEnumerable<PipelineSetup> initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();
 
             RequestHaltingMiddlewareOptions middlewareOptions = new RequestHaltingMiddlewareOptions();
             if (requestTimeout != null)

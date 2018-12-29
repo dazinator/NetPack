@@ -25,7 +25,7 @@ namespace NetPack.Pipeline
         /// </summary>
         /// <param name="requiement"></param>
         /// <returns></returns>
-        IPipelineBuilder IncludeRequirement(IRequirement requiement);
+        IPipelineBuilder IncludeRequirement(IRequirement requiement);       
 
     }
 }
