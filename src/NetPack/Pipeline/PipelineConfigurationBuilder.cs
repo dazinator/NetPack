@@ -143,15 +143,10 @@ namespace NetPack.Pipeline
             return this;
         }
 
-
-
         public IPipelineBuilder UseBaseRequestPath(PathString baseRequestPath)
         {      
             BaseRequestPath = baseRequestPath;
             return this;
         }
     }
-
-
-
 }

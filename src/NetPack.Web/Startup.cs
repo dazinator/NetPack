@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NetPack.HotModuleReload;
 using NetPack.RequireJs;
 
 namespace NetPack.Web
@@ -30,10 +28,11 @@ namespace NetPack.Web
         {
             // Add framework services.
             services.AddNetPack((setup) =>
-            {                
-                setup.AddPipeline(pipelineBuilder =>                {
-                    
-                    var builder = pipelineBuilder.WithHostingEnvironmentWebrootProvider()
+            {
+                setup.AddPipeline(pipelineBuilder =>
+                {
+
+                    Pipeline.IPipelineBuilder builder = pipelineBuilder.WithHostingEnvironmentWebrootProvider()
                     // Simple processor, that compiles typescript files into js files.                  
                     .AddTypeScriptPipe(input =>
                     {
@@ -216,13 +215,26 @@ namespace NetPack.Web
                                   output.File = "/rollup/hmr/amd/module/SomePage.js";
                               });
                        })
-                       //.ShouldPerformRequirementsCheck(p => false)
+                    //.ShouldPerformRequirementsCheck(p => false) // can disable checking of requirements on startup for speedier startup, for example checking all required npm modules are installed. By default this check is enabled.
 
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(500); // Inputs are monitored, and when changes occur, pipes will automatically re-process, with a delay of 500ms to consolidate duplicate file change token signalling into a single trigger.
 
                 });
-            });
+            }
+            , (nodeOptions)
+             =>
+            {
+                // We are optionally modifying how node services are configued, so that we can
+                // pick where any necessary npm modules will be resolved / installed to (default is directly under project dir/node_modules. 
+                string nodeProjectDir = System.IO.Path.Combine(nodeOptions.ProjectPath, "bin/netpack-npm");
+                nodeOptions.ProjectPath = nodeProjectDir;
+                if (!System.IO.Directory.Exists(nodeProjectDir))
+                {
+                    System.IO.Directory.CreateDirectory(nodeProjectDir);
+
+                }
+            }); 
 
             services.AddBrowserReload((options) =>
             {
@@ -231,7 +243,7 @@ namespace NetPack.Web
                 options.WatchContentRoot("/Views/**/*.cshtml");
             });
 
-          //  services.AddTransient<ITagHelperComponent, BodyTagHelperComponent>();
+            //  services.AddTransient<ITagHelperComponent, BodyTagHelperComponent>();
 
 
             services.AddHotModuleReload((options) =>
@@ -244,7 +256,7 @@ namespace NetPack.Web
                             .Include("/netpack/built.js")
                             .Include("/amd/**/*.js")
                             .Include("/hmr/amd/**/*.js");
-                });               
+                });
             });
 
             services.AddMvc();

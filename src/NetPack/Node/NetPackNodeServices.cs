@@ -10,18 +10,22 @@ namespace NetPack
     {
         private readonly INodeServices _nodeServices;
 
+        public string ProjectDir { get; }
+
 #if NODESERVICESASYNC
         private readonly IApplicationLifetime _lifetime;
 
-        public NetPackNodeServices(INodeServices nodeServices, IApplicationLifetime lifetime)
+        public NetPackNodeServices(INodeServices nodeServices, string projectDir, IApplicationLifetime lifetime)
         {
             _nodeServices = nodeServices;
+            ProjectDir = projectDir;
            _lifetime = lifetime;
         }
 #else
-        public NetPackNodeServices(INodeServices nodeServices)
+        public NetPackNodeServices(INodeServices nodeServices, string projectDir)
         {
             _nodeServices = nodeServices;
+            ProjectDir = projectDir;
         }
 #endif
 

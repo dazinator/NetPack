@@ -7,12 +7,12 @@ namespace NetPack.Requirements
 {
     public static class ProcessUtils
     {
-        public static Process CreateNpmProcess(string args)
+        public static Process CreateNpmProcess(string args, string workingDirectory = null)
         {
-            return CreateProcess("npm.cmd", args);
+            return CreateProcess("npm.cmd", args, workingDirectory);
         }
 
-        public static Process CreateProcess(string exeName, string args)
+        public static Process CreateProcess(string exeName, string args, string workingDirectory = null)
         {
             var process = new Process();
             var npmExePath = ResolveExecutablePathFromEnvironmentPath(exeName);
@@ -25,7 +25,10 @@ namespace NetPack.Requirements
             // run without showing console windows
             psi.CreateNoWindow = true;
             psi.UseShellExecute = false;
-
+            if(!string.IsNullOrWhiteSpace(workingDirectory))
+            {
+                psi.WorkingDirectory = workingDirectory;
+            }
             // redirects the compiler error output, so we can read
             // and display errors if any
             psi.RedirectStandardError = true;

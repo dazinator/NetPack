@@ -52,36 +52,8 @@ namespace NetPack
 
         }
 
-        public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions)
-        {
-            // Enable Node Services
-            //services.AddNodeServices((options) =>
-            //{
-            //    options.UseSocketHosting();
-            //    options.WatchFileExtensions = null;
-            //   // options.NodeInstanceOutputLogger
-            //   // options.
-            //   // HostingModel = NodeHostingModel.Socket;
-            //});
-
-
-            services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
-            {
-                //var nodeServices = serviceProvider.GetRequiredService<INodeServices>();
-
-                NodeServicesOptions options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
-                // otherwise node services restarts automatically when file changes are made, losing state - we want to handle watch on netcore side.
-                options.WatchFileExtensions = null;
-
-                INodeServices nodeServices = NodeServicesFactory.CreateNodeServices(options);
-#if NODESERVICESASYNC
-                IApplicationLifetime lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
-                return new NetPackNodeServices(nodeServices, lifetime);
-#else
-                return new NetPackNodeServices(nodeServices);
-#endif
-
-            });
+        public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions, Action<NodeServicesOptions> configureGlobalNodeOptions = null)
+        {         
 
             services.AddSingleton(new NodeJsIsInstalledRequirement());
             services.AddSingleton<IRequirement, NpmDependenciesRequirement>();
@@ -99,6 +71,25 @@ namespace NetPack
                 FileProcessingOptions opts = new FileProcessingOptions(services);
                 configureOptions(opts);
             }
+
+            services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
+            {
+                //var nodeServices = serviceProvider.GetRequiredService<INodeServices>();
+
+                NodeServicesOptions options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
+                // otherwise node services restarts automatically when file changes are made, losing state - we want to handle watch on netcore side.
+                options.WatchFileExtensions = null;
+                configureGlobalNodeOptions?.Invoke(options);
+              
+                INodeServices nodeServices = NodeServicesFactory.CreateNodeServices(options);
+#if NODESERVICESASYNC
+                IApplicationLifetime lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
+                return new NetPackNodeServices(nodeServices, options.ProjectPath, lifetime);
+#else
+                return new NetPackNodeServices(nodeServices, options.ProjectPath);
+#endif
+               
+            });
 
             return services;
         }

@@ -15,7 +15,9 @@ namespace NetPack.Pipeline
             var dependencies = builder.ServiceProvider.GetRequiredService<NpmDependencyList>();
             configureNpmDependencies?.Invoke(dependencies);
 
-            var depsRequirement = new NpmDependenciesRequirement(dependencies);
+            var nodeServices = builder.ServiceProvider.GetRequiredService<INetPackNodeServices>();
+            var depsRequirement = new NpmDependenciesRequirement(dependencies, nodeServices);
+
             builder.IncludeRequirement(depsRequirement);
         }
 

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace NetPack.Requirements
@@ -13,9 +14,12 @@ namespace NetPack.Requirements
     {
         private readonly NpmDependencyList _dependencies;
 
-        public NpmDependenciesRequirement(NpmDependencyList dependencies)
+        public INetPackNodeServices NodeServices { get; }
+
+        public NpmDependenciesRequirement(NpmDependencyList dependencies, INetPackNodeServices nodeServices)
         {
             _dependencies = dependencies;
+            NodeServices = nodeServices;
         }
 
         public void Install(IPipeLine pipeline)
@@ -30,18 +34,27 @@ namespace NetPack.Requirements
             JObject packageJson = new JObject();
             packageJson.Add("dependencies", deps);
 
-            IFileProvider fileProvider = pipeline.EnvironmentFileProvider;
-            // check for override package.json file
-            IFileInfo overrides = fileProvider.GetFileInfo("/package.override.json");
-            if (overrides.Exists && !overrides.IsDirectory)
-            {
-                ApplyOverride(packageJson, overrides);
-            }
+            // Todo: replace this with some form of IFileProvider so can come from other sources.
+            string projectDir = NodeServices.ProjectDir;
+            string overrideFilePath = Path.Combine(projectDir, "package.override.json");
 
-            string packageJsonPath = "package.json";
+            // IFileProvider fileProvider = pipeline.EnvironmentFileProvider;
+            // check for override package.json file
+            //  IFileInfo overrides = fileProvider.GetFileInfo("/package.override.json");
+            if (System.IO.File.Exists(overrideFilePath))
+            {
+                var fileInfo = new FileInfo(overrideFilePath);
+                ApplyOverride(packageJson, fileInfo);
+            }
+            //if (overrides.Exists && !overrides.IsDirectory)
+            //{
+               
+            //}           
+            string packageJsonPath = Path.Combine(projectDir, "package.json");
             SavePackageJson(packageJsonPath, packageJson);
 
-            RunNpmInstall();
+            //var workingDir = 
+            RunNpmInstall(projectDir);
 
         }
 
@@ -51,17 +64,18 @@ namespace NetPack.Requirements
             System.IO.File.WriteAllText(path, JsonConvert.SerializeObject(packageJson));
         }
 
-        private void ApplyOverride(JObject deps, IFileInfo overrides)
+        private void ApplyOverride(JObject deps, FileInfo overrides)
         {
 
         }
 
-        private void RunNpmInstall()
+        private void RunNpmInstall(string workingDir)
         {
             string args = "install";
-
-            using (Process p = ProcessUtils.CreateNpmProcess(args))
+          
+            using (Process p = ProcessUtils.CreateNpmProcess(args, workingDir))
             {
+                
                 p.Start();
 
                 // make sure it finished executing before proceeding 
@@ -117,7 +131,7 @@ namespace NetPack.Requirements
             {
                 return false;
             }
-            if (obj.GetType() == this.GetType())
+            if (obj.GetType() == GetType())
             {
                 return true;
             }
@@ -126,7 +140,7 @@ namespace NetPack.Requirements
 
         public override int GetHashCode()
         {
-            return 140743331 + EqualityComparer<Type>.Default.GetHashCode(this.GetType());
+            return 140743331 + EqualityComparer<Type>.Default.GetHashCode(GetType());
         }
     }
 }
