@@ -17,6 +17,7 @@ namespace NetPack.Pipeline
     {
 
         public static TimeSpan DefaultInitialiseTimeout = new TimeSpan(0, 5, 0);
+        private readonly Predicate<IPipeLine> _shouldPerformRequirementsCheck;
 
         /// <summary>
         /// Constructor.
@@ -34,13 +35,14 @@ namespace NetPack.Pipeline
             IDirectory sourcesOutputDirectory,
             ILogger<Pipeline> logger,
             string baseRequestPath = null,
-            IDirectory generatedOutputDirectory = null)
+            IDirectory generatedOutputDirectory = null, 
+            Predicate<IPipeLine> shouldPerformRequirementsCheck = null)
         {
             EnvironmentFileProvider = environmentFileProvider;
             Pipes = pipes;
             Requirements = requirements;            
-            Logger = logger;           
-
+            Logger = logger;
+            _shouldPerformRequirementsCheck = shouldPerformRequirementsCheck;
             generatedOutputDirectory = generatedOutputDirectory ?? new InMemoryDirectory();
             GeneratedOutputFileProvider = new InMemoryFileProvider(generatedOutputDirectory);
 
@@ -105,7 +107,16 @@ namespace NetPack.Pipeline
         public void Initialise()
         {
             // run checks for requirements.
-            EnsureRequirements();
+            bool shouldCheckRequirements = _shouldPerformRequirementsCheck?.Invoke(this) ?? true;
+            if(shouldCheckRequirements)
+            {
+                CheckRequirements();
+            }
+            else
+            {
+                Logger.LogWarning("Skipped checking requirements for pipeline - you should ensure all npm dependencies are installed etc otherwise you may get errors at runtime.");
+            }
+
             // Trigger the pipeline to be flushed if it hasn't already.
             // we want to block becausewe dont want the app to finish starting
             // before all assets have been processed..
@@ -114,8 +125,10 @@ namespace NetPack.Pipeline
 
         }
 
-        private void EnsureRequirements()
+        private void CheckRequirements()
         {
+            Logger.LogInformation("Checking requirements for pipeline");
+
             foreach (IRequirement requirement in Requirements)
             {
                 requirement.Check(this);

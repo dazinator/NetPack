@@ -114,13 +114,12 @@ namespace NetPack.Pipeline
         public IPipeLine BuildPipeLine()
         {
             var logger = ServiceProvider.GetRequiredService<ILogger<Pipeline>>();
-            var pipeLine = new Pipeline(FileProvider, Pipes, Requirements, SourcesOutputDirectory, logger, BaseRequestPath);
+            var pipeLine = new Pipeline(FileProvider, Pipes, Requirements, SourcesOutputDirectory, logger, BaseRequestPath, shouldPerformRequirementsCheck: ShouldPerformRequirementsCheckPredicate);
             // var fileProvider = new NetPackPipelineFileProvider(pipeLine);
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
 
-        }     
-        
+        }             
 
         public IPipelineBuilder IncludeRequirement(IRequirement requirement)
         {
@@ -130,7 +129,21 @@ namespace NetPack.Pipeline
             }
             return this;
         }
-        
+
+        public Predicate<IPipeLine> ShouldPerformRequirementsCheckPredicate { get; set; }
+
+        /// <summary>
+        /// A predicate that returns whether requirements for the pipeline should be checked when the pipeline is first initialised. For example, the pipeline may have requirements that certain npm packages are installed, or other environmental things. If this check is disabled then it will result in quicker start up times, but you have to be sure all requirements are met.
+        /// for the operation of the pipeline on the current environment. 
+        /// </summary>
+        /// <returns></returns>
+        public IPipelineBuilder ShouldPerformRequirementsCheck(Predicate<IPipeLine> predicate)
+        {
+            ShouldPerformRequirementsCheckPredicate = predicate;
+            return this;
+        }
+
+
 
         public IPipelineBuilder UseBaseRequestPath(PathString baseRequestPath)
         {      

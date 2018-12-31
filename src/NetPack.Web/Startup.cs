@@ -30,9 +30,9 @@ namespace NetPack.Web
         {
             // Add framework services.
             services.AddNetPack((setup) =>
-            {
-                setup.AddPipeline(pipelineBuilder =>
-                {
+            {                
+                setup.AddPipeline(pipelineBuilder =>                {
+                    
                     var builder = pipelineBuilder.WithHostingEnvironmentWebrootProvider()
                     // Simple processor, that compiles typescript files into js files.                  
                     .AddTypeScriptPipe(input =>
@@ -46,7 +46,7 @@ namespace NetPack.Web
                         options.InlineSourceMap = false;
                         options.NoImplicitAny = true;
                         options.SourceMap = true;
-                    })                  
+                    })
                     // Add a require js processor that takes all AMD format javascript files and optimises them using rjs optimiser.
                     .AddRequireJsOptimisePipe(input =>
                     {
@@ -57,7 +57,7 @@ namespace NetPack.Web
                         options.MainConfigFile = "/js/requireConfig.js";
                         options.GenerateSourceMaps = true;
                         options.Optimizer = Optimisers.none;
-                        options.BaseUrl = "amd";                    
+                        options.BaseUrl = "amd";
                         //  options.AppDir = "amd";
                         options.Name = "SomePage"; // The name of the AMD module to optimise.
                         options.Out = "built.js"; // The name of the output file.                        
@@ -212,10 +212,11 @@ namespace NetPack.Web
                               {
                                   output.Format = Rollup.RollupOutputFormat.Iife;
                                   //  output. = "/rollup/hmr/es6/module/";
-                                 // output.File = "SomePage.js";
+                                  // output.File = "SomePage.js";
                                   output.File = "/rollup/hmr/amd/module/SomePage.js";
                               });
                        })
+                       //.ShouldPerformRequirementsCheck(p => false)
 
                     .UseBaseRequestPath("/netpack") // serves all outputs using the specified base request path.
                     .Watch(500); // Inputs are monitored, and when changes occur, pipes will automatically re-process, with a delay of 500ms to consolidate duplicate file change token signalling into a single trigger.
