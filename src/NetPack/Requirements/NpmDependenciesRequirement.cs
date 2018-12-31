@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.FileProviders;
-using NetPack.Pipeline;
+﻿using NetPack.Pipeline;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -38,18 +37,11 @@ namespace NetPack.Requirements
             string projectDir = NodeServices.ProjectDir;
             string overrideFilePath = Path.Combine(projectDir, "package.override.json");
 
-            // IFileProvider fileProvider = pipeline.EnvironmentFileProvider;
-            // check for override package.json file
-            //  IFileInfo overrides = fileProvider.GetFileInfo("/package.override.json");
             if (System.IO.File.Exists(overrideFilePath))
             {
                 var fileInfo = new FileInfo(overrideFilePath);
                 ApplyOverride(packageJson, fileInfo);
             }
-            //if (overrides.Exists && !overrides.IsDirectory)
-            //{
-               
-            //}           
             string packageJsonPath = Path.Combine(projectDir, "package.json");
             SavePackageJson(packageJsonPath, packageJson);
 
@@ -66,6 +58,8 @@ namespace NetPack.Requirements
 
         private void ApplyOverride(JObject deps, FileInfo overrides)
         {
+            //todo: load deps from the package.override.json file and override them in the existing JObject.
+            // This provides a mechanism for manual override of dependencies that get installed as expressed in code.
 
         }
 
