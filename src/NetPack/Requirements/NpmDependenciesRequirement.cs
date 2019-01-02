@@ -29,7 +29,7 @@ namespace NetPack.Requirements
                 return;
             }
 
-            JObject deps = _dependencies.ToJObject();
+            JObject deps = _dependencies.ToJObject() ?? new JObject();
             JObject packageJson = new JObject();
             packageJson.Add("dependencies", deps);
 
@@ -39,8 +39,9 @@ namespace NetPack.Requirements
 
             if (System.IO.File.Exists(overrideFilePath))
             {
-                var fileInfo = new FileInfo(overrideFilePath);
-                ApplyOverride(packageJson, fileInfo);
+                FileInfo fileInfo = new FileInfo(overrideFilePath);
+                JObject overridePackageJson = LoadOverride(fileInfo);
+                ApplyOverride(packageJson, overridePackageJson);
             }
             string packageJsonPath = Path.Combine(projectDir, "package.json");
             SavePackageJson(packageJsonPath, packageJson);
@@ -50,26 +51,57 @@ namespace NetPack.Requirements
 
         }
 
+        private void ApplyOverride(JObject packageJson, JObject overridePackageJson)
+        {
+            JProperty deps = overridePackageJson.Property("dependencies");
+            JObject overrideDepsObject = deps.Value as JObject;
+            JObject existingDeps = packageJson.Property("dependencies")?.Value as JObject;    
+            
+            foreach (JProperty item in overrideDepsObject.Properties())
+            {
+                JProperty existingProp = existingDeps.Property(item.Name);
+                if (existingProp != null)
+                {
+                    // override the dependency.
+                    existingProp.Value = item.Value;
+                }
+                else
+                {
+                    // add the dependency.
+                    existingDeps.Add(item.Name, item.Value);
+                }
+            }
+        }
+
         private void SavePackageJson(string path, JObject packageJson)
         {
             // serialize JSON to a string and then write string to a file
             System.IO.File.WriteAllText(path, JsonConvert.SerializeObject(packageJson));
         }
 
-        private void ApplyOverride(JObject deps, FileInfo overrides)
+        private JObject LoadOverride(FileInfo overrides)
         {
             //todo: load deps from the package.override.json file and override them in the existing JObject.
             // This provides a mechanism for manual override of dependencies that get installed as expressed in code.
+            // read JSON directly from a file
+            using (StreamReader file = overrides.OpenText())
+            {
+                using (JsonTextReader reader = new JsonTextReader(file))
+                {
+                    JObject overridePackageJson = (JObject)JToken.ReadFrom(reader);
+                    return overridePackageJson;
+                }
+            }
 
         }
 
         private void RunNpmInstall(string workingDir)
         {
             string args = "install";
-          
+
             using (Process p = ProcessUtils.CreateNpmProcess(args, workingDir))
             {
-                
+
                 p.Start();
 
                 // make sure it finished executing before proceeding 
