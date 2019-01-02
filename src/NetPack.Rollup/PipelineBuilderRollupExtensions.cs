@@ -17,7 +17,7 @@ namespace NetPack
         public static IPipelineBuilder AddRollupPipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<RollupPipeOptionsBuilder> configureOptions = null)
         {
 
-            var nodeServices = AddRollup(builder);
+            INetPackNodeServices nodeServices = AddRollup(builder);
 
             RollupPipeOptionsBuilder optionsBuilder = new RollupPipeOptionsBuilder(builder);
             configureOptions?.Invoke(optionsBuilder);
@@ -36,18 +36,11 @@ namespace NetPack
             IServiceProvider appServices = builder.ServiceProvider;
             INetPackNodeServices nodeServices = (INetPackNodeServices)appServices.GetRequiredService(typeof(INetPackNodeServices));
 
+
             // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.
-            NodeJsRequirement nodeJsRequirement = new NodeJsRequirement();
-            builder.IncludeRequirement(nodeJsRequirement);
-
-            NpmModuleRequirement rollupModule = new NpmModuleRequirement("rollup", true, "0.66.2");
-            builder.IncludeRequirement(rollupModule);
-
-            NpmModuleRequirement rollupPluginHypothetical = new NpmModuleRequirement("rollup-plugin-hypothetical", true, "2.1.0");
-            builder.IncludeRequirement(rollupPluginHypothetical);
-
-            NpmModuleRequirement netpackRollup = new NpmModuleRequirement("netpack-rollup", true, "1.0.18");
-            builder.IncludeRequirement(netpackRollup);
+            builder.DependsOnNode((deps) => deps.AddDependency("rollup", "0.66.2")
+                                                .AddDependency("rollup-plugin-hypothetical", "2.1.0")
+                                                .AddDependency("netpack-rollup", "1.0.18"));     
 
             return nodeServices;
         }
@@ -55,7 +48,7 @@ namespace NetPack
         public static IPipelineBuilder AddRollupCodeSplittingPipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<RollupPipeCodeSplittingOptionsBuilder> configureOptions = null)
         {
 
-            var nodeServices = AddRollup(builder);
+            INetPackNodeServices nodeServices = AddRollup(builder);
 
             RollupPipeCodeSplittingOptionsBuilder optionsBuilder = new RollupPipeCodeSplittingOptionsBuilder(builder);
             configureOptions?.Invoke(optionsBuilder);

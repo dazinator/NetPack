@@ -47,23 +47,30 @@ namespace NetPack
                 });
 
                 return this;
-            }         
+            }
 
 
         }
 
-        public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions)
-        {
-            // Enable Node Services
-            //services.AddNodeServices((options) =>
-            //{
-            //    options.UseSocketHosting();
-            //    options.WatchFileExtensions = null;
-            //   // options.NodeInstanceOutputLogger
-            //   // options.
-            //   // HostingModel = NodeHostingModel.Socket;
-            //});
+        public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions, Action<NodeServicesOptions> configureGlobalNodeOptions = null)
+        {         
 
+            services.AddSingleton(new NodeJsIsInstalledRequirement());
+            services.AddSingleton<IRequirement, NpmDependenciesRequirement>();
+            services.AddSingleton<NpmDependencyList>();
+
+            services.AddSingleton<PipelineManager>();
+            // services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
+            services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
+            services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
+            services.AddTransient<IDirectory, InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
+
+
+            if (configureOptions != null)
+            {
+                FileProcessingOptions opts = new FileProcessingOptions(services);
+                configureOptions(opts);
+            }
 
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {
@@ -72,30 +79,17 @@ namespace NetPack
                 NodeServicesOptions options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
                 // otherwise node services restarts automatically when file changes are made, losing state - we want to handle watch on netcore side.
                 options.WatchFileExtensions = null;
-
+                configureGlobalNodeOptions?.Invoke(options);
+              
                 INodeServices nodeServices = NodeServicesFactory.CreateNodeServices(options);
 #if NODESERVICESASYNC
-                 var lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
-                 return new NetPackNodeServices(nodeServices, lifetime);
+                IApplicationLifetime lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
+                return new NetPackNodeServices(nodeServices, options.ProjectPath, lifetime);
 #else
-                return new NetPackNodeServices(nodeServices);
+                return new NetPackNodeServices(nodeServices, options.ProjectPath);
 #endif
-
+               
             });
-
-            services.AddSingleton(new NodeJsRequirement());
-            services.AddSingleton<IRequirement>(new NodeJsRequirement());
-            services.AddSingleton<PipelineManager>();
-            // services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
-            services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
-            services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
-            services.AddTransient<IDirectory, InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
-
-            if (configureOptions != null)
-            {
-                FileProcessingOptions opts = new FileProcessingOptions(services);
-                configureOptions(opts);
-            }
 
             return services;
         }
@@ -118,7 +112,7 @@ namespace NetPack
             }
 
             // Triggers all pipeline to be initialised and registered with pipeline manager.
-            System.Collections.Generic.IEnumerable<PipelineSetup> initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();            
+            System.Collections.Generic.IEnumerable<PipelineSetup> initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();
 
             RequestHaltingMiddlewareOptions middlewareOptions = new RequestHaltingMiddlewareOptions();
             if (requestTimeout != null)

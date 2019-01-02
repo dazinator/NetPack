@@ -1,5 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders.Directory;
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,7 +55,6 @@ namespace NetPack.Pipeline
         {
             get;
         }
-
         //bool HasUninitialisedPipes();
 
     }

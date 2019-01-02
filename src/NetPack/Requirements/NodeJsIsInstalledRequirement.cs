@@ -1,11 +1,12 @@
+using NetPack.Pipeline;
 using System;
 using System.Diagnostics;
 
 namespace NetPack.Requirements
-{
-    public class NodeJsRequirement : IRequirement
+{   
+    public class NodeJsIsInstalledRequirement : IRequirement
     {
-        public virtual void Check()
+        public virtual void Check(IPipeLine pipeline)
         {
 
             using (Process p = new Process())
@@ -44,13 +45,11 @@ namespace NetPack.Requirements
             {
                 return false;
             }
-            if (obj.GetType() == typeof(NodeJsRequirement))
+            if (obj.GetType() == typeof(NodeJsIsInstalledRequirement))
             {
                 return true;
             }
             return false;
         }
-
-       
     }
 }

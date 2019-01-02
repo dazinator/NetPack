@@ -35,7 +35,7 @@ namespace NetPack.Rollup.Tests
                             input.Include("wwwroot/*.js");
                         }, options =>
                         {
-                            options.AddPlugin((plugin) => plugin.RequiresNpmModule("foo", "1.0.0")
+                            options.AddPlugin((plugin) => plugin.HasNpmDependency("foo", "1.0.0")
                                                                 .HasOptionsOfKind(OptionsKind.Object, (c) =>
                                                                 {
                                                                     c.Prop = true;

@@ -61,8 +61,8 @@ namespace NetPack.RequireJs
                 {
                     Contents = fileContent,
                     Path = file.UrlPath.ToString().TrimStart(new char[] { '/' })
-                });
-            }
+                });                
+            }           
 
             optimiseRequest.Options = _options;
 

@@ -16,7 +16,7 @@ namespace NetPack
         {
             builder.AddImport((a) =>
              {
-                 a.RequiresNpmModule("module-lookup-amd", version)
+                 a.HasNpmDependency("module-lookup-amd", version)
                   .HasDefaultExportName("lookup");   // only imported into the script as default export name, won't be included in rollupjs plugins list, but other plugin config could reference it.                                       
              });
             return builder;
@@ -33,7 +33,7 @@ namespace NetPack
         {
             builder.AddPlugin((a) =>
              {
-                 IRollupPluginStepConfigurationBuilder stepBuilder = a.RequiresNpmModule("rollup-plugin-amd", version);
+                 IRollupPluginStepConfigurationBuilder stepBuilder = a.HasNpmDependency("rollup-plugin-amd", version);
                  if (configureOptions != null)
                  {
                      stepBuilder.HasOptionsOfKind(OptionsKind.Object, (amdPluginOptions) =>

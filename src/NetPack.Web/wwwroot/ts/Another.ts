@@ -1,10 +1,9 @@
 ﻿export class Another {
-    constructor(public another: string) { }
+    constructor() { }
     greet() {
-        return " < h1 > " + this.another + " < /h1>";
+        return "Loaded /ts/Another.ts";
     }
 };
 
-var another = new Another("awd de");
-document.body.querySelector(".message").innerHTML += another.greet();  
-
+var another = new Another();
+document.body.querySelector(".message").innerHTML += another.greet(); 

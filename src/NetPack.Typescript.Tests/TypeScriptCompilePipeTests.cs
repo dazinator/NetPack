@@ -34,8 +34,8 @@ namespace NetPack.Typescript.Tests
 
             mockNodeInstance.Setup(a => a.CreateStringAsTempFile(It.IsAny<string>())).Returns(new StringAsTempFile("blah", CancellationToken.None));
 
-            var mockJsRequirement = new Moq.Mock<NodeJsRequirement>();
-            mockJsRequirement.Setup(a => a.Check());
+            var mockJsRequirement = new Moq.Mock<NodeJsIsInstalledRequirement>();
+            mockJsRequirement.Setup(a => a.Check(null));
 
             var embeddedScript = new StringFileInfo("some embedded script", "netpack-typescript");
             var mockEmbeddedResources = new Moq.Mock<IEmbeddedResourceProvider>();

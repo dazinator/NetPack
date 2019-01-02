@@ -83,7 +83,6 @@ namespace NetPack.RequireJs
             IDirectory sourcesDirectory = _serviceProvider.GetRequiredService<IDirectory>();
             PipelineConfigurationBuilder builder = new PipelineConfigurationBuilder(_serviceProvider, sourcesDirectory);
 
-
             IPipelineBuilder pipeBuilder = builder.WithHostingEnvironmentWebrootProvider()
              .AddRequireJsOptimisePipe(input =>
              {

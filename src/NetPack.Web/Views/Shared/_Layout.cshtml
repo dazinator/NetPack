@@ -17,9 +17,13 @@
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
     <style>
-      body {
-          padding-top: 150px;
-      }
+        body {
+            padding-top: 200px;
+        }
+
+        .navbar-brand {
+            font-size:16px
+        }
     </style>
 </head>
 <body>
@@ -37,7 +41,7 @@
                 <ul class="nav navbar-nav">
                     <a asp-area="" asp-controller="Home" asp-action="SingleTypescriptFile" class="navbar-brand">Single Typescript File</a>
                     <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFiles" class="navbar-brand">Multiple Typescript Files</a>
-                    <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFilesCombinedToSingleJsFile" class="navbar-brand">Multiple Typescript Files Combined To Single Js File</a>
+                    @*<a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFilesCombinedToSingleJsFile" class="navbar-brand">Multiple Typescript Files Combined To Single Js File</a>*@
                     <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimised" class="navbar-brand">A RequireJs optimised file based on AMD.</a>
                     <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimisedTagHelper" class="navbar-brand">A RequireJs Optimise TagHelper.</a>
                     <a asp-area="" asp-controller="Home" asp-action="JsMin" class="navbar-brand">JsMin.</a>

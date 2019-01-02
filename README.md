@@ -118,7 +118,7 @@ The bottom two scripts are the bundle file, and `requirejs` itself which we happ
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/reload.js"></script> @*This reload script file is embedded into a netpack assembly, you don't have to source it yourself*@
 
-    <script src="/lib/require.js"></script>
+    <script src="~/lib/require.js/require.min.js"></script>
     <script src="~/netpack/built.js" asp-append-version="true"></script>
 
 

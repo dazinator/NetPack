@@ -36,8 +36,8 @@ namespace NetPack
         {
             RollupPluginOptionsBuilder builder = new RollupPluginOptionsBuilder();
             configurePlugin(builder);
-            IPipelineBuilder.IncludeRequirement(builder.ModuleRequirement);
-            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, builder.GetJsonConfigurationObject(), builder.DefaultExportName, builder.IsImportOnly, builder.PluginRunsBeforeSystemPlugins);
+            IPipelineBuilder.DependsOnNode((deps) => deps.AddDependency(builder.NpmDependency));
+            InputOptions.AddPlugin(builder.NpmDependency.PackageName, builder.GetJsonConfigurationObject(), builder.DefaultExportName, builder.IsImportOnly, builder.PluginRunsBeforeSystemPlugins);
             return (TBuilder)this;
         }
 
@@ -45,8 +45,8 @@ namespace NetPack
         {
             RollupImportOptionsBuilder builder = new RollupImportOptionsBuilder();
             configurePlugin(builder);
-            IPipelineBuilder.IncludeRequirement(builder.ModuleRequirement);
-            InputOptions.AddPlugin(builder.ModuleRequirement.PackageName, null, builder.DefaultExportName, true);
+            IPipelineBuilder.DependsOnNode((deps) => deps.AddDependency(builder.NpmDependency));
+            InputOptions.AddPlugin(builder.NpmDependency.PackageName, null, builder.DefaultExportName, true);
             return (TBuilder)this;
         }
 

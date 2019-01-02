@@ -5,11 +5,12 @@
 <p>
     Netpack offers a RequireJS TagHelper for optimising AMD modules into a bundle using r.js optimiser, within your Razor pages directly:
     <pre>
-        &lt;require-js-optimise include=&quot;amd/*.js&quot;, &quot;js/requireConfig.js&quot;
-                         main=&quot;SomePage&quot;
-                         out-name=&quot;built.js&quot;
-                         out-path=&quot;/netpack&quot;&gt;
-        &lt;/require-js-optimise&gt;
+        &#x3C;require-js-optimise include=&#x22;amd/*.js, js/requireConfig.js&#x22;
+                         require-js-src=&#x22;/lib/require.js/require.min.js&#x22;
+                         main=&#x22;SomePage&#x22;
+                         out-name=&#x22;built.js&#x22;
+                         out-path=&#x22;/netpack&#x22;&#x3E;
+        &#x3C;/require-js-optimise&#x3E;
 </pre>
 </p>
 
@@ -42,8 +43,9 @@
     {
 
 
-    <script data-main="/netpack/built.js" src="/lib/require.js"></script>
+    @*<script data-main="/netpack/built.js" src="~/lib/require.js/require.min.js"></script>*@
     <require-js-optimise include="amd/*.js, js/requireConfig.js"
+                         require-js-src="/lib/require.js/require.min.js"
                          main="SomePage"
                          out-name="built.js"
                          out-path="/netpack">
