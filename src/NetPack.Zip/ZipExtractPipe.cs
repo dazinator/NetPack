@@ -10,16 +10,6 @@ using System.Threading.Tasks;
 
 namespace NetPack.Zip
 {
-    public class ZipExtractPipeOptions
-    {
-        public ZipExtractPipeOptions()
-        {
-
-        }
-
-        public string BaseExtractPath { get; set; }
-    }
-
     public class ZipExtractPipe : BasePipe
     {
 
