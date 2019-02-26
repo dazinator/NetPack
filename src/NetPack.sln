@@ -49,7 +49,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.BrowserReload", "Ne
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.HotModuleReload", "NetPack.HotModuleReload\NetPack.HotModuleReload.csproj", "{63FDD53F-2C0B-4337-B85A-8517BAECCD28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetPack.HotModuleReload.TagHelpers", "NetPack.HotModuleReload.TagHelpers\NetPack.HotModuleReload.TagHelpers.csproj", "{DFD52273-021D-4D72-A991-27D870C67847}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetPack.HotModuleReload.TagHelpers", "NetPack.HotModuleReload.TagHelpers\NetPack.HotModuleReload.TagHelpers.csproj", "{DFD52273-021D-4D72-A991-27D870C67847}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetPack.Zip", "NetPack.Zip\NetPack.Zip.csproj", "{F485D100-6544-435C-AA15-CFE90E3D106A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetPack.Zip.Tests", "NetPack.Zip.Tests\NetPack.Zip.Tests.csproj", "{0394420A-5657-4FC9-AA6F-74178B5E7993}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +133,14 @@ Global
 		{DFD52273-021D-4D72-A991-27D870C67847}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFD52273-021D-4D72-A991-27D870C67847}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFD52273-021D-4D72-A991-27D870C67847}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F485D100-6544-435C-AA15-CFE90E3D106A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F485D100-6544-435C-AA15-CFE90E3D106A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F485D100-6544-435C-AA15-CFE90E3D106A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F485D100-6544-435C-AA15-CFE90E3D106A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0394420A-5657-4FC9-AA6F-74178B5E7993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0394420A-5657-4FC9-AA6F-74178B5E7993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0394420A-5657-4FC9-AA6F-74178B5E7993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0394420A-5657-4FC9-AA6F-74178B5E7993}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,6 +164,8 @@ Global
 		{EFA93BE2-4535-47C4-B7AB-52CCCFD1BD6C} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 		{63FDD53F-2C0B-4337-B85A-8517BAECCD28} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 		{DFD52273-021D-4D72-A991-27D870C67847} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
+		{F485D100-6544-435C-AA15-CFE90E3D106A} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
+		{0394420A-5657-4FC9-AA6F-74178B5E7993} = {D3B0CC01-206D-4612-94FC-3AE3A300153E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F97B401-084D-46B4-A4FD-53F4E50B4048}
