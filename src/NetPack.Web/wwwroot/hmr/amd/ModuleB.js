@@ -1,4 +1,4 @@
-﻿define("ModuleB", ["require", "exports", "./ModuleA"], function (require, exports, moduleA) {
+﻿define("ModuleB", ["require", "exports", "./ModuleA", "@hot"], function (require, exports, moduleA, hot) {
     "use strict";
     console.log("ModuleB running");
 
@@ -11,7 +11,7 @@
     // todo, think about a way to subscribe to dependency reloads, so for example,
     // when moduleA is reloading, we can update our reference of it to the new version.
     self.__unload = function () {
-        console.log("module b unloading..");
+        console.log("module b unloading...");
         self.moduleA.removeModuleFromList(self.state);
     };   
 

@@ -27,5 +27,7 @@ namespace NetPack.Pipeline
         /// <returns></returns>
         IPipelineBuilder IncludeRequirement(IRequirement requiement);
 
+        IPipelineBuilder ShouldPerformRequirementsCheck(Predicate<IPipeLine> predicate);
+
     }
 }

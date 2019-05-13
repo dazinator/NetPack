@@ -63,19 +63,25 @@ namespace NetPack.Utils
         {
             int current = Interlocked.Increment(ref counter);
 
+            if(counter > 1000)
+            {
+                // detect error
+                Console.WriteLine("debounc limit exceeded: " + counter);
+                return;
+            }
             Task.Delay(waitTime).ContinueWith(task =>
             {
                 // Is this the last task that was queued?
                 if (current == counter && !cts.IsCancellationRequested)
                 {
                     action(state);
-                }
+                }               
                 else
                 {
                     Console.WriteLine("debounced..");
                 }
 #if NETSTANDARD2_0
-                  task.Dispose();
+                task.Dispose();
 #endif
 
             }, cts.Token);

@@ -1,8 +1,6 @@
-require.config({
-    // app entry point
-    //deps: ["SomePage"],
+requirejs.config({
     //By default load any module IDs from amd
-    baseUrl: '/amd',
+    baseUrl: '/hmr/amd',
     //except, if the module ID starts with "app",
     //load it from the js/app directory. paths
     //config is relative to the baseUrl, and
@@ -12,13 +10,3 @@ require.config({
         '@hot': 'empty:'
     }
 });
-
-
-//var require = {
-//    baseUrl: '/amd',
-//    waitSeconds: 0,
-//    paths: {
-//        '@hot': 'empty:'
-//    }
-//};
-

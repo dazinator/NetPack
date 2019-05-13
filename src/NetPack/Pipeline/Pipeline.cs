@@ -17,6 +17,7 @@ namespace NetPack.Pipeline
     {
 
         public static TimeSpan DefaultInitialiseTimeout = new TimeSpan(0, 5, 0);
+        private readonly Predicate<IPipeLine> _shouldPerformRequirementsCheck;
 
         /// <summary>
         /// Constructor.
@@ -34,13 +35,14 @@ namespace NetPack.Pipeline
             IDirectory sourcesOutputDirectory,
             ILogger<Pipeline> logger,
             string baseRequestPath = null,
-            IDirectory generatedOutputDirectory = null)
-        {
+            IDirectory generatedOutputDirectory = null, 
+            Predicate<IPipeLine> shouldPerformRequirementsCheck = null)
+        {           
             EnvironmentFileProvider = environmentFileProvider;
             Pipes = pipes;
             Requirements = requirements;            
-            Logger = logger;           
-
+            Logger = logger;
+            _shouldPerformRequirementsCheck = shouldPerformRequirementsCheck;
             generatedOutputDirectory = generatedOutputDirectory ?? new InMemoryDirectory();
             GeneratedOutputFileProvider = new InMemoryFileProvider(generatedOutputDirectory);
 
@@ -73,18 +75,10 @@ namespace NetPack.Pipeline
         public IFileProvider GeneratedOutputFileProvider { get; set; }
 
         /// <summary>
-        /// Provides access to the subset of input / source files that need to be served up to the borwser, usually the case if sourcemaps are in play without inline sources.
+        /// Provides access to the subset of input / source files that need to be exposed / served up to the borwser, usually the case if sourcemaps are in play without inline sources.
         /// </summary>
         public IFileProvider SourcesFileProvider { get; set; }
 
-        ///// <summary>
-        ///// Provides access too all un-processed output files only. These are basically input files that need to be seen by the brwoser, but on which
-        ///// no processing occurred. For example, a processor that compiles typescript input files, and produces js output files may need to also 
-        ///// ensure the orgiginal typescript files can be served up to the browser when source maps are enabled. The typescript files are the original
-        ///// input files and no actual changes are being made to those files so they are placed in the UnprocessedOutputFileProvider which
-        ///// get's integrated with the Environments WebRoot file provider so that the files can be resolved.
-        ///// </summary>
-        //public IDirectory SourcesOutputDirectory { get; set; }
         public ILogger<Pipeline> Logger { get; }     
 
         /// <summary>
@@ -93,19 +87,28 @@ namespace NetPack.Pipeline
         public IFileProvider WebrootFileProvider { get; set; }    
 
         /// <summary>
-        /// The configured pipes in this pipeline.
+        /// The pipes in this pipeline.
         /// </summary>
         public List<PipeProcessor> Pipes { get; set; }
 
         /// <summary>
-        /// Requirements that must be met for this pipeline to function.
+        /// Any requirements that should be met for this pipeline to function.
         /// </summary>
         public List<IRequirement> Requirements { get; set; }      
 
         public void Initialise()
         {
             // run checks for requirements.
-            EnsureRequirements();
+            bool shouldCheckRequirements = _shouldPerformRequirementsCheck?.Invoke(this) ?? true;
+            if(shouldCheckRequirements)
+            {
+                CheckRequirements();
+            }
+            else
+            {
+                Logger.LogWarning("Skipped checking requirements for pipeline - you should ensure all npm dependencies are installed etc otherwise you may get errors at runtime.");
+            }
+
             // Trigger the pipeline to be flushed if it hasn't already.
             // we want to block becausewe dont want the app to finish starting
             // before all assets have been processed..
@@ -114,16 +117,18 @@ namespace NetPack.Pipeline
 
         }
 
-        private void EnsureRequirements()
+        private void CheckRequirements()
         {
+            Logger.LogInformation("Checking requirements for pipeline");
+
             foreach (IRequirement requirement in Requirements)
             {
-                requirement.Check();
+                requirement.Check(this);
             }
         }
 
         /// <summary>
-        /// Processes all pipes.
+        /// Processes all pipes in the pipeline.
         /// </summary>
         /// <returns></returns>
         public Task ProcessAsync(CancellationToken cancelationToken)
@@ -131,7 +136,7 @@ namespace NetPack.Pipeline
             return ProcessPipesAsync(Pipes, cancelationToken);
         }
 
-        public bool IsBusy => Pipes.Any(a => a.IsProcessing);     
+        public bool IsBusy => Pipes.Any(a => a.IsProcessing);
 
         public async Task ProcessPipesAsync(IEnumerable<PipeProcessor> pipes, CancellationToken cancellationToken)
         {          
