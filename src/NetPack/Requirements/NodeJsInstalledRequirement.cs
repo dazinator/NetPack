@@ -23,7 +23,15 @@ namespace NetPack.Requirements
 
                 p.StartInfo = psi;
 
-                p.Start();
+                try
+                {
+                    p.Start();
+                }
+                catch (System.ComponentModel.Win32Exception ex)
+                {
+                    throw new NodeJsNotInstalledException(ex.Message);                    
+                }
+               
 
                 // reads the error output
                 var errorMessage = p.StandardError.ReadToEnd();
@@ -51,6 +59,6 @@ namespace NetPack.Requirements
             return false;
         }
 
-       
+
     }
 }

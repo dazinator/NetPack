@@ -16,15 +16,16 @@
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
-    <style>
-      body {
-          padding-top: 150px;
-      }
-    </style>
+    @*<style>
+        body {
+            padding-top: 150px;
+        }
+    </style>*@
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
+    @*<div class="navbar navbar-inverse navbar-fixed-top">*@
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
@@ -32,29 +33,55 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
+                <a class="navbar-brand" href="#">NetPack</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <a asp-area="" asp-controller="Home" asp-action="SingleTypescriptFile" class="navbar-brand">Single Typescript File</a>
-                    <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFiles" class="navbar-brand">Multiple Typescript Files</a>
-                    <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFilesCombinedToSingleJsFile" class="navbar-brand">Multiple Typescript Files Combined To Single Js File</a>
-                    <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimised" class="navbar-brand">A RequireJs optimised file based on AMD.</a>
-                    <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimisedTagHelper" class="navbar-brand">A RequireJs Optimise TagHelper.</a>
-                    <a asp-area="" asp-controller="Home" asp-action="JsMin" class="navbar-brand">JsMin.</a>
-                    <a asp-area="" asp-controller="Home" asp-action="RollupBundle" class="navbar-brand">Rollup Js Single File Bundle.</a>
-                    <a asp-area="" asp-controller="Home" asp-action="RollupCodeSplitting" class="navbar-brand">Rollup Js Code Splitting.</a>
-                    <a asp-area="" asp-controller="Home" asp-action="BrowserReload" class="navbar-brand">Automatic Browser Reload</a>
-                    <a asp-area="" asp-controller="Home" asp-action="SystemHmr" class="navbar-brand">SystemJS Hot Module Reload</a>
-                    <a asp-area="" asp-controller="Home" asp-action="SystemHmrTagHelper" class="navbar-brand">SystemJS Hot Module Reload TagHelper</a>
-
-                    <a asp-area="" asp-controller="Home" asp-action="RequireJSHmr" class="navbar-brand">RequireJS Hot Module Reload</a>
-                    <a asp-area="" asp-controller="Home" asp-action="RequireJSHmrTagHelper" class="navbar-brand">RequireJS Hot Module Reload using TagHelper</a>
-
-                    @*<li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>*@
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="SingleTypescriptFile">Single Typescript File</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFiles">Multiple Typescript Files</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="MultipleTypescriptFilesCombinedToSingleJsFile">Multiple Typescript Files Combined To Single Js File</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimised">A RequireJs optimised file based on AMD.</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="RequireJsOptimisedTagHelper">A RequireJs Optimise TagHelper.</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="JsMin">JsMin.</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="RollupBundle">Rollup Js Single File Bundle.</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="RollupCodeSplitting">Rollup Js Code Splitting.</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="BrowserReload">Automatic Browser Reload</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="SystemHmr">SystemJS Hot Module Reload</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="SystemHmrTagHelper">SystemJS Hot Module Reload TagHelper</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="RequireJSHmr">RequireJS Hot Module Reload</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="RequireJSHmrTagHelper">RequireJS Hot Module Reload using TagHelper</a>
+                    </li>
+                    @*
+                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>*@
                 </ul>
             </div>
         </div>
-    </div>
+    </nav>
     <div class="container body-content">
         @RenderBody()
         <hr />

@@ -1,5 +1,5 @@
 ﻿body {
-    padding-top: 50px;
+    /*padding-top: 50px;*/
     padding-bottom: 20px;
 }
 
@@ -29,10 +29,14 @@ textarea {
     width: 100%;
 }
 
+.navbar-nav .li {
+    font-size:8px
+}
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
-  /* Hide captions */
-  .carousel-caption {
+    /* Hide captions */
+    .carousel-caption {
     display: none
   }
 }
