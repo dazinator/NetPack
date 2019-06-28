@@ -1,47 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.FileProviders;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NetPack.BrowserReload
 {
     public class BrowserReloadOptions
     {
-        public List<string> WebRootWatchPatterns { get; }
-        public List<string> ContentRootWatchPatterns { get; }
 
+        public List<BrowserReloadFileProviderOptions> FileProviderOptions { get; set; }
+        //public List<string> WebRootWatchPatterns { get; }
+        //public List<string> ContentRootWatchPatterns { get; }
 
         public BrowserReloadOptions()
         {
-            WebRootWatchPatterns = new List<string>();
-            ContentRootWatchPatterns = new List<string>();
+            FileProviderOptions = new List<BrowserReloadFileProviderOptions>();
+
         }
 
-        public BrowserReloadOptions WatchWebRoot(string pattern)
+        public BrowserReloadFileProviderOptions FileProvider(IFileProvider fileProvider)
         {
-            string searchPattern = pattern;
-            if (!pattern.StartsWith("/"))
-            {
-                searchPattern = "/" + pattern;
-            }
-            if (!WebRootWatchPatterns.Contains(searchPattern))
-            {
-                WebRootWatchPatterns.Add(searchPattern);
-            }
-            return this;
+            var options = new BrowserReloadFileProviderOptions(fileProvider);
+            FileProviderOptions.Add(options);
+            //configureOptions(options);
+            return options;
         }
 
-        public BrowserReloadOptions WatchContentRoot(string pattern)
-        {
-            string searchPattern = pattern;
-            if (!pattern.StartsWith("/"))
-            {
-                searchPattern = "/" + pattern;
-            }
-            if (!ContentRootWatchPatterns.Contains(searchPattern))
-            {
-                ContentRootWatchPatterns.Add(searchPattern);
-            }
-            return this;
-        }
 
         /// <summary>
         /// A delay in milliseconds after a file change is detected, until the reload is signalled to the client browsers. 
@@ -55,17 +39,7 @@ namespace NetPack.BrowserReload
             return this;
         }
 
-        public int Delay { get; set; }
-
-        public IEnumerable<string> GetWebRootWatchPatterns()
-        {
-            return WebRootWatchPatterns.AsEnumerable();
-        }
-
-        public IEnumerable<string> GetContentRootWatchPatterns()
-        {
-            return ContentRootWatchPatterns.AsEnumerable();
-        }
+        public int Delay { get; set; }      
 
     }
 }

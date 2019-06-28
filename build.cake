@@ -2,7 +2,7 @@
 // TOOLS
 //////////////////////////////////////////////////////////////////////
 #tool "nuget:https://ci.appveyor.com/nuget/gitversion-8nigugxjftrw?package=GitVersion.CommandLine&version=4.0.0-pullrequest1269-1542"
-#tool "nuget:?package=GitReleaseNotes&version=0.7.0"
+#tool "nuget:?package=GitReleaseNotes&version=0.7.1"
 #addin "nuget:?package=NuGet.Core&version=2.14.0"
 #addin nuget:?package=Cake.Git
 
@@ -55,7 +55,7 @@ Task("__Default")
     .IsDependentOn("__Build")
     .IsDependentOn("__Test")    
     .IsDependentOn("__Pack")
-    .IsDependentOn("__GenerateReleaseNotes")
+    //.IsDependentOn("__GenerateReleaseNotes")
     .IsDependentOn("__PublishNuGetPackages");
 
 Task("__Clean")
