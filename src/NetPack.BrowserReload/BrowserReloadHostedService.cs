@@ -9,22 +9,21 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace NetPack.BrowserReload
 {
 
     public class BrowserReloadHostedService : IHostedService
     {
-        private readonly IHostingEnvironment _env;
+      //  private readonly IHostingEnvironment _env;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<BrowserReloadHostedService> _logger;
         private readonly IOptions<BrowserReloadOptions> _options;
         private IDisposable _changeCallbackDisposable;
 
-        public BrowserReloadHostedService(IHostingEnvironment env, IServiceScopeFactory serviceScopeFactory, ILogger<BrowserReloadHostedService> logger, IOptions<BrowserReloadOptions> options)
+        public BrowserReloadHostedService(IServiceScopeFactory serviceScopeFactory, ILogger<BrowserReloadHostedService> logger, IOptions<BrowserReloadOptions> options)
         {
-            _env = env;
+            //_env = env;
             _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
             _options = options;
@@ -37,8 +36,10 @@ namespace NetPack.BrowserReload
         public Task StartAsync(CancellationToken cancellationToken)
         {
             // "/netpack/built.js";
-            WatchFiles(_env.WebRootFileProvider, _options.Value.GetWebRootWatchPatterns());
-            WatchFiles(_env.ContentRootFileProvider, _options.Value.GetContentRootWatchPatterns());
+            foreach (var fileProviderOptions in _options.Value.FileProviderOptions)
+            {
+                WatchFiles(fileProviderOptions.FileProvider, fileProviderOptions.GetWatchPatterns());
+            }           
 
             return Task.CompletedTask;
         }

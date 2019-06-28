@@ -19,9 +19,12 @@ namespace NetPack.Web
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+            Environment = env;
         }
 
         public IConfigurationRoot Configuration { get; }
+
+        public Microsoft.AspNetCore.Hosting.IHostingEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -239,11 +242,16 @@ namespace NetPack.Web
             services.AddBrowserReload((options) =>
             {
                 // trigger browser reload when our bundle file changes.
-                options.WatchWebRoot("/netpack/built.js");
-                options.WatchContentRoot("/Views/**/*.cshtml");
-            });
+                options.FileProvider(Environment.WebRootFileProvider)
+                        .Watch("/netpack/built.js");
 
-            //  services.AddTransient<ITagHelperComponent, BodyTagHelperComponent>();
+                // trigger browser reload when any content cshtml files change.
+                options.FileProvider(Environment.ContentRootFileProvider)
+                        .Watch("/Views/**/*.cshtml");
+
+               // options.SetDelay(2000); // allows multiple changes to accumulate before triggering refresh.
+
+            });
 
 
             services.AddHotModuleReload((options) =>
