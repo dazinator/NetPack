@@ -55,7 +55,7 @@ Task("__Default")
     .IsDependentOn("__Build")
     .IsDependentOn("__Test")    
     .IsDependentOn("__Pack")
-    .IsDependentOn("__GenerateReleaseNotes")
+    //.IsDependentOn("__GenerateReleaseNotes")
     .IsDependentOn("__PublishNuGetPackages");
 
 Task("__Clean")
