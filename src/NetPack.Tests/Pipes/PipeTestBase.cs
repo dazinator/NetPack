@@ -22,7 +22,7 @@ namespace NetPack.Tests.Pipes
             var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + subPath.ToString();
             //  _fileProvider.AddFile(subPath, content);
             var fileInfo = new StringFileInfo(content, subPath.Name);
-            _directory.AddFile(subPath.Directory, fileInfo);
+            Directory.AddFile(subPath.Directory, fileInfo);
             return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
         }
 
@@ -32,14 +32,14 @@ namespace NetPack.Tests.Pipes
             var fileContent = content();
             //  _fileProvider.AddFile(subPath, content);
             var fileInfo = new StringFileInfo(fileContent, subPath.Name);
-            _directory.AddFile(subPath.Directory, fileInfo);
+            Directory.AddFile(subPath.Directory, fileInfo);
             return new FileWithDirectory() { Directory = "/" + subPath.Directory, FileInfo = fileInfo };
         }
 
         protected async Task WhenFilesProcessedByPipe(Func<IPipe> pipeFactory, params FileWithDirectory[] files)
         {
             //  var sourceFilesList = new List<IFileInfo>(files);
-            var provider = new InMemoryFileProvider(_directory);
+            var provider = new InMemoryFileProvider(Directory);
             //  PipelineContext = new PipelineContext(provider, _sourcesdirectory);
             var input = new PipeInput();
             foreach (var item in files)
@@ -78,6 +78,6 @@ namespace NetPack.Tests.Pipes
         public IPipe Sut { get; set; }
 
         public IPipeLine Pipeline { get; set; }
-
+        public IDirectory Directory { get => _directory; set => _directory = value; }
     }
 }
