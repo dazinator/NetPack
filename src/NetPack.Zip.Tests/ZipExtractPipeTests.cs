@@ -30,7 +30,7 @@ namespace NetPack.Zip.Tests
             ThenTheProcessedOutputDirectoryFile("foo.txt", Assert.NotNull);
 
 
-            // The combined file should not have any of the source mapping urls that were present in the original input files.
+            // Content of file should match
             ThenTheProcessedOutputDirectoryFile("foo.txt", (unzippedFile) =>
             {
                 var content = unzippedFile.ReadAllContent();
