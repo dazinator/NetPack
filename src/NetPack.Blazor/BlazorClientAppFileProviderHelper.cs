@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-/// <summary>
-///  Taken from https://github.com/aspnet/AspNetCore/blob/d3400f7cb23d83ae93b536a5fc9f46fc2274ce68/src/Components/Blazor/Server/src/BlazorConfig.cs
-///  Which is:
-///  // Copyright (c) .NET Foundation. All rights reserved.
-///  //  Licensed under the Apache License, Version 2.0. See License.txt at this location for information: https://github.com/aspnet/AspNetCore/blob/master/LICENSE.txt
-/// </summary>
+
 namespace NetPack.Blazor
 {
     public static class BlazorClientAppFileProviderHelper
