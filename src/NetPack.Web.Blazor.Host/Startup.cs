@@ -52,19 +52,13 @@ namespace NetPack.Web.Blazor.Host
             app.UseStaticFiles();
             app.UseBrowserReload();
 
-            app.UseClientSideBlazorFiles(BlazorClientWebRootFileProvider, true);
-            // platformAdminTenantApp.UseStaticFiles();
-            app.UseBrowserReload();
+            app.UseClientSideBlazorFiles(BlazorClientWebRootFileProvider, true);          
 
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapFallbackToClientSideBlazor<NetPack.Web.Blazor.Startup>("index.html");
-                //endpoints.MapGet("/", async context =>
-                //{
-                //    await context.Response.WriteAsync("Hello World!");
-                //});
             });
         }
     }
