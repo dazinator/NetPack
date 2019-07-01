@@ -14,7 +14,7 @@ NetPack uses the concept of "pipelines" which allow you to define which files fr
 
 Pipelines can generate outputs. When an output is generated, it may trigger another pipeline to run (chain effect) if another pipline is watching for that input. In this mannor you can set up workflows by chaining pipelines together.
 
-Some NetPack pipelines actually send your files to an NPM process managed by the pipleline, so that processing can occur using NPM libraries, and the output files pipe backed into .NET Core. For example, the `Rollup` pipeline does this.
+Some pipelines that NetPack provides out of the box, actually send your files to an NPM process managed by the pipleline, so that processing can occur using NPM libraries, and the output files pipe backed into .NET Core. For example, the `Rollup` pipeline does this.
 
 NetPack can watch the inputs to pipelines, and re-trigger them to process if any oinputs change.
 
