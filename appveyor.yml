@@ -1,5 +1,9 @@
 version: 1.0.{build}
 skip_tags: true
+image: Visual Studio 2019 Preview
+install:
+  - cinst dotnetcore-sdk --pre
+  - dotnet new -i Microsoft.AspNetCore.Blazor.Templates
 environment:
   NuGetOrgApiKey: 
     secure: u8JpW5kkti8pMi+ra2QcXTJPhkHCA8pkKSiiZOJbcS/vFVHNvF3W8qw1Fy2If6a7
