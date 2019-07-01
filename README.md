@@ -8,10 +8,12 @@
 
 ### What problem does it solve?
 
-NetPack runs with your asp.net core app (configures in startup.cs in the usual mannor) and handles all of your file processing needs, including automatica "browser refresh."
+NetPack runs with your asp.net core app (configures in startup.cs in the usual mannor) and handles all of your file processing needs. It also includes some optional supporting middlewares, for "browser refresh." and "Hot Module Reload".
 
-NetPack has the concept of "pipelines" which allow you to process files in different ways.
+NetPack uses the concept of "pipelines" which allow you to process files from `IFileProvider'`s in different ways.
 For example, there is a `rollupjs` pipeline so that you can use the awesome power of `rollupjs` to process your files. There is also an `rjs` optimise pipeline if you need to optimise those requirejs AMD files for production. There is a typescript pipeline, and others.
+
+Some NetPack pipelines actually send your files to an NPM process managed by the pipleline, so that processing can occur using NPM libraries, and the output files pipe backed into .NET Core where it can be seen or possibly served up to the browser via an another `IFileProvider` integrated with `StaticFiles` middleware.
 
 NetPack will watch your inputs too, if you tell it too, and will automatically re-process them through the pipeline if they change.
 You can use NetPack for:
@@ -23,6 +25,7 @@ You can use NetPack for:
 - [x] Browser Reload - Automatically triggers your browser window to `reload()` when desired files are changed.
 - [x] Hot Module Reload (for SystemJS) - Automatically reloads a SystemJS module as you make changes. Allows a quicker feedback loop than a full browser reload/
 - [ ] Hot Module Reload (for RequireJS) - WIP. This might not be possible as RequireJS doesn't have as much support for HMR as SystemJS it seems, but still investigating.
+- [x] Automatic recompilation, and reload of Blazor applications.
 
 
 All generated files, are held in memory, and accessible by your applications IHotingEnvironment.WebRootFileProvider. This means all of the standard asp.net mvc TagHelpers will resolve any generated scripts that NetPack produces..
