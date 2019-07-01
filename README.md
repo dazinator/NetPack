@@ -10,7 +10,7 @@
 
 NetPack runs within your own asp.net core application (configured in startup.cs in the usual mannor) and handles all of your file processing needs whilst your application is running. It also includes some optional supporting middlewares, to enable "automatic browser refresh" and "Hot Module Reload" etc.
 
-NetPack uses the concept of "pipelines" which allow you to define which files from an `IFileProvider' you want to process (using Include, and Exclude patterns) and then the run actions on those files as necessary. A number of pipelines are provided out of the box for doing all sorts of things. Please run the `NetPack.Web` project and visit the different pages to see various examples.
+NetPack uses the concept of "pipelines" which allow you to define which files from an `IFileProvider` you want to process (using Include, and Exclude patterns) and then the run actions on those files as necessary. A number of pipelines are provided out of the box for doing all sorts of things. Please run the `NetPack.Web` project and visit the different pages to see various examples.
 
 Pipelines can generate outputs. When an output is generated, it may trigger another pipeline to run (chain effect) if another pipline is watching for that input. In this mannor you can set up workflows by chaining pipelines together.
 
