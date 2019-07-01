@@ -9,9 +9,14 @@ namespace NetPack.Blazor
 {
     public static class PipelineConfigurationBuilderExtensions
     {
-        public static IPipelineBuilder WithBlazorClientAppFileProvider<TClientApp>(this IPipelineConfigurationBuilder pipelineBuilder)
+        public static IPipelineBuilder WithBlazorClientWebRootFileProvider<TClientApp>(this IPipelineConfigurationBuilder pipelineBuilder)
         {
-            var fp = BlazorClientAppFileProviderHelper.GetFileProvider<TClientApp>();
+            var fp = BlazorClientAppFileProviderHelper.GetStaticFileProvider<TClientApp>();
+            return pipelineBuilder.WithFileProvider(fp);
+        }
+        public static IPipelineBuilder WithBlazorClientContentFileProvider<TClientApp>(this IPipelineConfigurationBuilder pipelineBuilder)
+        {
+            var fp = BlazorClientAppFileProviderHelper.GetContentFileProvider<TClientApp>();
             return pipelineBuilder.WithFileProvider(fp);
         }
     }

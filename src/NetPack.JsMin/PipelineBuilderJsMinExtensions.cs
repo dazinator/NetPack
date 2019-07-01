@@ -26,7 +26,7 @@ namespace NetPack
                 input(inputBuilder);
             }, pipe);
 
-            builder.AddPipe(input, pipe);
+           // builder.AddPipe(input, pipe);
             return builder;
         }
 

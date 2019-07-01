@@ -13,7 +13,8 @@ namespace NetPack.Blazor
 {
     public static class BlazorClientAppFileProviderHelper
     {
-        public static IFileProvider GetFileProvider<TClientApp>()
+
+        public static string GetBlazorClientProjectDirectory<TClientApp>(out string outputAssemblyPath)
         {
             var assemblylocation = typeof(TClientApp).Assembly.Location;
             var configFilePath = Path.ChangeExtension(assemblylocation, ".blazor.config");
@@ -23,15 +24,21 @@ namespace NetPack.Blazor
             if (projFilePath == ".")
             {
                 projFilePath = assemblylocation;
-            }
+            }         
 
             var projDirectory = Path.GetDirectoryName(projFilePath);
-            var outputAssemblyPath = Path.Combine(projDirectory, configLines[1]);
+            outputAssemblyPath = Path.Combine(projDirectory, configLines[1]);
+            return projDirectory;
+        }
+
+        public static IFileProvider GetStaticFileProvider<TClientApp>()
+        {
+            var projDirectory = GetBlazorClientProjectDirectory<TClientApp>(out string outputAssemblyPath);            
+          
             string webRootPath = Path.Combine(projDirectory, "wwwroot");
             bool webRootPathExists = Directory.Exists(webRootPath);
 
             var distPath = Path.Combine(Path.GetDirectoryName(outputAssemblyPath), "dist");
-
             bool distExists = Directory.Exists(distPath);
 
             var fileProviders = new List<IFileProvider>();
@@ -53,6 +60,13 @@ namespace NetPack.Blazor
             {
                 return fileProviders.FirstOrDefault();
             }
+        }
+
+        public static IFileProvider GetContentFileProvider<TClientApp>()
+        {
+            var projDirectory = GetBlazorClientProjectDirectory<TClientApp>(out string outputAssemblyPath);
+            return new PhysicalFileProvider(projDirectory);
+
         }
 
         /// <summary>
