@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NetPack.BrowserReload\NetPack.BrowserReload.csproj" />
     <ProjectReference Include="..\NetPack.Process\NetPack.Process.csproj" />
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
   </ItemGroup>

@@ -22,18 +22,19 @@ namespace NetPack.Web.Blazor.Host
             {
                 a.AddPipeline((b) =>
                 {
-                    _ = b.WithBlazorClientContentFileProvider<NetPack.Web.Blazor.Startup>()
-                    .AddBlazorRecompilePipe<NetPack.Web.Blazor.Startup>()
+                    _ = b.WithBlazorClientContentFileProvider<Blazor.Startup>()
+                    .AddBlazorRecompilePipe<Blazor.Startup>()
                     .Watch();
                 });
             });
 
             // Requirement for browser reload.
             services.AddSignalR();
-            BlazorClientWebRootFileProvider = BlazorClientAppFileProviderHelper.GetStaticFileProvider<NetPack.Web.Blazor.Startup>();
+            BlazorClientWebRootFileProvider = BlazorClientAppFileProviderHelper.GetStaticFileProvider<Blazor.Startup>();
+
             services.AddBrowserReload((options) =>
             {
-                options.FileProvider(BlazorClientWebRootFileProvider)
+                options.WithBlazorClientStaticFiles<Blazor.Startup>()
                          .Watch("/**/*.dll")
                          .Watch("/**/*.css")
                          .Watch("/**/*.html");
@@ -52,7 +53,7 @@ namespace NetPack.Web.Blazor.Host
             app.UseStaticFiles();
             app.UseBrowserReload();
 
-            app.UseClientSideBlazorFiles(BlazorClientWebRootFileProvider, true);          
+            app.UseClientSideBlazorFiles(BlazorClientWebRootFileProvider, true);
 
             app.UseRouting();
 

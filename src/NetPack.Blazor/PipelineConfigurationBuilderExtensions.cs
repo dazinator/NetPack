@@ -3,12 +3,7 @@ using Microsoft.Extensions.Logging;
 using NetPack.Pipeline;
 using NetPack.Process;
 using System;
-/// <summary>
-///  Taken from https://github.com/aspnet/AspNetCore/blob/d3400f7cb23d83ae93b536a5fc9f46fc2274ce68/src/Components/Blazor/Server/src/BlazorConfig.cs
-///  Which is:
-///  // Copyright (c) .NET Foundation. All rights reserved.
-///  //  Licensed under the Apache License, Version 2.0. See License.txt at this location for information: https://github.com/aspnet/AspNetCore/blob/master/LICENSE.txt
-/// </summary>
+
 namespace NetPack.Blazor
 {
     public static class PipelineConfigurationBuilderExtensions
@@ -20,7 +15,7 @@ namespace NetPack.Blazor
         }
         public static IPipelineBuilder WithBlazorClientContentFileProvider<TClientApp>(this IPipelineConfigurationBuilder pipelineBuilder)
         {
-            var fp = BlazorClientAppFileProviderHelper.GetContentFileProvider<TClientApp>();
+            var fp = BlazorClientAppFileProviderHelper.GetProjectFileProvider<TClientApp>();
             return pipelineBuilder.WithFileProvider(fp);
         }
 
@@ -50,10 +45,11 @@ namespace NetPack.Blazor
                  processOptions.StdOutCallback = logOutput;
                  processOptions.StdErrCallback = logErrorCallback;
                  configureOptions?.Invoke(processOptions);
-             });           
+             });
 
             return builder;
         }
+
 
     }
 }
