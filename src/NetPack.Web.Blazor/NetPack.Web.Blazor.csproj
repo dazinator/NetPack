@@ -12,4 +12,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Blazor.DevServer" Version="3.0.0-preview6.19307.2" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- extends watching group to include *.razor files -->
+    <Watch Include="**\*.razor" />
+  </ItemGroup>
+
 </Project>
