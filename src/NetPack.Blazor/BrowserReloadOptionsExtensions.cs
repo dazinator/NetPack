@@ -14,4 +14,5 @@ namespace NetPack.Blazor
             return reloadOptions.FileProvider(BlazorClientAppFileProviderHelper.GetProjectFileProvider<TClient>());
         }
     }
+ 
 }

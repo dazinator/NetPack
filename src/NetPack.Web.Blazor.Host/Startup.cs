@@ -59,7 +59,7 @@ namespace NetPack.Web.Blazor.Host
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapFallbackToClientSideBlazor<NetPack.Web.Blazor.Startup>("index.html");
+                endpoints.MapFallbackToClientSideBlazor<Blazor.Startup>("index.html");
             });
         }
     }

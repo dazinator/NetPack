@@ -17,4 +17,8 @@
     <Watch Include="**\*.razor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NetPack.BrowserReload.BlazorClient\NetPack.BrowserReload.BlazorClient.csproj" />
+  </ItemGroup>
+
 </Project>

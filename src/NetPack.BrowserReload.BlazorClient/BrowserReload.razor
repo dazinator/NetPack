@@ -1,0 +1,24 @@
+﻿@inject BrowserReloadClient ReloadClient
+@inject IUriHelper UriHelper
+@implements IDisposable
+
+@code{
+
+    protected override async Task OnInitAsync()
+    {
+        ReloadClient.Reload += Reload;
+        await ReloadClient.StartListening();
+        await base.OnInitAsync();
+    }
+
+    public void Reload(object sender, EventArgs args)
+    {
+        Console.WriteLine("Browser reload triggered..");
+        UriHelper.NavigateTo(UriHelper.GetAbsoluteUri(), true);
+    }
+
+    public void Dispose()
+    {
+        ReloadClient.Reload -= Reload;
+    }
+}
