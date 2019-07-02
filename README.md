@@ -8,12 +8,16 @@
 
 ### What problem does it solve?
 
-NetPack runs with your asp.net core app (configures in startup.cs in the usual mannor) and handles all of your file processing needs, including automatica "browser refresh."
+NetPack runs within your own asp.net core application (configured in startup.cs in the usual mannor) and handles all of your file processing needs whilst your application is running. It also includes some optional supporting middlewares, to enable "automatic browser refresh" and "Hot Module Reload" etc.
 
-NetPack has the concept of "pipelines" which allow you to process files in different ways.
-For example, there is a `rollupjs` pipeline so that you can use the awesome power of `rollupjs` to process your files. There is also an `rjs` optimise pipeline if you need to optimise those requirejs AMD files for production. There is a typescript pipeline, and others.
+NetPack uses the concept of "pipelines" which allow you to define which files from an `IFileProvider` you want to process (using Include, and Exclude patterns) and then the run actions on those files as necessary. A number of pipelines are provided out of the box for doing all sorts of things. Please run the `NetPack.Web` project and visit the different pages to see various examples.
 
-NetPack will watch your inputs too, if you tell it too, and will automatically re-process them through the pipeline if they change.
+Pipelines can generate outputs. When an output is generated, it may trigger another pipeline to run (chain effect) if another pipline is watching for that input. In this mannor you can set up workflows by chaining pipelines together.
+
+Some pipelines that NetPack provides out of the box, actually send your files to an NPM process managed by the pipleline, so that processing can occur using NPM libraries, and the output files pipe backed into .NET Core. For example, the `Rollup` pipeline does this.
+
+NetPack can watch the inputs to pipelines, and re-trigger them to process if any oinputs change.
+
 You can use NetPack for:
 
 - [x] Typescript Compilation
@@ -23,9 +27,11 @@ You can use NetPack for:
 - [x] Browser Reload - Automatically triggers your browser window to `reload()` when desired files are changed.
 - [x] Hot Module Reload (for SystemJS) - Automatically reloads a SystemJS module as you make changes. Allows a quicker feedback loop than a full browser reload/
 - [ ] Hot Module Reload (for RequireJS) - WIP. This might not be possible as RequireJS doesn't have as much support for HMR as SystemJS it seems, but still investigating.
+- [x] Blazor app reload (Automatic recompilation of .razor files, and reloading of blazor client apps in the browser as you make changes at runtime).
 
 
-All generated files, are held in memory, and accessible by your applications IHotingEnvironment.WebRootFileProvider. This means all of the standard asp.net mvc TagHelpers will resolve any generated scripts that NetPack produces..
+Typically, generated output files, are held in memory. NetPack provides an `IFileProvider` that sits on top of this In Memory Directory and can see all outputs just like ordinary files that might live on disk - they have a name and directory etc. NetPack includes this IFileProvider in with StaticFilesMiddleware so that these generated outputs can be served up to the browser.
+accessible by your applications IHotingEnvironment.WebRootFileProvider. 
 
 # Stay in ASP.NET Core land.
 
