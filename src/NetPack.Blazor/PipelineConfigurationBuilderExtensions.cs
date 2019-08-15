@@ -34,6 +34,7 @@ namespace NetPack.Blazor
                  var projDir = BlazorClientAppFileProviderHelper.GetBlazorClientProjectDirectory<TStartup>(out string outputAssemblyPath);
                  processOptions.WorkingDirectory = projDir;
                  processOptions.AddArgument("build");
+                 processOptions.AddArgument("-p:BlazorLinkOnBuild=false"); // disable linker whilst debugging
                  Action<string> logOutput = new Action<string>((a) =>
                  {
                      logger.LogDebug(a.ToString());
