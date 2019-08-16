@@ -4,11 +4,11 @@
 
 @code{
 
-    protected override async Task OnInitAsync()
+    protected override async Task OnInitializedAsync()
     {
         ReloadClient.Reload += Reload;
         await ReloadClient.StartListening();
-        await base.OnInitAsync();
+        await base.OnInitializedAsync();
     }
 
     public void Reload(object sender, EventArgs args)

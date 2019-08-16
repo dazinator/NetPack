@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using NetPack.BrowserReload.BlazorClient;
 using System;
 
 namespace NetPack.Web.Blazor
@@ -15,7 +14,7 @@ namespace NetPack.Web.Blazor
                 var urlHelper = sp.GetRequiredService<IUriHelper>();
                 var hubUrl = urlHelper.ToAbsoluteUri("reloadhub");
                 Console.WriteLine("Browser Reload: " + hubUrl);
-                return hubUrl.ToString();
+                return hubUrl.ToString();                
             });
         }
 

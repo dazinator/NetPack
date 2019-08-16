@@ -2,7 +2,7 @@ version: 1.0.{build}
 skip_tags: true
 image: Visual Studio 2019 Preview
 install:
-  - cinst dotnetcore-sdk --version 3.0.100-preview7-012821 --pre
+  - cinst dotnetcore-sdk --version 3.0.100-preview8-013656 --pre
   - dotnet new -i Microsoft.AspNetCore.Blazor.Templates
 environment:
   NuGetOrgApiKey: 
