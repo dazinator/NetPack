@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using NetPack.BrowserReload.BlazorClient;
@@ -12,7 +13,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<BrowserReloadClient>((sp)=> {
                 var url = getUrl(sp);
                 var jsRuntime = sp.GetRequiredService<IJSRuntime>();
-                var client = new BrowserReloadClient(jsRuntime, url);
+                var navManager = sp.GetRequiredService<NavigationManager>();
+                var client = new BrowserReloadClient(jsRuntime, navManager, url);
                 return client;
             });
             return services;

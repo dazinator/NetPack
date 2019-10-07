@@ -1,5 +1,5 @@
 ﻿@inject BrowserReloadClient ReloadClient
-@inject IUriHelper UriHelper
+@inject NavigationManager UriHelper
 @implements IDisposable
 
 @code{
@@ -14,7 +14,7 @@
     public void Reload(object sender, EventArgs args)
     {
         Console.WriteLine("Browser reload triggered..");
-        UriHelper.NavigateTo(UriHelper.GetAbsoluteUri(), true);
+        UriHelper.NavigateTo(UriHelper.ToAbsoluteUri("/").ToString(), true);
     }
 
     public void Dispose()

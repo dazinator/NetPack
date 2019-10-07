@@ -1,4 +1,5 @@
 ﻿using BlazorSignalR;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using System;
@@ -13,11 +14,11 @@ namespace NetPack.BrowserReload.BlazorClient
 
         public event EventHandler Reload;
 
-        public BrowserReloadClient(IJSRuntime jsRuntime, string hubPath)
+        public BrowserReloadClient(IJSRuntime jsRuntime, NavigationManager navManager, string hubPath)
         {
 
             _connection = new HubConnectionBuilder()
-                .WithUrlBlazor(hubPath, jsRuntime, options: opt =>
+                .WithUrlBlazor(hubPath, jsRuntime, navManager, options: opt =>
                    {
                        //opt.AccessTokenProvider = () =>
                        //{

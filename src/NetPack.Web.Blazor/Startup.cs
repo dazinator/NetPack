@@ -11,7 +11,7 @@ namespace NetPack.Web.Blazor
         {
             services.AddBrowserReloadClient((sp) =>
             {
-                var urlHelper = sp.GetRequiredService<IUriHelper>();
+                var urlHelper = sp.GetRequiredService<NavigationManager>();
                 var hubUrl = urlHelper.ToAbsoluteUri("reloadhub");
                 Console.WriteLine("Browser Reload: " + hubUrl);
                 return hubUrl.ToString();                
