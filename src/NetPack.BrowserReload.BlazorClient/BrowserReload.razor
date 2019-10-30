@@ -2,7 +2,8 @@
 @inject NavigationManager UriHelper
 @implements IDisposable
 
-@code{
+@code
+{
 
     protected override async Task OnInitializedAsync()
     {
@@ -14,7 +15,7 @@
     public void Reload(object sender, EventArgs args)
     {
         Console.WriteLine("Browser reload triggered..");
-        UriHelper.NavigateTo(UriHelper.ToAbsoluteUri("/").ToString(), true);
+        UriHelper.NavigateTo(UriHelper.Uri, true);
     }
 
     public void Dispose()
