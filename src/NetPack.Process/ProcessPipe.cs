@@ -18,6 +18,7 @@ namespace NetPack.Process
 
         public ProcessPipe(ProcessPipeOptions options, ILogger<ProcessPipe> logger, string name = "Process") : base(name)
         {
+            _logger = logger;
             _options = options;
         }
 
