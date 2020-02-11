@@ -28,53 +28,51 @@ namespace NetPack.Process
             try
             {
 
-           
+                var opt = _options;
 
-            var opt = _options;
+                var builder = Cli.Wrap(opt.ExecutableName)
+                                .SetCancellationToken(cancelationToken)
+                                .SetArguments(opt.Arguments);
 
-            var builder = Cli.Wrap(opt.ExecutableName)
-                            .SetCancellationToken(cancelationToken)
-                            .SetArguments(opt.Arguments);
+                foreach (var item in opt.EnvironmentVariables)
+                {
+                    builder.SetEnvironmentVariable(item.Key, item.Value);
+                }
 
-            foreach (var item in opt.EnvironmentVariables)
-            {
-                builder.SetEnvironmentVariable(item.Key, item.Value);
-            }
+                if (opt.StdOutCallback != null)
+                {
+                    builder.SetStandardOutputCallback(opt.StdOutCallback);
+                }
 
-            if (opt.StdOutCallback != null)
-            {
-                builder.SetStandardOutputCallback(opt.StdOutCallback);
-            }
+                if (opt.StdErrCallback != null)
+                {
+                    builder.SetStandardErrorCallback(opt.StdErrCallback);
+                }
 
-            if (opt.StdErrCallback != null)
-            {
-                builder.SetStandardErrorCallback(opt.StdErrCallback);
-            }
+                if (!string.IsNullOrWhiteSpace(opt.WorkingDirectory))
+                {
+                    builder.SetWorkingDirectory(opt.WorkingDirectory);
+                }
 
-            if(!string.IsNullOrWhiteSpace(opt.WorkingDirectory))
-            {
-                builder.SetWorkingDirectory(opt.WorkingDirectory);
-            }           
+                builder.EnableExitCodeValidation(opt.ThrowExceptionOnNonZeorExitCode);
+                builder.EnableStandardErrorValidation(opt.ThrowExceptionOnNonEmptyStdErr);
 
-            builder.EnableExitCodeValidation(opt.ThrowExceptionOnNonZeorExitCode);
-            builder.EnableStandardErrorValidation(opt.ThrowExceptionOnNonEmptyStdErr);
+                var res = await builder.ExecuteAsync();
 
-            var res = await builder.ExecuteAsync();
+                var exitCode = res.ExitCode;
+                var stdOut = res.StandardOutput;
+                var stdErr = res.StandardError;
+                var startTime = res.StartTime;
+                var exitTime = res.ExitTime;
+                var runTime = res.RunTime;
 
-            var exitCode = res.ExitCode;
-            var stdOut = res.StandardOutput;
-            var stdErr = res.StandardError;
-            var startTime = res.StartTime;
-            var exitTime = res.ExitTime;
-            var runTime = res.RunTime;
-
-            GenerateOutput(context, exitCode, stdOut, stdErr, startTime, exitTime, runTime);
+                GenerateOutput(context, exitCode, stdOut, stdErr, startTime, exitTime, runTime);
 
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error processing process pipe.");
-               // throw;
+                // throw;
             }
         }
 

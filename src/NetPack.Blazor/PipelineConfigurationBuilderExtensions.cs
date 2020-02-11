@@ -29,7 +29,7 @@ namespace NetPack.Blazor
              {
                  input.Include("/**/*.razor");
              }, (processOptions) =>
-             {
+             {                 
                  processOptions.ExecutableName = "dotnet.exe";
                  var projDir = BlazorClientAppFileProviderHelper.GetBlazorClientProjectDirectory<TStartup>(out string outputAssemblyPath);
                  processOptions.WorkingDirectory = projDir;
