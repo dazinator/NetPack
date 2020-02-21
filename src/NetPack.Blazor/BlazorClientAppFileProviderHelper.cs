@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.FileProviders;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,17 @@ namespace NetPack.Blazor
 
         public static string GetBlazorClientProjectDirectory<TClientApp>(out string outputAssemblyPath)
         {
-            var assemblylocation = typeof(TClientApp).Assembly.Location;
+            return GetBlazorClientProjectDirectory(typeof(TClientApp), out outputAssemblyPath);
+        }
+
+        public static string GetBlazorClientProjectDirectory(Type spaType, out string outputAssemblyPath)
+        {
+            var assemblylocation = spaType.Assembly.Location;
+            return GetBlazorClientProjectDirectory(assemblylocation, out outputAssemblyPath);
+        }
+
+        public static string GetBlazorClientProjectDirectory(string assemblylocation, out string outputAssemblyPath)
+        {
             var configFilePath = Path.ChangeExtension(assemblylocation, ".blazor.config");
             var configLines = System.IO.File.ReadLines(configFilePath).ToList();
 
@@ -25,9 +36,16 @@ namespace NetPack.Blazor
             return projDirectory;
         }
 
+
         public static IFileProvider GetStaticFileProvider<TClientApp>()
         {
-            var projDirectory = GetBlazorClientProjectDirectory<TClientApp>(out string outputAssemblyPath);
+            return GetStaticFileProvider(typeof(TClientApp));
+        }
+
+        public static IFileProvider GetStaticFileProvider(Type spaType)
+        {
+
+            var projDirectory = GetBlazorClientProjectDirectory(spaType, out string outputAssemblyPath);
 
             string webRootPath = Path.Combine(projDirectory, "wwwroot");
             bool webRootPathExists = Directory.Exists(webRootPath);
@@ -54,14 +72,18 @@ namespace NetPack.Blazor
             {
                 return fileProviders.FirstOrDefault();
             }
+
         }
 
         public static IFileProvider GetProjectFileProvider<TClientApp>()
         {
-            var projDirectory = GetBlazorClientProjectDirectory<TClientApp>(out string outputAssemblyPath);
-            return new PhysicalFileProvider(projDirectory);
-
+            return GetProjectFileProvider(typeof(TClientApp));
         }
 
+        public static IFileProvider GetProjectFileProvider(Type type)
+        {
+            var projDirectory = GetBlazorClientProjectDirectory(type, out string outputAssemblyPath);
+            return new PhysicalFileProvider(projDirectory);
+        }
     }
 }
