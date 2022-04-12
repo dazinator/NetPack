@@ -4,7 +4,7 @@
 #tool "nuget:https://ci.appveyor.com/nuget/gitversion-8nigugxjftrw?package=GitVersion.CommandLine&version=5.0.1"
 #tool "nuget:?package=GitReleaseNotes&version=0.7.1"
 #addin "nuget:?package=NuGet.Core&version=2.14.0"
-#addin nuget:?package=Cake.Git
+#addin nuget:?package=Cake.Git&version=0.22.0
 
 
 //////////////////////////////////////////////////////////////////////
