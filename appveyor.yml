@@ -3,7 +3,6 @@ skip_tags: true
 image: Visual Studio 2022
 install:
   - cinst dotnet-sdk --version 6.0.201  
-  - dotnet new -i Microsoft.AspNetCore.Blazor.Templates
 environment:
   NuGetOrgApiKey: 
     secure: u8JpW5kkti8pMi+ra2QcXTJPhkHCA8pkKSiiZOJbcS/vFVHNvF3W8qw1Fy2If6a7
