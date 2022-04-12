@@ -6,6 +6,6 @@ namespace NetPack.Requirements
     {
         NpmDependencyBuilder SetVersion(string version);
         NpmDependencyBuilder SetPackageName(string name);
-      //  NpmModuleRequirementBuilder InstallAutomatically();
+        //  NpmModuleRequirementBuilder InstallAutomatically();
     }
 }

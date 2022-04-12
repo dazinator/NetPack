@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetPack.BrowserReload;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Routing;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -15,27 +16,24 @@ namespace NetPack
         private const string DefaultHubPathString = "/reloadhub";
 
         public static IServiceCollection AddBrowserReload(this IServiceCollection services, Action<BrowserReloadOptions> configureOptions)
-        {            
-            services.AddSingleton<IHostedService, BrowserReloadHostedService>();           
+        {
+            services.AddSingleton<IHostedService, BrowserReloadHostedService>();
             services.Configure<BrowserReloadOptions>(configureOptions);
             services.ConfigureOptions(typeof(BrowserReloadOptionsConfigureOptions));
             return services;
         }
 
-        public static IApplicationBuilder UseBrowserReload(this IApplicationBuilder app)
+        public static HubEndpointConventionBuilder UseBrowserReload(this IEndpointRouteBuilder app)
         {
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<BrowserReloadHub>(DefaultHubPathString);
-            });
-            return app;
+            return app.MapHub<BrowserReloadHub>(DefaultHubPathString);
+
         }
 
-        public static HubRouteBuilder MapBrowserReloadHub(this HubRouteBuilder builder, string path = DefaultHubPathString)
-        {
-            builder.MapHub<BrowserReloadHub>(path);
-            return builder;
-        }
+        //public static HubRouteBuilder MapBrowserReloadHub(this HubRouteBuilder builder, string path = DefaultHubPathString)
+        //{
+        //    builder.MapHub<BrowserReloadHub>(path);
+        //    return builder;
+        //}
 
     }
 }

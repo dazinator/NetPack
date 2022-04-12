@@ -1,4 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Dazinator.Extensions.FileProviders;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -62,7 +62,7 @@ namespace NetPack.HotModuleReload
 
                 string[] excludePatterns = watchPatterns.ExcludePatterns.ToArray();
                 IEnumerable<Tuple<string, IFileInfo>> watchedFiles = fileProvider.Search(new string[1] { item }, excludePatterns);
-                var timestamps = watchedFiles.Select(a => new { Path = $"{a.Item1}/{a.Item2.Name}", Modified = a.Item2.LastModified }).ToDictionary(a=>a.Path, b=>b.Modified);
+                var timestamps = watchedFiles.Select(a => new { Path = $"{a.Item1}/{a.Item2.Name}", Modified = a.Item2.LastModified }).ToDictionary(a => a.Path, b => b.Modified);
                 var state = new { IncludePattern = item, ExcludePatterns = excludePatterns, FileStamps = timestamps };
 
                 allDisposables.Add(ChangeTokenHelper.OnChangeDebounce(() =>
@@ -93,7 +93,7 @@ namespace NetPack.HotModuleReload
                         if (s.FileStamps.ContainsKey(maybeNewFilePath))
                         {
                             var previousLastModified = s.FileStamps[maybeNewFilePath];
-                            if(maybeNewFile.Item2.LastModified > previousLastModified)
+                            if (maybeNewFile.Item2.LastModified > previousLastModified)
                             {
                                 // file has changed.
                                 changedFiles.Add(maybeNewFilePath);
@@ -115,12 +115,12 @@ namespace NetPack.HotModuleReload
                     }
                 }, state, _options.Value.Delay));
 
-            }          
+            }
 
             CompositeDisposable compositeDisposable = new CompositeDisposable(allDisposables);
             _changeCallbackDisposable = compositeDisposable;
 
-        }       
+        }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {

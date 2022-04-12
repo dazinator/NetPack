@@ -4,11 +4,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
-using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Microsoft.AspNetCore.Http;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders;
 
 namespace NetPack.RequireJs.Tests
 {
@@ -67,16 +68,16 @@ define(""ModuleB"", [""require"", ""exports"", ""ModuleA""], function (require, 
 ";
         //public const string ConfigFileContent =
         //    @"requirejs.config({\r\n baseUrl: \'wwwroot\',\r\n    paths: {\r\n        app: \'..\/app\'\r\n    }\r\n});";
-        
+
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
 
             app.UseNetPack();
 
-           
 
-          //  var pipeline = fileProcessingBuilder.Pipeline;
-           // pipeline.Initialise();
+
+            //  var pipeline = fileProcessingBuilder.Pipeline;
+            // pipeline.Initialise();
 
             app.Run(async (context) =>
             {

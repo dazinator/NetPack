@@ -1,6 +1,6 @@
 ﻿using ApprovalTests;
 using ApprovalTests.Reporters;
-using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using Xunit;

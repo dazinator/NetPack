@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using NetPack.File;
-using Dazinator.AspNet.Extensions.FileProviders;
-
-namespace NetPack.Pipeline
+﻿namespace NetPack.Pipeline
 {
     //public class PipelineOutput
     //{
@@ -12,7 +7,7 @@ namespace NetPack.Pipeline
     //    public PipelineOutput(List<SourceFile> files)
     //    {
     //        Files = files;
-            
+
     //    }
 
     //    public PipelineOutput(List<SourceFile> files, string requestPath) : this(files)

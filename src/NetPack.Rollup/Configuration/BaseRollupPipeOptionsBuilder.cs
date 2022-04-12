@@ -58,7 +58,7 @@ namespace NetPack
             return (TBuilder)this;
         }
 
-        public IPipelineBuilder IPipelineBuilder => _builder;       
+        public IPipelineBuilder IPipelineBuilder => _builder;
 
         public TInputOptions InputOptions => _inputOptions;
 
@@ -66,7 +66,7 @@ namespace NetPack
         {
             inputOptions?.Invoke(InputOptions);
             return (TBuilder)this;
-        }       
+        }
 
         public List<TOutputOptions> OutputOptions => _outputOptions;
 

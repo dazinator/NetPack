@@ -5,8 +5,10 @@ using System.Text;
 using Microsoft.Extensions.FileProviders;
 using Xunit;
 using Xunit.Abstractions;
-using Dazinator.AspNet.Extensions.FileProviders;
 using NetPack.Tests;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Microsoft.AspNetCore.Http;
+using Dazinator.Extensions.FileProviders;
 
 namespace NetPack.JsCombine.Tests
 {
@@ -43,14 +45,16 @@ namespace NetPack.JsCombine.Tests
 
         private IFileInfo GivenFileThatHasSourceMappingUrl(string path, int length)
         {
-            var subPathInfo = SubPathInfo.Parse(path);
-            var subPath = subPathInfo.ToString();
-            var fileName = subPathInfo.Name;
-            var mapFileName = subPathInfo + ".map";
+            //var subPathInfo = SubPathInfo.Parse(path);
+            PathStringUtils.GetPathAndFilename(path, out var directory, out var name);
+
+            //var subPath = subPathInfo.ToString();
+            var fileName = name;
+            var mapFileName = directory.Add($"/{name}.map");
 
 
             var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + mapFileName;
-            var addedFileInfo = _fileProvider.Directory.AddFile(subPath, new StringFileInfo(content, fileName)).FileInfo;
+            var addedFileInfo = _fileProvider.Directory.AddFile(directory, new StringFileInfo(content, fileName)).FileInfo;
             //var fileInfo = _fileProvider.GetFileInfo(subPath);
             return addedFileInfo;
         }

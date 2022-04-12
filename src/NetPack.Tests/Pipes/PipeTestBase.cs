@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NetPack.Pipeline;
-using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
+using Microsoft.AspNetCore.Http;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 
 namespace NetPack.Tests.Pipes
 {
@@ -18,22 +20,26 @@ namespace NetPack.Tests.Pipes
 
         public FileWithDirectory GivenAFileInfo(string path, int length)
         {
-            var subPath = SubPathInfo.Parse(path);
-            var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + subPath.ToString();
+            PathStringUtils.GetPathAndFilename(path, out var directory, out var fileName);
+            var fullPath = directory.Add($"/{fileName}");
+
+            //var subPath = SubPathInfo.Parse(path);
+            var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=" + fullPath;
             //  _fileProvider.AddFile(subPath, content);
-            var fileInfo = new StringFileInfo(content, subPath.Name);
-            Directory.AddFile(subPath.Directory, fileInfo);
-            return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
+            var fileInfo = new StringFileInfo(content, fileName);
+            Directory.AddFile(directory, fileInfo);
+            return new FileWithDirectory() { Directory = directory, FileInfo = fileInfo };
         }
 
         public FileWithDirectory GivenAFileInfo(string fileName, Func<string> content)
         {
-            var subPath = SubPathInfo.Parse(fileName);
+            PathStringUtils.GetPathAndFilename(fileName, out var directory, out var name);
+            //var subPath = SubPathInfo.Parse(fileName);
             var fileContent = content();
             //  _fileProvider.AddFile(subPath, content);
-            var fileInfo = new StringFileInfo(fileContent, subPath.Name);
-            Directory.AddFile(subPath.Directory, fileInfo);
-            return new FileWithDirectory() { Directory = "/" + subPath.Directory, FileInfo = fileInfo };
+            var fileInfo = new StringFileInfo(fileContent, name);
+            Directory.AddFile(directory, fileInfo);
+            return new FileWithDirectory() { Directory = directory, FileInfo = fileInfo };
         }
 
         protected async Task WhenFilesProcessedByPipe(Func<IPipe> pipeFactory, params FileWithDirectory[] files)
@@ -47,7 +53,8 @@ namespace NetPack.Tests.Pipes
                 input.AddInclude(item.UrlPath);
             }
             Sut = pipeFactory();
-            var loggerFactory = new LoggerFactory().AddConsole();
+
+            var loggerFactory = LoggerFactory.Create(a => a.AddConsole());
 
             var pipeContext = new PipeProcessor(input, Sut, loggerFactory.CreateLogger<PipeProcessor>());
             var pipes = new List<PipeProcessor>() { pipeContext };

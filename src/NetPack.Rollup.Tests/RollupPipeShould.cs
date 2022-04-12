@@ -1,4 +1,5 @@
-using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,7 +40,7 @@ namespace NetPack.Rollup.Tests
             HttpResponseMessage response = await _client.GetAsync(request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
-        }       
+        }
 
         [Fact]
         public async Task Create_Bundle_File_With_SourceMap()
@@ -254,13 +255,13 @@ classA.doSomething();
                                     output.File = "bundle.js";
                                     output.Sourcemap = SourceMapType.File;
                                 });
-                               
+
                             })
                              .AddRollupPipe(input =>
                              {
                                  input.Include("wwwroot/*.js");
                              }, options =>
-                             {                               
+                             {
 
                                  options.InputOptions.Input = "/wwwroot/ModuleB.js";
                                  options.HasOutput((output) =>
@@ -270,7 +271,7 @@ classA.doSomething();
                                      output.Sourcemap = SourceMapType.Inline;
                                      output.Name = "mybundle";
                                  });
-                                 
+
                              })
                               .AddRollupPipe(input =>
                               {
@@ -285,7 +286,7 @@ classA.doSomething();
                                       output.Format = Rollup.RollupOutputFormat.System;
                                       output.File = "/external/bundlewithexternal.js";
                                       output.Sourcemap = SourceMapType.File;
-                                  });                                  
+                                  });
                                   //options.OutputOptions.Sourcemap = SourceMapType.File;
                                   //options.OutputOptions.Name = "mybundle";
                               })
@@ -313,7 +314,7 @@ classA.doSomething();
                                        });
                                    });
 
-                                   
+
 
                                    //options.OutputOptions.Sourcemap = SourceMapType.File;
                                    //options.OutputOptions.Name = "mybundle";

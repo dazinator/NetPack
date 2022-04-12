@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 
 namespace NetPack.Requirements
-{   
+{
     public class NodeJsIsInstalledRequirement : IRequirement
     {
         public virtual void Check(IPipeLine pipeline)
@@ -24,6 +24,15 @@ namespace NetPack.Requirements
 
                 p.StartInfo = psi;
 
+                try
+                {
+
+                }
+                catch (Exception e)
+                {
+
+                    throw;
+                }
                 p.Start();
 
                 // reads the error output

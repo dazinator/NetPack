@@ -51,7 +51,7 @@ namespace NetPack.Typescript
         /// </summary>
         public string Charset { get; set; }
 
-     
+
         public bool? CheckJs { get; set; }
 
 
@@ -60,7 +60,7 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? Declaration { get; set; }
 
-           
+
         public bool? DeclarationMap { get; set; }
 
         public bool? EmitDeclarationOnly { get; set; }
@@ -261,7 +261,7 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? NoImplicitThis { get; set; }
 
-       
+
         public bool? NoStrictGenericChecks { get; set; }
 
         /// <summary>
@@ -290,9 +290,9 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? NoResolve { get; set; }
 
-     
 
-      
+
+
 
         /// <summary>
         /// DEPRECATED. Use --outFile instead.
@@ -322,7 +322,7 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? PreserveConstEnums { get; set; }
 
-        
+
         public bool? PreserveSymlinks { get; set; }
 
         ///// <summary>
@@ -341,8 +341,8 @@ namespace NetPack.Typescript
         /// Specifies the object invoked for createElement and __spread when targeting "react" JSX emit.
         /// </summary>
         public string ReactNamespace { get; set; }
-        
-        
+
+
         public bool? Composite { get; set; }
 
         /// <summary>
@@ -381,7 +381,7 @@ namespace NetPack.Typescript
         /// </summary>
         public string SourceRoot { get; set; }
 
-               
+
         public bool? StrictFunctionTypes { get; set; }
 
         /// <summary>
@@ -396,8 +396,8 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? StripInternal { get; set; }
 
-      
-      
+
+
 
         /// <summary>
         /// Suppress excess property checks for object literals.
@@ -420,7 +420,7 @@ namespace NetPack.Typescript
         /// </summary>
         public bool? TraceResolution { get; set; }
 
-       
+
         public bool? ResolveJsonModule { get; set; }
 
         /// <summary>
@@ -469,7 +469,7 @@ namespace NetPack.Typescript
         UMD = 3,
         System = 4,
         ES2015 = 5,
-        ESNext = 6       
+        ESNext = 6
     }
 
     public enum NewLineKind
@@ -483,7 +483,7 @@ namespace NetPack.Typescript
         Classic = 1,
         NodeJs = 2,
     }
-    
+
     public enum JsxEmit
     {
         None = 0,

@@ -1,5 +1,4 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
+using Dazinator.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipeline;
@@ -32,7 +31,7 @@ namespace NetPack.JsCombine
         }
 
         public override async Task ProcessAsync(PipeState state, CancellationToken cancelationToken)
-        {           
+        {
 
             PathString outputSubPath = _options.OutputFilePath.ToPathString();
 
@@ -40,7 +39,7 @@ namespace NetPack.JsCombine
             string sourceMapPath = outputSubPath + ".map";
             if (_options.SourceMapMode != SourceMapMode.None)
             {
-               // state.AddBlock(sourceMapPath);
+                // state.AddBlock(sourceMapPath);
             }
 
 
@@ -55,7 +54,7 @@ namespace NetPack.JsCombine
             int totalLineCount = 0;
             Encoding encoding = Encoding.UTF8;
 
-           
+
 
             foreach (FileWithDirectory fileWithDirectory in inputFiles)
             {
@@ -82,7 +81,9 @@ namespace NetPack.JsCombine
             //   var outputFilep = FileWithDirectory.Parse(_options.OutputFilePath);
 
             // Now if there are source mapping url directives present, need to produce a new source map file and directive.
-            SubPathInfo outputFilePath = SubPathInfo.Parse(_options.OutputFilePath);
+            PathStringUtils.GetPathAndFilename(_options.OutputFilePath, out var directory, out var fileName);
+
+            // SubPathInfo outputFilePath = SubPathInfo.Parse(_options.OutputFilePath);
             if (hasSourceMappingDirectives && _options.SourceMapMode != SourceMapMode.None)
             {
 
@@ -93,11 +94,11 @@ namespace NetPack.JsCombine
                 //var mapFilePath = context.GetServePath(outputFilePath.ToString() + ".map");
                 //  var mapFileWithDirectory = new FileWithDirectory() { Directory = }
                 // SubPathInfo.Parse(context.BaseRequestPath + "/" + outputFilePath.ToString() + ".map");
-                IFileInfo indexMapFile = BuildIndexMap(ms, scriptInfos, outputFilePath, state);
+                IFileInfo indexMapFile = BuildIndexMap(ms, scriptInfos, directory, fileName, state);
 
                 // Output the new map file in the pipeline.
                 //  var mapFile = new FileWithDirectory() { Directory = outputFilePath.Directory, FileInfo = indexMapFile };
-                state.AddOutput(outputFilePath.Directory.ToPathString(), indexMapFile);
+                state.AddOutput(directory, indexMapFile);
 
 
 
@@ -108,7 +109,7 @@ namespace NetPack.JsCombine
                 using (StreamWriter writer = new StreamWriter(ms, Encoding.UTF8, 1024, true))
                 {
                     writer.WriteLine();
-                    await writer.WriteLineAsync($"//# sourceMappingURL={mapServePath.ToString()}");
+                    await writer.WriteLineAsync($"//# sourceMappingURL=/{mapServePath.ToString()}");
                 }
 
                 // make sure all the source js files can be served up to the browser.
@@ -122,9 +123,9 @@ namespace NetPack.JsCombine
 
             //ensure it's reset
             ms.Position = 0;
-            var bundleJsFile = new MemoryStreamFileInfo(ms, encoding, outputFilePath.Name);
+            var bundleJsFile = new MemoryStreamFileInfo(ms, fileName);
             // Output the new combines file.
-            state.AddOutput(outputFilePath.Directory, bundleJsFile);
+            state.AddOutput(directory, bundleJsFile);
 
         }
 
@@ -140,7 +141,7 @@ namespace NetPack.JsCombine
         //}
 
 
-        private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, SubPathInfo combinedFilePath, PipeState state)
+        private IFileInfo BuildIndexMap(MemoryStream ms, List<CombinedScriptInfo> scriptInfos, PathString directory, string fileName, PipeState state)
         {
             // todo
             // throw new NotImplementedException();
@@ -150,13 +151,13 @@ namespace NetPack.JsCombine
             // 1. Create a new index map json object, and append sections for each of the existing source map declarations.
             JObject indexMap = new JObject();
             indexMap["version"] = 3;
-            indexMap["file"] = combinedFilePath.Name;
+            indexMap["file"] = fileName;
 
             JArray sections = new JArray();
 
             // for each of the original scripts that was combined.
             // check for a source map declaration - which is a requestpath to a .map file.
-            string mapFileName = combinedFilePath.ToString() + ".map";
+            string mapFileName = directory.Add($"/{fileName}.map");
             foreach (CombinedScriptInfo script in scriptInfos)
             {
                 SourceMappingUrlDeclaration declaration = script.SourceMapDeclaration;
@@ -208,7 +209,7 @@ namespace NetPack.JsCombine
                     sourceMapObject = JObject.Parse(sourceMapFileContents);
 
 
-                    AdjustSourceMapPathsRelativeToSiteRoot(sourceMapObject, combinedFilePath.Directory, script, state);
+                    AdjustSourceMapPathsRelativeToSiteRoot(sourceMapObject, directory, script, state);
 
                     // if we couldn't find the source map file, then it means the source mapping url declaration in the 
                     // js file that we processed, does not take a form that identifies a file with the IFileProvider.
@@ -238,7 +239,7 @@ namespace NetPack.JsCombine
 
             indexMap["sections"] = sections;
 
-            StringFileInfo file = new StringFileInfo(indexMap.ToString(), mapFileName);
+            StringFileInfo file = new StringFileInfo(indexMap.ToString(), mapFileName.TrimStart('/'));
             return file;
 
 

@@ -30,11 +30,11 @@ namespace NetPack.HotModuleReload
             if (string.Equals(context.TagName, "body",
                              StringComparison.OrdinalIgnoreCase))
             {
-             //   StringBuilder builder = new StringBuilder();
+                //   StringBuilder builder = new StringBuilder();
 
                 var scripts = new HmrScripts();
                 ViewContext.ViewData[nameof(HmrScripts)] = scripts;
-               // context.Items[nameof(HmrScripts)] = scripts;
+                // context.Items[nameof(HmrScripts)] = scripts;
 
                 // Execute children, they can read the BodyContext                
                 await output.GetChildContentAsync();
@@ -83,12 +83,12 @@ namespace NetPack.HotModuleReload
             }
 
             var options = viewData[nameof(HmrScripts)] as HmrScripts;
-           
+
             output.TagName = "";    // Replaces <Hmr> with <script> tag
 
             string modReloaderSrc = ModuleReloaderSrc;
-            
-            if(options == null)
+
+            if (options == null)
             {
                 return;
             }

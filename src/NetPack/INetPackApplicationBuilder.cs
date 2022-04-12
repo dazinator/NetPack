@@ -6,7 +6,7 @@ namespace NetPack
 {
     public interface INetPackApplicationBuilder : IApplicationBuilder
     {
-        IPipeLine Pipeline { get;  }
-       // IFileProvider PipelineFileProvider { get; }
+        IPipeLine Pipeline { get; }
+        // IFileProvider PipelineFileProvider { get; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.Http;
+﻿using Dazinator.Extensions.FileProviders;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
@@ -92,7 +91,7 @@ namespace NetPack.Rollup
                     }
 
                 }
-            }           
+            }
         }
     }
 }

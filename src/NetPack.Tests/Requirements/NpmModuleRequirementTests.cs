@@ -25,7 +25,7 @@ namespace NetPack.Tests.Requirements
 
             var requirementTow = new NpmDependency("typescript");
             Assert.Contains(requirementTow, list);
-            
+
             var requirementThree = new NpmDependency("another");
             Assert.DoesNotContain(requirementThree, list);
         }

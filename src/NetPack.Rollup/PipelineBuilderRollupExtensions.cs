@@ -40,7 +40,7 @@ namespace NetPack
             // add requirements to the pipeline to check nodejs is installed, and the npm packages we need.
             builder.DependsOnNode((deps) => deps.AddDependency("rollup", "0.66.2")
                                                 .AddDependency("rollup-plugin-hypothetical", "2.1.0")
-                                                .AddDependency("netpack-rollup", "1.0.18"));     
+                                                .AddDependency("netpack-rollup", "1.0.18"));
 
             return nodeServices;
         }

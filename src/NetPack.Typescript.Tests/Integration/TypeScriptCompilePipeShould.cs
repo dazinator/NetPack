@@ -5,12 +5,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
-using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using System;
-using System.Runtime.InteropServices.ComTypes;
 using Microsoft.AspNetCore.Http;
-using NetPack.Pipeline;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders;
 
 namespace NetPack.Typescript.Tests
 {
@@ -146,7 +145,7 @@ namespace NetPack.Typescript.Tests
         {
             app.UseNetPack();
             app.UseStaticFiles(new StaticFileOptions() { });
-          
+
             app.Run(async (a) =>
             {
                 var changeFileKey = "Change";
@@ -157,15 +156,16 @@ namespace NetPack.Typescript.Tests
                     {
                         foreach (var value in values)
                         {
-                            var subPath = SubPathInfo.Parse(value);
+                            PathStringUtils.GetPathAndFilename(value, out var directory, out var name);
+                            // var subPath = SubPathInfo.Parse(value);
 
                             var existingFile = InMemoryFileProvider.GetFileInfo(value);
                             var existingFileContents = existingFile.ReadAllContent();
                             var modifiedFileContents = existingFileContents + Environment.NewLine +
                                                        "// modified on " + DateTime.UtcNow;
 
-                            var retrievedFolder = InMemoryFileProvider.Directory.GetFolder(subPath.Directory);
-                            var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
+                            var retrievedFolder = InMemoryFileProvider.Directory.GetFolder(directory);
+                            var modifiedFile = new StringFileInfo(modifiedFileContents, name);
                             retrievedFolder.UpdateFile(modifiedFile);
 
                         }

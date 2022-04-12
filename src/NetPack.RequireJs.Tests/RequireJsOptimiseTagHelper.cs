@@ -56,7 +56,7 @@ namespace NetPack.RequireJs
 
         private IPipeLine EnsurePipeline()
         {
-           
+
             var pipeBuilder = Builder.WithHostingEnvironmentWebrootProvider()
              .AddRequireJsOptimisePipe(input =>
              {

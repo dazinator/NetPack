@@ -1,4 +1,4 @@
-using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
@@ -26,13 +26,14 @@ namespace NetPack.RequireJs
 
         }
 
-        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger, RequireJsOptimisationPipeOptions options, string name = "RequireJs Optimise"):base(name)
+        public RequireJsOptimisePipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<RequireJsOptimisePipe> logger, RequireJsOptimisationPipeOptions options, string name = "RequireJs Optimise") : base(name)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
             _options = options;
             _script = new Lazy<StringAsTempFile>(() =>
             {
+                // Todo replace with embedded manifest provider
                 Assembly assy = GetType().GetAssemblyFromType();
                 Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
                 string scriptContent = script.ReadAllContent();
@@ -61,27 +62,25 @@ namespace NetPack.RequireJs
                 {
                     Contents = fileContent,
                     Path = file.UrlPath.ToString().TrimStart(new char[] { '/' })
-                });                
-            }           
+                });
+            }
 
             optimiseRequest.Options = _options;
 
-           
-                cancelationToken.ThrowIfCancellationRequested();
-                RequireJsOptimiseResult result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
-                foreach (NodeInMemoryFile file in result.Files)
-                {
-                    string filePath = file.Path.Replace('\\', '/');
-                    SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
-                    PathString dir = subPathInfo.Directory.ToPathString();
-                    context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
-                }
 
-                //if (!string.IsNullOrWhiteSpace(result.Error))
-                //{
-                //    throw new RequireJsOptimiseException(result.Error);
-                //}
-           
+            cancelationToken.ThrowIfCancellationRequested();
+            RequireJsOptimiseResult result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
+            foreach (NodeInMemoryFile file in result.Files)
+            {
+                PathStringUtils.GetPathAndFilename(file.Path, out var directory, out var fileName);
+                context.AddOutput(directory, new StringFileInfo(file.Contents, fileName));
+            }
+
+            //if (!string.IsNullOrWhiteSpace(result.Error))
+            //{
+            //    throw new RequireJsOptimiseException(result.Error);
+            //}
+
 
 
         }

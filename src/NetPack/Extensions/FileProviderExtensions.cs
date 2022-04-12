@@ -2,9 +2,9 @@
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipeline;
 using System.Collections.Generic;
-using Dazinator.AspNet.Extensions.FileProviders;
 using System.Linq;
-using System;
+using Dazinator.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
 
 namespace NetPack
 {
@@ -47,16 +47,17 @@ namespace NetPack
             // check if file already present? Multiple input patterns can match the same files.
             foreach (var file in files)
             {
-                var path = $"{file.Item1}/{file.Item2.Name}";
-                if (!results.ContainsKey(path))
+                PathString directoryPath = $"/{file.Item1}";
+                var fullPath = directoryPath.Add($"/{file.Item2.Name}");
+                if (!results.ContainsKey(fullPath))
                 {
-                    var item = new FileWithDirectory() { Directory = file.Item1, FileInfo = file.Item2 };
-                    results.Add(path, item);
+                    var item = new FileWithDirectory() { Directory = directoryPath, FileInfo = file.Item2 };
+                    results.Add(fullPath, item);
                 }
             }
 
             return results.Values.ToArray();
-        }      
+        }
 
 
     }

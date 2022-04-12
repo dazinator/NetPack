@@ -1,7 +1,7 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NetPack.Pipeline;
@@ -61,10 +61,10 @@ namespace NetPack.Tests
                     input.Include("**/*.txt");
                 }, mockAnotherPipe.Object)
                 .BuildPipeLine();
-            
+
             // assert
             Assert.NotNull(pipeLine);
-         //   Assert.False(pipeLine.HasFlushed);
+            //   Assert.False(pipeLine.HasFlushed);
             Assert.NotNull(pipeLine.Context.GeneratedOutput);
             Assert.NotNull(pipeLine.EnvironmentFileProvider);
             Assert.NotNull(pipeLine.Context.FileProvider);

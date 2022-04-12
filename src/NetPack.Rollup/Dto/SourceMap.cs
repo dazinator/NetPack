@@ -9,7 +9,7 @@ namespace NetPack.Rollup
         public string[] Sources { get; set; }
         public string[] SourcesContent { get; set; }
         public string[] Names { get; set; }
-        public JValue Mappings { get; set; }       
+        public JValue Mappings { get; set; }
 
     }
 }

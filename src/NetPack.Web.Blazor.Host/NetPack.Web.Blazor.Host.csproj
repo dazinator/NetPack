@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NetPack.Blazor\NetPack.Blazor.csproj" />
     <ProjectReference Include="..\NetPack.BrowserReload\NetPack.BrowserReload.csproj" />
     <ProjectReference Include="..\NetPack.Process\NetPack.Process.csproj" />
-    <ProjectReference Include="..\NetPack.Web.Blazor\NetPack.Web.Blazor.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.2.0-preview1.20073.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.1" />
 

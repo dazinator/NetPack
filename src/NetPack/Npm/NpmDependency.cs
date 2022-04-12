@@ -12,7 +12,7 @@ namespace NetPack.Requirements
         {
             PackageName = packageName;
             Version = version;
-        }      
+        }
 
         public override bool Equals(object obj)
         {

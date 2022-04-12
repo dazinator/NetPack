@@ -1,7 +1,6 @@
 ﻿using CliWrap;
-using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
+using Dazinator.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NetPack.Pipeline;
 using System;
 using System.IO;
@@ -90,7 +89,7 @@ namespace NetPack.Process
                 streamWriter.Write($"\"RunTime\": \"{runtime}\"");
                 streamWriter.WriteLine("}");
 
-                context.AddOutput("/process-results", new MemoryStreamFileInfo(memoryStream, System.Text.Encoding.UTF8, Name + ".json"));
+                context.AddOutput("/process-results", new MemoryStreamFileInfo(memoryStream, Name + ".json"));
             }
         }
     }

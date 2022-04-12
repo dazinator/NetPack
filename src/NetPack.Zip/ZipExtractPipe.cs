@@ -1,5 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
+﻿using Dazinator.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 using NetPack.Pipeline;
 using System;
@@ -53,7 +52,7 @@ namespace NetPack.Zip
                     Console.WriteLine(ex.ToString());
                     throw;
                 }
-                
+
             }
 
         }
@@ -67,12 +66,10 @@ namespace NetPack.Zip
 
                 await readStream.CopyToAsync(ms);
 
-                var memoryStreamFile = new MemoryStreamFileInfo(ms, null, entry.Name);
+                var memoryStreamFile = new MemoryStreamFileInfo(ms, entry.Name);
 
-                var subPath = SubPathInfo.Parse(entry.FullName);
-                var pathString = new PathString($"/{subPath.Directory}");
-
-                state.AddOutput(pathString, memoryStreamFile);
+                PathStringUtils.GetPathAndFilename(entry.FullName, out var directory, out var fileName);
+                state.AddOutput(directory, memoryStreamFile);
             }
         }
     }

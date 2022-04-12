@@ -15,7 +15,7 @@ namespace NetPack.Rollup
         [EnumMember(Value = "iife")]
         Iife,
         [EnumMember(Value = "umd")]
-        Umd        
+        Umd
     }
 
 }

@@ -1,4 +1,5 @@
-using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -150,14 +151,15 @@ export default function () {
                             options.InputOptions.AddEntryPoint("/wwwroot/Main.js")
                                                 .AddEntryPoint("/wwwroot/Second.js");
 
-                            options.HasOutput((output) => {
+                            options.HasOutput((output) =>
+                            {
                                 output.Format = Rollup.RollupOutputFormat.Esm;
                                 output.Sourcemap = SourceMapType.File;
-                                output.Dir = "/rollup";                                
+                                output.Dir = "/rollup";
                             });
-                           
+
                         })
-                        // Example of a rollup build that produces multiple output formats from same set of inputs.
+                         // Example of a rollup build that produces multiple output formats from same set of inputs.
                          .AddRollupCodeSplittingPipe(input =>
                          {
                              input.Include("wwwroot/*.js");
@@ -166,13 +168,15 @@ export default function () {
                              options.InputOptions.AddEntryPoint("/wwwroot/Main.js")
                                                  .AddEntryPoint("/wwwroot/Second.js");
 
-                             options.HasOutput((output) => {
+                             options.HasOutput((output) =>
+                             {
                                  output.Format = Rollup.RollupOutputFormat.Esm;
                                  output.Sourcemap = SourceMapType.File;
                                  output.Dir = "/rollup/modules";
                              });
 
-                             options.HasOutput((output) => {
+                             options.HasOutput((output) =>
+                             {
                                  output.Format = Rollup.RollupOutputFormat.System;
                                  output.Sourcemap = SourceMapType.File;
                                  output.Dir = "/rollup/nomodules";

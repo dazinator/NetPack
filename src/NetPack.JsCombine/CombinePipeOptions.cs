@@ -23,7 +23,7 @@ namespace NetPack.JsCombine
         /// </summary>
         public string OutputFilePath { get; set; }
 
-       
+
         ///// <summary>
         ///// The filename for the combined css file.
         ///// </summary>

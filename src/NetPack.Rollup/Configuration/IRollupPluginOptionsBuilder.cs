@@ -9,7 +9,7 @@ namespace NetPack
     {
         IRollupPluginStepConfigurationBuilder HasNpmDependency(string name, string version);
         IRollupPluginStepConfigurationBuilder HasNpmDependency(Action<NpmDependencyBuilder> configureNpmModuleRequirement);
-      //  RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
+        //  RollupPipeOptionsBuilder WithConfiguration(Action<dynamic> configure);
     }
 
     public interface IRollupImportOptionsBuilder

@@ -1,25 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
-    <AssemblyName>NetPack.RequireJs</AssemblyName>
-    <PackageId>NetPack.RequireJs</PackageId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<AssemblyName>NetPack.RequireJs</AssemblyName>
+		<PackageId>NetPack.RequireJs</PackageId>
+		<!--<GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>-->
+	</PropertyGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Embedded\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Embedded\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NetPack\NetPack.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\NetPack\NetPack.csproj" />
+		<!--Note this package must be kept directly referenced from the project for embedded manifest to be included at build time.--><!--
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0" />-->
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+	</ItemGroup>
+
+	<!--<PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup>-->
 
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Properties\" />
+	</ItemGroup>
 
 </Project>

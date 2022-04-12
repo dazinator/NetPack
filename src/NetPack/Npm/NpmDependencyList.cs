@@ -24,7 +24,7 @@ namespace NetPack.Requirements
         {
             _dependencies.Add(new NpmDependency(packageName, version));
             return this;
-        }        
+        }
 
         public INpmDependencyList AddDependency(Action<INpmDependencyBuilder> configure)
         {

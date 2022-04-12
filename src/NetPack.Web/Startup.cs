@@ -11,7 +11,7 @@ namespace NetPack.Web
     public class Startup
     {
 
-        public Startup(Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -24,7 +24,7 @@ namespace NetPack.Web
 
         public IConfigurationRoot Configuration { get; }
 
-        public Microsoft.AspNetCore.Hosting.IHostingEnvironment Environment { get; }
+        public IWebHostEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -237,7 +237,7 @@ namespace NetPack.Web
                     System.IO.Directory.CreateDirectory(nodeProjectDir);
 
                 }
-            }); 
+            });
 
             services.AddBrowserReload((options) =>
             {
@@ -249,7 +249,7 @@ namespace NetPack.Web
                 options.FileProvider(Environment.ContentRootFileProvider)
                         .Watch("/Views/**/*.cshtml");
 
-               // options.SetDelay(2000); // allows multiple changes to accumulate before triggering refresh.
+                // options.SetDelay(2000); // allows multiple changes to accumulate before triggering refresh.
 
             });
 
@@ -273,11 +273,10 @@ namespace NetPack.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
 
+            app.UseRouting();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -291,8 +290,17 @@ namespace NetPack.Web
             app.UseNetPack();
             app.UseStaticFiles();
 
-            app.UseBrowserReload();
-            app.UseHotModuleReload();
+         
+            app.UseEndpoints(a =>
+            {
+
+                a.UseBrowserReload();
+                a.UseHotModuleReload();
+                a.MapControllers();
+            });
+            // Microsoft.AspNetCore.Builder.UseEndpoints(...).
+
+            // app.UseHotModuleReload();
             // UseBrowserReload() calls UseSignalR() under the hood with default options.
             // If you want full control of singlar setup, use the following instead:
             //app.UseSignalR(routes =>
@@ -300,12 +308,12 @@ namespace NetPack.Web
             //    routes.MapBrowserReloadHub();
             //});
 
-            app.UseMvc(routes =>
-             {
-                 routes.MapRoute(
-                     name: "default",
-                     template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
-             });
+            //app.UseMvc(routes =>
+            // {
+            //     routes.MapRoute(
+            //         name: "default",
+            //         template: "{controller=Home}/{action=SingleTypescriptFile}/{id?}");
+            // });
 
             app.Use(async (context, next) =>
             {

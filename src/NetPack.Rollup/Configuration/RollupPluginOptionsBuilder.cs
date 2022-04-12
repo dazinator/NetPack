@@ -19,7 +19,7 @@ namespace NetPack
         IRollupPluginStepConfigurationBuilder HasOptionsOfKind(OptionsKind kind, Action<dynamic> configureOptions);
         IRollupPluginStepConfigurationBuilder RunsBeforeSystemPlugins();
         IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JObject> configureOptions);
-        IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JArray> configureOptions);     
+        IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JArray> configureOptions);
     }
 
     public class RollupPluginOptionsBuilder : IRollupPluginOptionsBuilder, IRollupPluginStepConfigurationBuilder
@@ -58,7 +58,7 @@ namespace NetPack
             NpmDependency module = new NpmDependency(packageName, version);
             NpmDependency = module;
             return this;
-        }       
+        }
 
         public IRollupPluginStepConfigurationBuilder ImportOnly(string defaultExportName = null)
         {
@@ -73,13 +73,13 @@ namespace NetPack
 
         public IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JObject> configureOptions)
         {
-            OptionsKind =  OptionsKind.Object;
+            OptionsKind = OptionsKind.Object;
             if (configureOptions != null)
             {
-              
-                    JObject options = new JObject();
-                    configureOptions?.Invoke(options);
-                    Options = options;   
+
+                JObject options = new JObject();
+                configureOptions?.Invoke(options);
+                Options = options;
             }
             return this;
         }
@@ -137,7 +137,7 @@ namespace NetPack
             DefaultExportName = name;
             return this;
         }
-       
+
         public IRollupPluginStepConfigurationBuilder RunsBeforeSystemPlugins()
         {
             PluginRunsBeforeSystemPlugins = true;
@@ -158,16 +158,16 @@ namespace NetPack
 
     public class RollupImportOptionsBuilder : IRollupImportOptionsBuilder, IRollupImportConfigurationBuilder
     {
-       
-        private NpmDependency _npmDependency = null;       
+
+        private NpmDependency _npmDependency = null;
         private string _defaultExportName = null;
 
-        public NpmDependency NpmDependency { get => _npmDependency; set => _npmDependency = value; }       
+        public NpmDependency NpmDependency { get => _npmDependency; set => _npmDependency = value; }
 
-        public string DefaultExportName { get => _defaultExportName; set => _defaultExportName = value; }       
+        public string DefaultExportName { get => _defaultExportName; set => _defaultExportName = value; }
 
         public RollupImportOptionsBuilder()
-        {           
+        {
         }
 
         public IRollupImportConfigurationBuilder HasNpmDependency(Action<NpmDependencyBuilder> configureNpmModuleRequirement)
@@ -183,7 +183,7 @@ namespace NetPack
             NpmDependency module = new NpmDependency(packageName, version);
             NpmDependency = module;
             return this;
-        }       
+        }
 
         /// <summary>
         /// The name of the default export in the script used in the import statement. e.g import { defaultExportName } from 'module-name'".

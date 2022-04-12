@@ -7,7 +7,7 @@ using System;
 namespace NetPack
 {
     public static class IServiceCollectionExtensions
-    {      
+    {
 
         public static IPipelineBuilder AddProcessPipe(this IPipelineBuilder builder, Action<PipelineInputBuilder> input, Action<ProcessPipeOptions> configureOptions, string name = "Process")
         {
@@ -16,7 +16,7 @@ namespace NetPack
 
             IServiceProvider appServices = builder.ServiceProvider;
             ILogger<ProcessPipe> logger = (ILogger<ProcessPipe>)appServices.GetRequiredService(typeof(ILogger<ProcessPipe>));
-            
+
             var pipe = new ProcessPipe(options, logger, name);
 
             builder.AddPipe((inputBuilder) =>

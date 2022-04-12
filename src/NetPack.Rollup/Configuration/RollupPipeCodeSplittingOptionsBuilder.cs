@@ -16,8 +16,8 @@ namespace NetPack
         {
         }
 
-        public RollupPipeCodeSplittingOptionsBuilder(IPipelineBuilder builder, RollupCodeSplittingInputOptions inputOptions, List<RollupOutputDirOptions> outputOptions): base(builder,inputOptions,outputOptions)
+        public RollupPipeCodeSplittingOptionsBuilder(IPipelineBuilder builder, RollupCodeSplittingInputOptions inputOptions, List<RollupOutputDirOptions> outputOptions) : base(builder, inputOptions, outputOptions)
         {
-        }         
+        }
     }
 }

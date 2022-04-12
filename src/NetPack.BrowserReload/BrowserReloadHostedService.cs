@@ -15,7 +15,7 @@ namespace NetPack.BrowserReload
 
     public class BrowserReloadHostedService : IHostedService
     {
-      //  private readonly IHostingEnvironment _env;
+        //  private readonly IHostingEnvironment _env;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<BrowserReloadHostedService> _logger;
         private readonly IOptions<BrowserReloadOptions> _options;
@@ -39,7 +39,7 @@ namespace NetPack.BrowserReload
             foreach (var fileProviderOptions in _options.Value.FileProviderOptions)
             {
                 WatchFiles(fileProviderOptions.FileProvider, fileProviderOptions.GetWatchPatterns());
-            }           
+            }
 
             return Task.CompletedTask;
         }

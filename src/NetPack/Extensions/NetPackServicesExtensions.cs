@@ -1,5 +1,4 @@
-
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.NodeServices;
@@ -53,7 +52,7 @@ namespace NetPack
         }
 
         public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions, Action<NodeServicesOptions> configureGlobalNodeOptions = null)
-        {         
+        {
 
             services.AddSingleton(new NodeJsIsInstalledRequirement());
             services.AddSingleton<IRequirement, NpmDependenciesRequirement>();
@@ -80,7 +79,7 @@ namespace NetPack
                 // otherwise node services restarts automatically when file changes are made, losing state - we want to handle watch on netcore side.
                 options.WatchFileExtensions = null;
                 configureGlobalNodeOptions?.Invoke(options);
-              
+
                 INodeServices nodeServices = NodeServicesFactory.CreateNodeServices(options);
 #if NODESERVICESASYNC
                 IApplicationLifetime lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
@@ -88,7 +87,7 @@ namespace NetPack
 #else
                 return new NetPackNodeServices(nodeServices, options.ProjectPath);
 #endif
-               
+
             });
 
             return services;

@@ -39,7 +39,7 @@ namespace NetPack.BrowserReload
             return this;
         }
 
-        public int Delay { get; set; }      
+        public int Delay { get; set; }
 
     }
 }

@@ -1,9 +1,8 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
+﻿using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetPack.Requirements;
-using NetPack.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,18 +34,18 @@ namespace NetPack.Pipeline
             IDirectory sourcesOutputDirectory,
             ILogger<Pipeline> logger,
             string baseRequestPath = null,
-            IDirectory generatedOutputDirectory = null, 
+            IDirectory generatedOutputDirectory = null,
             Predicate<IPipeLine> shouldPerformRequirementsCheck = null)
-        {           
+        {
             EnvironmentFileProvider = environmentFileProvider;
             Pipes = pipes;
-            Requirements = requirements;            
+            Requirements = requirements;
             Logger = logger;
             _shouldPerformRequirementsCheck = shouldPerformRequirementsCheck;
             generatedOutputDirectory = generatedOutputDirectory ?? new InMemoryDirectory();
             GeneratedOutputFileProvider = new InMemoryFileProvider(generatedOutputDirectory);
 
-            sourcesOutputDirectory = sourcesOutputDirectory ?? new InMemoryDirectory();           
+            sourcesOutputDirectory = sourcesOutputDirectory ?? new InMemoryDirectory();
             SourcesFileProvider = new InMemoryFileProvider(sourcesOutputDirectory);
 
             // let in memory generated netpack files override files from environment..
@@ -61,7 +60,7 @@ namespace NetPack.Pipeline
             // Name = Guid.NewGuid().ToString();
         }
 
-        public PipelineContext Context { get; set; }      
+        public PipelineContext Context { get; set; }
 
         /// <summary>
         /// Provides access to files that need to be processed from the environment. 
@@ -79,12 +78,12 @@ namespace NetPack.Pipeline
         /// </summary>
         public IFileProvider SourcesFileProvider { get; set; }
 
-        public ILogger<Pipeline> Logger { get; }     
+        public ILogger<Pipeline> Logger { get; }
 
         /// <summary>
         /// Provides access to all files that should be visible to webroot - i.e a browser.
         /// </summary>
-        public IFileProvider WebrootFileProvider { get; set; }    
+        public IFileProvider WebrootFileProvider { get; set; }
 
         /// <summary>
         /// The pipes in this pipeline.
@@ -94,13 +93,13 @@ namespace NetPack.Pipeline
         /// <summary>
         /// Any requirements that should be met for this pipeline to function.
         /// </summary>
-        public List<IRequirement> Requirements { get; set; }      
+        public List<IRequirement> Requirements { get; set; }
 
         public void Initialise()
         {
             // run checks for requirements.
             bool shouldCheckRequirements = _shouldPerformRequirementsCheck?.Invoke(this) ?? true;
-            if(shouldCheckRequirements)
+            if (shouldCheckRequirements)
             {
                 CheckRequirements();
             }
@@ -139,18 +138,18 @@ namespace NetPack.Pipeline
         public bool IsBusy => Pipes.Any(a => a.IsProcessing);
 
         public async Task ProcessPipesAsync(IEnumerable<PipeProcessor> pipes, CancellationToken cancellationToken)
-        {          
+        {
             try
             {
-                IEnumerable<Task> processTasks = pipes.Select(p=>ProcessPipe(p, cancellationToken));
+                IEnumerable<Task> processTasks = pipes.Select(p => ProcessPipe(p, cancellationToken));
                 Task task = Task.WhenAll(processTasks);
                 await task;
             }
             catch (Exception e)
             {
-                Logger.LogError(new EventId(1001), e, "Error occurred processing pipeline");               
-            }               
-          
+                Logger.LogError(new EventId(1001), e, "Error occurred processing pipeline");
+            }
+
         }
 
         public async Task ProcessPipe(PipeProcessor pipe, CancellationToken cancellationToken)

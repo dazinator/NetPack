@@ -25,7 +25,7 @@ namespace NetPack.Requirements
             // run without showing console windows
             psi.CreateNoWindow = true;
             psi.UseShellExecute = false;
-            if(!string.IsNullOrWhiteSpace(workingDirectory))
+            if (!string.IsNullOrWhiteSpace(workingDirectory))
             {
                 psi.WorkingDirectory = workingDirectory;
             }

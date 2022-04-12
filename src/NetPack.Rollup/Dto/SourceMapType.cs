@@ -7,7 +7,7 @@ namespace NetPack.Rollup
         [EnumMember(Value = "file")]
         File,
         [EnumMember(Value = "inline")]
-        Inline,       
+        Inline,
     }
 
 }

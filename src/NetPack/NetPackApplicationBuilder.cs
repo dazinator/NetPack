@@ -16,7 +16,7 @@ namespace NetPack
         {
             _builder = appBuilder;
             Pipeline = pipeline;
-           // PipelineFileProvider = pipelineFileProvider;
+            // PipelineFileProvider = pipelineFileProvider;
         }
 
         public IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware)

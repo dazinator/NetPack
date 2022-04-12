@@ -55,8 +55,8 @@ namespace NetPack.Requirements
         {
             JProperty deps = overridePackageJson.Property("dependencies");
             JObject overrideDepsObject = deps.Value as JObject;
-            JObject existingDeps = packageJson.Property("dependencies")?.Value as JObject;    
-            
+            JObject existingDeps = packageJson.Property("dependencies")?.Value as JObject;
+
             foreach (JProperty item in overrideDepsObject.Properties())
             {
                 JProperty existingProp = existingDeps.Property(item.Name);

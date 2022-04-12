@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Requirements;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 
 namespace NetPack.Pipeline
 {
@@ -119,7 +119,7 @@ namespace NetPack.Pipeline
             //  public IFileProvider FileProvider { get; set; }
             return pipeLine;
 
-        }             
+        }
 
         public IPipelineBuilder IncludeRequirement(IRequirement requirement)
         {
@@ -144,7 +144,7 @@ namespace NetPack.Pipeline
         }
 
         public IPipelineBuilder UseBaseRequestPath(PathString baseRequestPath)
-        {      
+        {
             BaseRequestPath = baseRequestPath;
             return this;
         }

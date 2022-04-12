@@ -27,7 +27,7 @@ namespace NetPack.Pipeline
             {
                 IncludeList.Add(searchPattern);
                 LastChanged = DateTime.UtcNow;
-            }          
+            }
         }
 
         public void AddExclude(string pattern)
@@ -37,11 +37,11 @@ namespace NetPack.Pipeline
             {
                 searchPattern = "/" + pattern;
             }
-            if(!ExcludeList.Contains(searchPattern))
+            if (!ExcludeList.Contains(searchPattern))
             {
                 ExcludeList.Add(searchPattern);
                 LastChanged = DateTime.UtcNow;
-            }          
+            }
         }
 
         public DateTime LastChanged { get; set; }
@@ -54,8 +54,8 @@ namespace NetPack.Pipeline
         public IEnumerable<string> GetExcludes()
         {
             return ExcludeList.AsEnumerable();
-        }       
-       
+        }
+
     }
 
 

@@ -4,7 +4,7 @@ using System;
 namespace NetPack.Utils
 {
     public static class ChangeTokenHelper
-    {     
+    {
         private const int DefaultDelayInMilliseconds = 500;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace NetPack.Utils
             var debouncer = new Debouncer<T>(TimeSpan.FromMilliseconds(delayInMilliseconds));
             var token = ChangeToken.OnChange<T>(changeTokenFactory, s => debouncer.Debounce(listener, s), state);
             return token;
-        }       
+        }
 
     }
 }

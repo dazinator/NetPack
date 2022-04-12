@@ -1,6 +1,3 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using NetPack.File;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace NetPack.Tests
@@ -8,7 +5,7 @@ namespace NetPack.Tests
     public class SubPathInfoTests
     {
         private ITestOutputHelper _output;
-     
+
 
         public SubPathInfoTests(ITestOutputHelper output)
         {

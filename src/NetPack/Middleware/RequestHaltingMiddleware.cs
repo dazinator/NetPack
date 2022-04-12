@@ -45,7 +45,7 @@ namespace NetPack
             if (IsValidMethod(context.Request) && !PathEndsInSlash(context.Request.Path))
             {
                 bool wait = true;
-                while(wait)
+                while (wait)
                 {
                     wait = pipelineManager.PipeLines.Any(a =>
                     {
@@ -57,16 +57,16 @@ namespace NetPack
                         return file.Exists && !file.IsDirectory && a.Value.IsBusy;
                     });
 
-                    if(wait)
+                    if (wait)
                     {
                         logger.LogDebug("Waiting on busy pipeline for file: " + context.Request.Path);
                         await Task.Delay(500);
                     }
-                }               
+                }
 
-               // await FileLocks.WaitIfLockedAsync(context.Request.Path, _options.Timeout, context.RequestAborted);
+                // await FileLocks.WaitIfLockedAsync(context.Request.Path, _options.Timeout, context.RequestAborted);
                 //await FileRequestServices.WhenFileNotLocked(context.Request.Path, _options.Timeout, context.RequestAborted);
-               // logger.LogDebug("File processing finished." + context.Request.Path);
+                // logger.LogDebug("File processing finished." + context.Request.Path);
             }
 
             await _next.Invoke(context);

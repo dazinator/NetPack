@@ -1,10 +1,7 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetPack.Extensions;
-using NetPack.Node.Dto;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
@@ -24,7 +21,7 @@ namespace NetPack.HotModuleReload
 
 
 
-        public HotModuleReloadPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<HotModuleReloadPipe> logger, IOptions<HotModuleReloadOptions> options, string name = "Hot Module Reload"):base(name)
+        public HotModuleReloadPipe(INetPackNodeServices nodeServices, IEmbeddedResourceProvider embeddedResourceProvider, ILogger<HotModuleReloadPipe> logger, IOptions<HotModuleReloadOptions> options, string name = "Hot Module Reload") : base(name)
         {
             _nodeServices = nodeServices;
             _embeddedResourceProvider = embeddedResourceProvider;
@@ -49,7 +46,7 @@ namespace NetPack.HotModuleReload
 
             // browser implementation can take care of reloading the module including it's dependants.
 
-          
+
 
 
         }

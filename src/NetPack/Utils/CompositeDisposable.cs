@@ -16,9 +16,9 @@ namespace NetPack
         /// Creates a new instance of <see cref="CompositeDisposable"/>.
         /// </summary>
         /// <param name="disposables">The list of <see cref="IDisposable"/> to compose.</param>
-        public CompositeDisposable():this(new List<IDisposable>())
+        public CompositeDisposable() : this(new List<IDisposable>())
         {
-          
+
         }
 
         /// <summary>

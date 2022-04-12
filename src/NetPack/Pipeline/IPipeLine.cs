@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace NetPack.Pipeline
 {
     public interface IPipeLine
-    {     
+    {
 
         List<PipeProcessor> Pipes { get; }
 
@@ -43,11 +43,11 @@ namespace NetPack.Pipeline
 
         IFileProvider EnvironmentFileProvider { get; set; }
 
-        IFileProvider GeneratedOutputFileProvider { get; set; }      
+        IFileProvider GeneratedOutputFileProvider { get; set; }
 
         IFileProvider SourcesFileProvider { get; set; }
 
-        IFileProvider WebrootFileProvider { get; set; }      
+        IFileProvider WebrootFileProvider { get; set; }
 
         void Initialise();
 

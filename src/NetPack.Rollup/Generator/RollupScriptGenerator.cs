@@ -18,7 +18,7 @@ namespace NetPack.Rollup
                     return Template.Parse(reader.ReadToEnd());
                 }
             });
-        }      
+        }
 
         public string GenerateScript(RollupInputOptions rollupOptions)
         {

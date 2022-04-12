@@ -1,4 +1,5 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -39,7 +40,7 @@ namespace NetPack.Tests
                                 .AddPipe(inputs => inputs.Input.AddInclude("wwwroot/foo.ts"), new DelegatePipe(async (context, token) =>
                                 {
                                     // block requests for the file we are generating, until we have finished generating it.
-                                  //  string generatedFilePath = "/wwwroot/foo.js";
+                                    //  string generatedFilePath = "/wwwroot/foo.js";
 
                                     //  requestHalter.AddBlock(generatedFilePath);
 

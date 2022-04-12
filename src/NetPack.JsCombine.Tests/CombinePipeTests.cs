@@ -9,10 +9,10 @@ namespace NetPack.JsCombine.Tests
 {
     public class CombinePipeTests : PipeTestBase
     {
-      
 
-        [InlineData(SourceMapMode.None, "js/red.js", "js/green.js", "js/blue.js" )]
-        [InlineData(SourceMapMode.Inline,"js/red.js", "js/green.js", "js/blue.js")]
+
+        [InlineData(SourceMapMode.None, "js/red.js", "js/green.js", "js/blue.js")]
+        [InlineData(SourceMapMode.Inline, "js/red.js", "js/green.js", "js/blue.js")]
         [Theory]
         public async Task Combines_Javascript_Files_With_Source_Maps(SourceMapMode sourceMapMode, params string[] jsFilePaths)
         {
@@ -24,7 +24,7 @@ namespace NetPack.JsCombine.Tests
                 var jsFileMapPath = jsFilePath + ".map";
                 var jsFile = GivenAFileInfo(jsFilePath, () => TestUtils.GenerateString(1000) + Environment.NewLine + "//# sourceMappingURL=/" + jsFileMapPath);
                 var jsFileMap = GivenAFileInfo(jsFileMapPath, () => "{some: true, json: true}");
-              
+
                 jsFiles.Add(jsFile);
             }
 
@@ -46,7 +46,7 @@ namespace NetPack.JsCombine.Tests
             // The original, source files. should not be in the processed output directory.
             ThenTheProcessedOutputDirectoryFile("js/red.js", Assert.Null);
             ThenTheProcessedOutputDirectoryFile("js/green.js", Assert.Null);
-            ThenTheProcessedOutputDirectoryFile("js/blue.js", Assert.Null);           
+            ThenTheProcessedOutputDirectoryFile("js/blue.js", Assert.Null);
 
             // The combined file should not have any of the source mapping urls that were present in the original input files.
             ThenTheProcessedOutputDirectoryFile("mybundle.js", (combinedFile) =>
@@ -57,14 +57,14 @@ namespace NetPack.JsCombine.Tests
                 Assert.DoesNotContain("//# sourceMappingURL=/" + "js/blue.js.map", content);
             });
 
-        
+
             if (sourceMapMode != SourceMapMode.None)
             {
                 // The combined file should have a source mapping url, which points to its own index source map file.
                 ThenTheProcessedOutputDirectoryFile("mybundle.js", (combinedFile) =>
                 {
                     var content = combinedFile.ReadAllContent();
-                    Assert.Contains("//# sourceMappingURL=" + "mybundle.js.map", content);
+                    Assert.Contains("//# sourceMappingURL=/" + "mybundle.js.map", content);
                 });
 
                 // There should be an index source map.
@@ -96,7 +96,7 @@ namespace NetPack.JsCombine.Tests
             }
 
         }
-        
+
     }
 
 }

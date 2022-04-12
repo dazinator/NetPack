@@ -213,7 +213,7 @@ namespace NetPack.Utils
                         int length = endExclusive - start;
                         endExclusive = i;
                         string bufferContents = new string(charBuffer, start, length);
-                   
+
                         string stringToYield = previousEnd == null ? bufferContents : bufferContents + previousEnd;
                         if (!firstYield || stringToYield.Length != 0)
                         {

@@ -1,4 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Dazinator.Extensions.FileProviders.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Xunit;

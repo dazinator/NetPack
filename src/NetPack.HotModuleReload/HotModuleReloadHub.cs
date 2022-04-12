@@ -5,6 +5,6 @@ namespace NetPack.HotModuleReload
 {
     public class HotModuleReloadHub : Hub<IHotModuleReloadClient>
     {
-       
+
     }
 }

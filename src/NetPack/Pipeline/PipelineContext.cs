@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Http;
 using Polly;
 using System.IO;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 
 namespace NetPack.Pipeline
 {

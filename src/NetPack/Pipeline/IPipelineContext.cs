@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Http;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 
 namespace NetPack.Pipeline
 {
@@ -25,7 +25,7 @@ namespace NetPack.Pipeline
 
         IFileProvider FileProvider { get; set; }
 
-        PathString GetRequestPath(string directory, IFileInfo fileInfo);       
+        PathString GetRequestPath(string directory, IFileInfo fileInfo);
 
     }
 }

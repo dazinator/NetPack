@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using NetPack.HotModuleReload;
+using Microsoft.AspNetCore.Routing;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -15,27 +16,23 @@ namespace NetPack
         private const string DefaultHubPathString = "/hmrhub";
 
         public static IServiceCollection AddHotModuleReload(this IServiceCollection services, Action<HotModuleReloadOptions> configureOptions)
-        {            
-            services.AddSingleton<IHostedService, HotModuleReloadHostedService>();           
+        {
+            services.AddSingleton<IHostedService, HotModuleReloadHostedService>();
             services.Configure<HotModuleReloadOptions>(configureOptions);
             services.ConfigureOptions(typeof(PostConfigureStaticFilesOptions));
             return services;
         }
 
-        public static IApplicationBuilder UseHotModuleReload(this IApplicationBuilder app)
+        public static HubEndpointConventionBuilder UseHotModuleReload(this IEndpointRouteBuilder routeBuilder)
         {
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<HotModuleReloadHub>(DefaultHubPathString);
-            });
-            return app;
+            return routeBuilder.MapHub<HotModuleReloadHub>(DefaultHubPathString);
         }
 
-        public static HubRouteBuilder MapHotModuleReloadHub(this HubRouteBuilder builder, string path = DefaultHubPathString)
-        {
-            builder.MapHub<HotModuleReloadHub>(path);
-            return builder;
-        }
+        //public static HubRouteBuilder MapHotModuleReloadHub(this HubRouteBuilder builder, string path = DefaultHubPathString)
+        //{
+        //    builder.MapHub<HotModuleReloadHub>(path);
+        //    return builder;
+        //}
 
     }
 }

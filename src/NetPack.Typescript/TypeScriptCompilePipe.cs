@@ -1,4 +1,4 @@
-using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
@@ -127,10 +127,12 @@ namespace NetPack.Typescript
                 {
                     foreach (KeyValuePair<string, string> item in result.EchoFiles)
                     {
-                        SubPathInfo subPathInfo = SubPathInfo.Parse(item.Key);
-                        StringFileInfo outputFileInfo = new StringFileInfo(item.Value, subPathInfo.Name);
+                        PathStringUtils.GetPathAndFilename(item.Key, out var directory, out var fileName);
 
-                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+                        //  item.Key.Split(System.IO.Directory.s)
+                        //  SubPathInfo subPathInfo = SubPathInfo.Parse(item.Key);
+                        StringFileInfo outputFileInfo = new StringFileInfo(item.Value, fileName);
+                        context.AddOutput(directory, outputFileInfo);
                     }
                 }
 
@@ -138,10 +140,11 @@ namespace NetPack.Typescript
                 {
                     foreach (KeyValuePair<string, string> output in result.Sources)
                     {
-                        SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
-                        var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
+                        PathStringUtils.GetPathAndFilename(output.Key, out var directory, out var fileName);
 
-                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+                        //SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
+                        var outputFileInfo = new StringFileInfo(output.Value, fileName);
+                        context.AddOutput(directory, outputFileInfo);
 
                     }
                 }

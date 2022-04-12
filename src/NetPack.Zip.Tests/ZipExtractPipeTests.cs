@@ -17,7 +17,7 @@ namespace NetPack.Zip.Tests
                 builder.AddFile("foo.txt", System.Text.Encoding.Default.GetBytes("foo bar"));
             });
 
-          //  var zipFiles = new FileWithDirectory[] { new FileWithDirectory() { Directory = "/test", FileInfo = fooZip } };
+            //  var zipFiles = new FileWithDirectory[] { new FileWithDirectory() { Directory = "/test", FileInfo = fooZip } };
 
             await WhenFilesProcessedByPipe(() =>
             {

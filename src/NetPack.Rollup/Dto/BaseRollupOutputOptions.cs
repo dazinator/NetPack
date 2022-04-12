@@ -9,7 +9,7 @@ namespace NetPack.Rollup
     {
         public BaseRollupOutputOptions()
         {
-            Format = RollupOutputFormat.System;            
+            Format = RollupOutputFormat.System;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace NetPack.Rollup
             }
             globals?.Invoke(Globals);
         }
-       
+
         /// <summary>
         /// Object of id: name pairs, used for umd/iife bundles.
         /// Used to tell Rollup which module ids are mapped to global variables.
@@ -77,7 +77,7 @@ namespace NetPack.Rollup
         /// <summary>
         ///  Configure options for when the bundle output format is AMD.
         /// </summary>
-        public JObject Amd { get; set; }     
+        public JObject Amd { get; set; }
 
-    }       
+    }
 }

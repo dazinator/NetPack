@@ -327,7 +327,7 @@ namespace NetPack.JsMin
             await Put(_theA);
             _theA = Get(replaceCr: !allowLineFeed); //don't replace CR here, if we need to deal with that
 
-            for (;;)
+            for (; ; )
             {
                 //If the A matches B it means the string literal is done
                 // since at this moment B was the original A string literal (" or ')
@@ -411,7 +411,7 @@ namespace NetPack.JsMin
             await Put(_theA);     //write the $
             _theA = Get();  //get next (this will be { )
 
-            for (;;)
+            for (; ; )
             {
                 switch (_theA)
                 {
@@ -466,12 +466,12 @@ namespace NetPack.JsMin
                 await Put(' ');
             }
             await Put(_theB);
-            for (;;)
+            for (; ; )
             {
                 _theA = Get();
                 if (_theA == '[')
                 {
-                    for (;;)
+                    for (; ; )
                     {
                         await Put(_theA);
                         _theA = Get();
@@ -539,7 +539,7 @@ namespace NetPack.JsMin
                 {
                     case '/':
                         //handle single line comments
-                        for (;;)
+                        for (; ; )
                         {
                             c = Get();
                             if (IsLineSeparator(c))
@@ -552,7 +552,7 @@ namespace NetPack.JsMin
                         //handle multi-line comments
                         Get(); //move to *
 
-                        for (;;)
+                        for (; ; )
                         {
                             var exit = false;
                             c = Get(); //read next

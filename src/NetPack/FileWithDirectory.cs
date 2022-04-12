@@ -8,7 +8,7 @@ namespace NetPack
     {
         public PathString Directory { get; set; }
 
-        public PathString UrlPath { get { return $"{Directory}/{FileInfo.Name}"; } }
+        public PathString UrlPath { get { return Directory.Add($"/{FileInfo.Name}"); } }
 
         public IFileInfo FileInfo { get; set; }
 
@@ -24,19 +24,19 @@ namespace NetPack
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((FileWithDirectory) obj);
+            return Equals((FileWithDirectory)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (Directory.GetHashCode()*397) ^ FileInfo.GetHashCode();
+                return (Directory.GetHashCode() * 397) ^ FileInfo.GetHashCode();
             }
         }
 
         public bool IsNewerThan(FileWithDirectory file)
-        {           
+        {
             if (file == null)
             {
                 // We don't have a previous version of this file, so the file must be a new version.
@@ -48,6 +48,6 @@ namespace NetPack
             return changed;
         }
 
-      
+
     }
 }

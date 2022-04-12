@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <AssemblyName>NetPack.RequireJs.TagHelpers</AssemblyName>
     <PackageId>NetPack.RequireJs.TagHelpers</PackageId>
   </PropertyGroup>
@@ -11,20 +11,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NetPack.RequireJs\NetPack.RequireJs.csproj" />
+	  <FrameworkReference Include="Microsoft.AspNetCore.App" />
+	  <ProjectReference Include="..\NetPack.RequireJs\NetPack.RequireJs.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Runtime" Version="1.0.2" />
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+  <!--<PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup>-->
 
   <ItemGroup>
     <Folder Include="embedded\" />
     <Folder Include="Properties\" />
   </ItemGroup>
+
+  <!--<ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.2.0" />
+  </ItemGroup>-->
 
 </Project>

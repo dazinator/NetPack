@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Xunit;
-using Dazinator.AspNet.Extensions.FileProviders;
 using NetPack.Typescript;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders;
 
 namespace NetPack.Web.Tests
 {
@@ -165,7 +166,7 @@ namespace NetPack.Web.Tests
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
             {
 
-               
+
 
                 // env.WebRootFileProvider = mockFileProvider;
                 //   env.WebRootFileProvider = 
@@ -185,16 +186,19 @@ namespace NetPack.Web.Tests
                         {
                             foreach (var value in values)
                             {
-                                var subPath = SubPathInfo.Parse(value);
+
+                                PathStringUtils.GetPathAndFilename(value, out var directory, out var fileName);
+
+                                // var subPath = SubPathInfo.Parse(value);
 
                                 var existingFile = InMemoryFileProvider.GetFileInfo(value);
                                 var existingFileContents = existingFile.ReadAllContent();
                                 var modifiedFileContents = existingFileContents + Environment.NewLine +
                                                            "// modified on " + DateTime.UtcNow;
 
-                                var retrievedFolder = InMemoryFileProvider.Directory.GetFolder(subPath.Directory);
+                                var retrievedFolder = InMemoryFileProvider.Directory.GetFolder(directory);
 
-                                var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
+                                var modifiedFile = new StringFileInfo(modifiedFileContents, fileName);
 
                                 //  var fileToBeUpdated = mockFileProvider.Directory.GetFile(subPath.ToString());
                                 retrievedFolder.UpdateFile(modifiedFile);
@@ -209,12 +213,12 @@ namespace NetPack.Web.Tests
                     if (a.Request.Path.Value.Contains("netpack/ts/somefile.js"))
                     {
                         var file = env.WebRootFileProvider.GetFileInfo("/netpack/ts/somefile.js");
-                        
-                       // await SendFileResponseExtensions.SendFileAsync(a.Response, file);
+
+                        // await SendFileResponseExtensions.SendFileAsync(a.Response, file);
                     }
                 });
 
-               
+
             }
 
 

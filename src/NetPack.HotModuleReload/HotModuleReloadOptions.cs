@@ -48,7 +48,7 @@ namespace NetPack.HotModuleReload
     }
     public class HotModuleReloadOptions
     {
-      
+
 
         public WatchPatterns WebRootWatchPatterns { get; }
         public WatchPatterns ContentRootWatchPatterns { get; }
@@ -62,16 +62,16 @@ namespace NetPack.HotModuleReload
         }
 
         public HotModuleReloadOptions WatchWebRoot(Action<WatchPatterns> configure)
-        {           
+        {
             configure?.Invoke(WebRootWatchPatterns);
             return this;
-        }       
+        }
 
         public HotModuleReloadOptions WatchContentRoot(Action<WatchPatterns> configure)
-        {           
+        {
             configure?.Invoke(ContentRootWatchPatterns);
             return this;
-        }       
+        }
 
         /// <summary>
         /// A delay in milliseconds after a file change is detected, until the reload is signalled to the client browsers. 

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace NetPack.Utils
-{      
+{
     /// <summary>
     /// Courtesy of @cocowalla https://gist.github.com/cocowalla/5d181b82b9a986c6761585000901d1b8
     /// </summary>
@@ -63,7 +63,7 @@ namespace NetPack.Utils
         {
             int current = Interlocked.Increment(ref counter);
 
-            if(counter > 1000)
+            if (counter > 1000)
             {
                 // detect error
                 Console.WriteLine("debounc limit exceeded: " + counter);
@@ -75,7 +75,7 @@ namespace NetPack.Utils
                 if (current == counter && !cts.IsCancellationRequested)
                 {
                     action(state);
-                }               
+                }
                 else
                 {
                     Console.WriteLine("debounced..");

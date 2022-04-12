@@ -1,9 +1,6 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 using NetPack.Pipeline;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace NetPack.Tests

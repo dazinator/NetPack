@@ -19,7 +19,7 @@ namespace NetPack
         {
             _nodeServices = nodeServices;
             ProjectDir = projectDir;
-           _lifetime = lifetime;
+            _lifetime = lifetime;
         }
 #else
         public NetPackNodeServices(INodeServices nodeServices, string projectDir)
@@ -39,7 +39,7 @@ namespace NetPack
         public Task<T> Invoke<T>(string moduleName, params object[] args)
         {
 #if NODESERVICESASYNC
-             return _nodeServices.InvokeAsync<T>(moduleName, args);
+            return _nodeServices.InvokeAsync<T>(moduleName, args);
 #else
             return _nodeServices.Invoke<T>(moduleName, args);
 #endif
@@ -60,7 +60,7 @@ namespace NetPack
         public Task<T> InvokeExport<T>(string moduleName, string exportedFunctionName, params object[] args)
         {
 #if NODESERVICESASYNC
-             return _nodeServices.InvokeExportAsync<T>(moduleName, exportedFunctionName, args);
+            return _nodeServices.InvokeExportAsync<T>(moduleName, exportedFunctionName, args);
 #else
             return _nodeServices.InvokeExport<T>(moduleName, exportedFunctionName, args);
 #endif

@@ -9,7 +9,7 @@ namespace NetPack
     // Extension method put in root namespace for discoverability purposes.
     public static class SubpathHelper
     {
-        private readonly static char[] PathSegmentSeperators = new char[]{'/'};
+        private readonly static char[] PathSegmentSeperators = new char[] { '/' };
         //public static PathString Parse(string subPath)
         //{
         //    if (string.IsNullOrWhiteSpace(subPath))
@@ -76,8 +76,8 @@ namespace NetPack
             }
 
 
-          //  string[] fromDirectories = fromSubPath.Split(PathSegmentSeperators, StringSplitOptions.RemoveEmptyEntries);
-          //  string[] toDirectories = toSubPath.Split(PathSegmentSeperators, StringSplitOptions.RemoveEmptyEntries);
+            //  string[] fromDirectories = fromSubPath.Split(PathSegmentSeperators, StringSplitOptions.RemoveEmptyEntries);
+            //  string[] toDirectories = toSubPath.Split(PathSegmentSeperators, StringSplitOptions.RemoveEmptyEntries);
 
             string[] fromDirectories = fromDirectory.Split('/');
             string[] toDirectories = toSubPath.Split('/');

@@ -6,10 +6,9 @@ using Moq;
 using NetPack.Requirements;
 using NetPack.Utils;
 using Xunit;
-using Dazinator.AspNet.Extensions.FileProviders;
-using NetPack.Typescript;
 using NetPack.Tests.Pipes;
 using System.Threading;
+using Dazinator.Extensions.FileProviders;
 
 namespace NetPack.Typescript.Tests
 {
@@ -22,7 +21,7 @@ namespace NetPack.Typescript.Tests
 
             // arrange
             var mockNodeInstance = new Moq.Mock<INetPackNodeServices>();
-            mockNodeInstance.Setup(a => a.InvokeExportAsync<TypeScriptCompileResult>(It.IsAny<string>(),"build", It.IsAny<TypescriptCompileRequestDto>()))
+            mockNodeInstance.Setup(a => a.InvokeExportAsync<TypeScriptCompileResult>(It.IsAny<string>(), "build", It.IsAny<TypescriptCompileRequestDto>()))
                                          .ReturnsAsync(new TypeScriptCompileResult()
                                          {
                                              Sources = new Dictionary<string, string>()

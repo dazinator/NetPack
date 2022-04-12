@@ -1,5 +1,3 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using NetPack.File;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,7 +17,7 @@ namespace NetPack.Tests
         [InlineData("/some/output", "/jsfiles/jsfile.js", "../../jsfiles/jsfile.js")]
         [InlineData("/some/output/", "/jsfiles/jsfile.js", "../../jsfiles/jsfile.js")]
         [InlineData("/", "jsfiles/jsfile.js", "jsfiles/jsfile.js")]
-        [InlineData("", "/ts/another.js.map", "ts/another.js.map")]        
+        [InlineData("", "/ts/another.js.map", "ts/another.js.map")]
         public async void Can_Make_Relative_Subpath(string fromPath, string toPath, string expected)
         {
             // given a directory path, and also some file path, where they both share a common root directory,

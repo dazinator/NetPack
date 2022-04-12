@@ -1,4 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
+﻿using Dazinator.Extensions.FileProviders;
 using DotNet.SourceMaps;
 using NetPack.Pipeline;
 using Newtonsoft.Json;
@@ -30,11 +30,11 @@ namespace NetPack.JsMin
 
                 string outPutFileName = GetOutputFileName(item);
                 string subPath = item.Directory + outPutFileName;
-               // state.AddBlock(subPath);
+                // state.AddBlock(subPath);
 
                 // preemptive block any map file until we have processed.
                 string mapFileName = outPutFileName + ".map";
-               // state.AddBlock(subPath + ".map");
+                // state.AddBlock(subPath + ".map");
 
                 SourceMapBuilder mapBuilder = GetSourceMapBuilder(_options, outPutFileName, state, item);
 

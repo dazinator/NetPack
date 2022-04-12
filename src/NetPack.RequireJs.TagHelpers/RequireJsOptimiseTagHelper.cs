@@ -1,4 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders.Directory;
+﻿using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,14 +63,14 @@ namespace NetPack.RequireJs
                 outFile = $"{outFile}/{OutName}";
             }
 
-            output.Attributes.SetAttribute("data-main", outFile);       
+            output.Attributes.SetAttribute("data-main", outFile);
             //  pipeLine.
             //   / netpack / built.js
         }
 
         private IPipeLine EnsurePipeline()
         {
-          
+
             IPipeLine pipeline;
             if (PipelineManager.PipeLines.ContainsKey(PipelineName))
             {

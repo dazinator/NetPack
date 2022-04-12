@@ -1,4 +1,4 @@
-using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,6 @@ using NetPack.Node.Dto;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,16 +78,16 @@ namespace NetPack.Rollup
             RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
             //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
             cancelationToken.ThrowIfCancellationRequested();
-            
+
             foreach (RollupOutputFileOptions output in _outputOptions)
             {
                 var outputResults = response.Results[output.File];
-                
+
                 PathStringUtils.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
-                
+
                 foreach (var outputItem in outputResults)
                 {
-                    if(outputItem.Modules != null)
+                    if (outputItem.Modules != null)
                     {
                         foreach (var module in outputItem.Modules)
                         {
@@ -98,7 +97,7 @@ namespace NetPack.Rollup
                             }
                         }
                     }
-                   
+
                     state.AddOutput(rootPath, new StringFileInfo(outputItem.Code.ToString(), outputFileName));
                     if (outputItem.SourceMap != null)
                     {
@@ -107,7 +106,7 @@ namespace NetPack.Rollup
                     }
                 }
 
-            }          
+            }
 
         }
     }

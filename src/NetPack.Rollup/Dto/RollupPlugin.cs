@@ -9,13 +9,13 @@ namespace NetPack.Rollup
         private readonly bool _importOnly;
         private readonly bool _addBeforeVirtualFileSystem;
         private readonly string _defaultExportName;
-        
+
 
         public RollupPlugin(string packageName, object configuration, string defaultExportName, bool importOnly, bool addBeforeVirtualFileSystem)
         {
             if (defaultExportName == null)
             {
-               // defaultExportName = //"plugin" + Guid.NewGuid().ToString("N");
+                // defaultExportName = //"plugin" + Guid.NewGuid().ToString("N");
             }
             _packageName = packageName;
             _pluginConfiguration = configuration;

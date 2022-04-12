@@ -143,7 +143,7 @@ namespace NetPack.Utils
                     return ParsePackagesFromStdOut(outputText);
                 }
                 else
-                {                   
+                {
                     string errorMessage = string.Join(Environment.NewLine, errors);
                     throw new NodeJsNotInstalledException(errorMessage);
                 }
