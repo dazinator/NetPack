@@ -250,4 +250,7 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
-/tools
+
+## cake tool
+tools/*
+!tools/packages.config
