@@ -80,9 +80,10 @@ namespace NetPack.Rollup
             try
             {
                 _logger.LogInformation("Invoking Rollup build with {FileCount} files", optimiseRequest.Files.Count);
+                
                 RollupResponse response = await _nodeServices.InvokeExportAsync<RollupRequest, RollupResponse>(_script.Value, "build", optimiseRequest, cancelationToken);
+                
                 _logger.LogInformation("Rollup build completed, response has {ResultCount} results", response?.Results?.Count ?? 0);
-                //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
                 cancelationToken.ThrowIfCancellationRequested();
                 
                 foreach (RollupOutputFileOptions output in _outputOptions)
@@ -90,7 +91,13 @@ namespace NetPack.Rollup
                     _logger.LogInformation("Processing output file: {OutputFile}", output.File);
                     var outputResults = response.Results[output.File];
 
-                    var filePathInfo = PathStringHelper.SplitPath(output.File);
+                    // Ensure the file path starts with '/' for PathString compatibility
+                    string filePath = output.File;
+                    if (!filePath.StartsWith("/"))
+                    {
+                        filePath = "/" + filePath;
+                    }
+                    var filePathInfo = PathStringHelper.SplitPath(filePath);
                     
                   // PathStringHelper.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
                     

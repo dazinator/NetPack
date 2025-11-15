@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace NetPack.Rollup
 {
+    [JsonDerivedType(typeof(RollupOutputFileOptions))]
+    [JsonDerivedType(typeof(RollupOutputDirOptions))]
     public class BaseRollupOutputOptions
     {
         public BaseRollupOutputOptions()
@@ -14,7 +16,7 @@ namespace NetPack.Rollup
         /// <summary>
         /// The format of the generated bundle.
         /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(RollupOutputFormatJsonConverter))]
         [JsonPropertyName("format")]
         public RollupOutputFormat Format { get; set; }
 
