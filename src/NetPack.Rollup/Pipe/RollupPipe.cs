@@ -77,38 +77,49 @@ namespace NetPack.Rollup
 
             cancelationToken.ThrowIfCancellationRequested();
 
-            RollupResponse response = await _nodeServices.InvokeExportAsync<RollupRequest, RollupResponse>(_script.Value, "build", optimiseRequest, cancelationToken);
-            //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
-            cancelationToken.ThrowIfCancellationRequested();
-            
-            foreach (RollupOutputFileOptions output in _outputOptions)
+            try
             {
-                var outputResults = response.Results[output.File];
-
-                var filePathInfo = PathStringHelper.SplitPath(output.File);
+                _logger.LogInformation("Invoking Rollup build with {FileCount} files", optimiseRequest.Files.Count);
+                RollupResponse response = await _nodeServices.InvokeExportAsync<RollupRequest, RollupResponse>(_script.Value, "build", optimiseRequest, cancelationToken);
+                _logger.LogInformation("Rollup build completed, response has {ResultCount} results", response?.Results?.Count ?? 0);
+                //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
+                cancelationToken.ThrowIfCancellationRequested();
                 
-              // PathStringHelper.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
-                
-                foreach (var outputItem in outputResults)
+                foreach (RollupOutputFileOptions output in _outputOptions)
                 {
-                    if(outputItem.Modules != null)
-                    {
-                        foreach (var module in outputItem.Modules)
-                        {
-                            foreach (var export in module.Exports)
-                            {
+                    _logger.LogInformation("Processing output file: {OutputFile}", output.File);
+                    var outputResults = response.Results[output.File];
 
+                    var filePathInfo = PathStringHelper.SplitPath(output.File);
+                    
+                  // PathStringHelper.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
+                    
+                    foreach (var outputItem in outputResults)
+                    {
+                        if(outputItem.Modules != null)
+                        {
+                            foreach (var module in outputItem.Modules)
+                            {
+                                foreach (var export in module.Exports)
+                                {
+
+                                }
                             }
                         }
+                        state.AddStringFile(filePathInfo.Directory, outputItem.Code.ToString(), filePathInfo.FileName);
+                        if (outputItem.SourceMap != null)
+                        {
+                            string json =  JsonSerializer.Serialize(outputItem.SourceMap);
+                            state.AddStringFile(filePathInfo.Directory, json, filePathInfo.FileName + ".map");
+                        }
                     }
-                    state.AddStringFile(filePathInfo.Directory, outputItem.Code.ToString(), filePathInfo.FileName);
-                    if (outputItem.SourceMap != null)
-                    {
-                        string json =  JsonSerializer.Serialize(outputItem.SourceMap);
-                        state.AddStringFile(filePathInfo.Directory, json, filePathInfo.FileName + ".map");
-                    }
-                }
 
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during Rollup processing");
+                throw;
             }          
 
         }
