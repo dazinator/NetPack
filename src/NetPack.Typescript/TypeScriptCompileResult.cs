@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace NetPack.Typescript
 {
@@ -9,7 +9,7 @@ namespace NetPack.Typescript
         public TypescriptCompileError[] Errors { get; set; }
         public string Message { get; set; }
 
-        public JObject Echo { get; set; }
+        public JsonObject Echo { get; set; }
 
         public Dictionary<string, string> EchoFiles { get; set; }
     }

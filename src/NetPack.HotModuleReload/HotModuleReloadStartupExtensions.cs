@@ -1,6 +1,7 @@
 
 using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SignalR;
@@ -21,20 +22,10 @@ namespace NetPack
             services.ConfigureOptions(typeof(PostConfigureStaticFilesOptions));
             return services;
         }
-
-        public static IApplicationBuilder UseHotModuleReload(this IApplicationBuilder app)
+        public static IEndpointRouteBuilder MapHotModuleReloadHub(this IEndpointRouteBuilder endpoints, string path = DefaultHubPathString)
         {
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<HotModuleReloadHub>(DefaultHubPathString);
-            });
-            return app;
-        }
-
-        public static HubRouteBuilder MapHotModuleReloadHub(this HubRouteBuilder builder, string path = DefaultHubPathString)
-        {
-            builder.MapHub<HotModuleReloadHub>(path);
-            return builder;
+            endpoints.MapHub<HotModuleReloadHub>(path);
+            return endpoints;
         }
 
     }

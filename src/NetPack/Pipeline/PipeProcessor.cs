@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Polly.Retry;
 
 namespace NetPack.Pipeline
 {
@@ -22,15 +23,17 @@ namespace NetPack.Pipeline
             Input = input;
             Pipe = pipe;
             _logger = logger;
-            Policy = Policy.Handle<IOException>()
-                  .WaitAndRetryAsync(new[] {
-                      TimeSpan.FromSeconds(1),
-                      TimeSpan.FromSeconds(2),
-                      TimeSpan.FromSeconds(3)
-                      }, (exception, timeSpan) =>
-                      {
-                          // TODO: Log exception    
-                      });
+            RetryPolicy = Policy.Handle<IOException>()
+                .WaitAndRetryAsync(new[]
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(3)
+                }, onRetry: (ex, timeSpan, retryAttempt, context) =>
+                {
+                    // TODO: Log the exception
+                    Console.WriteLine($"Retry {retryAttempt} after {timeSpan.Seconds} seconds due to: {ex.Message}");
+                });
         }
 
         public IPipe Pipe { get; set; }
@@ -39,7 +42,7 @@ namespace NetPack.Pipeline
         public DateTime LastProcessStartTime { get; set; } = DateTime.MinValue.ToUniversalTime();
         public bool IsProcessing { get; set; }
 
-        public Policy Policy { get; set; }
+        public AsyncRetryPolicy  RetryPolicy { get; set; }
 
         /// <summary>
         /// Returns true if the input specification for the pipe has been changed since the pipe was last processed. 
@@ -98,7 +101,7 @@ namespace NetPack.Pipeline
                 //}
 
 
-                await Policy.ExecuteAsync(ct => Pipe.ProcessAsync(state, ct), token);
+                await RetryPolicy.ExecuteAsync(ct => Pipe.ProcessAsync(state, ct), token);
                 // flush outputs from succesfully processed pipe into pipeline.
                 if (!token.IsCancellationRequested)
                 {

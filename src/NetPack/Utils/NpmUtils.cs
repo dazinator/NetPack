@@ -14,18 +14,18 @@ namespace NetPack.Utils
         public static Dictionary<string, List<string>> ParsePackagesFromStdOut(string output)
         {
 
-            Dictionary<string, List<string>> packages = new Dictionary<string, List<string>>();
+            var packages = new Dictionary<string, List<string>>();
 
-            string asciiEncoded = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(output));
+            var asciiEncoded = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(output));
 
-            StringReader reader = new StringReader(asciiEncoded);
-            string line = reader.ReadLine(); // first line is environment current directory.
+            var reader = new StringReader(asciiEncoded);
+            var line = reader.ReadLine(); // first line is environment current directory.
 
-            char[] nonAsciiChars = new char[] { '?' }; // chars that could not be ascii encoded are turned into ? so we remove them.
+            var nonAsciiChars = new char[] { '?' }; // chars that could not be ascii encoded are turned into ? so we remove them.
 
             while (reader.Peek() != -1)
             {
-                string packageLine = reader.ReadLine();
+                var packageLine = reader.ReadLine();
                 if (packageLine.StartsWith("?") || packageLine.StartsWith("+--"))
                 {
                     //  var lastIndex = packageLine.LastIndexOf('?');
@@ -74,14 +74,14 @@ namespace NetPack.Utils
         {
             // query local npm modules, because requiring global modules within nodejs
             // requires an environment variable to be set: http://stackoverflow.com/questions/15636367/nodejs-require-a-global-module-package
-            using (Process p = ProcessUtils.CreateNpmProcess("list --depth 0"))
+            using (var p = ProcessUtils.CreateNpmProcess("list --depth 0"))
             {
 
 
-                List<string> errors = new List<string>();
-                List<string> warnings = new List<string>();
+                var errors = new List<string>();
+                var warnings = new List<string>();
 
-                StringBuilder output = new StringBuilder();
+                var output = new StringBuilder();
                 // StringBuilder error = new StringBuilder();
 
                 using (AutoResetEvent outputWaitHandle = new AutoResetEvent(false))
@@ -156,7 +156,7 @@ namespace NetPack.Utils
                 ? $"install {packageName}"
                 : $"install {packageName}@{version}";
 
-            using (Process p = ProcessUtils.CreateNpmProcess(args))
+            using (var p = ProcessUtils.CreateNpmProcess(args))
             {
                 p.Start();
 
@@ -164,8 +164,8 @@ namespace NetPack.Utils
                 p.WaitForExit();
 
                 // reads the error output
-                List<string> errors = new List<string>();
-                List<string> warnings = new List<string>();
+                var errors = new List<string>();
+                var warnings = new List<string>();
 
                 while (!p.StandardError.EndOfStream)
                 {

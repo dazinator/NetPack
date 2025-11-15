@@ -1,11 +1,11 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NetPack.Pipeline;
 using System.Linq;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Xunit;
 
 namespace NetPack.Tests

@@ -1,8 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace NetPack.Rollup
 {
+    [JsonDerivedType(typeof(RollupInputOptions))]
+    [JsonDerivedType(typeof(RollupCodeSplittingInputOptions))]
     public class BaseRollupInputOptions
     {
         public BaseRollupInputOptions()
@@ -11,7 +14,7 @@ namespace NetPack.Rollup
             External = new List<string>();
         }
 
-        public void AddPlugin(string name, object configuration, string defaultExportName = null, bool importOnly = false, bool addBeforeVirtualFileSystem = false)
+        public void AddPlugin(string name, JsonNode configuration, string defaultExportName = null, bool importOnly = false, bool addBeforeVirtualFileSystem = false)
         {
             Plugins.Add(new RollupPlugin(name, configuration, defaultExportName, importOnly, addBeforeVirtualFileSystem));
         }
@@ -19,11 +22,13 @@ namespace NetPack.Rollup
         /// <summary>
         /// List of plugins that will participate in the rollup bundling process.
         /// </summary>
+        [JsonPropertyName("plugins")]
         public List<RollupPlugin> Plugins { get; set; }
 
         /// <summary>
         ///  A List of module IDs that should remain external to the bundle.
         /// </summary>
+        [JsonPropertyName("external")]
         public List<string> External { get; set; }
 
         public BaseRollupInputOptions AddExternal(string externalModuleName)

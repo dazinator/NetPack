@@ -8,7 +8,7 @@
     self.addModuleToList = function (listId, moduleName) {
         var ul = document.getElementById(listId);
         var li = document.createElement("li");
-        li.appendChild(document.createTextNode(moduleName + " Loaded.. I am very productive.."));
+        li.appendChild(document.createTextNode(moduleName + " Loaded.. I am very productive today.."));
         ul.appendChild(li);            
         return { listId: listId, item: li };
     }; 

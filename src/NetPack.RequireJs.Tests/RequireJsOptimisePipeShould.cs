@@ -2,13 +2,15 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
-using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Microsoft.AspNetCore.Http;
+using NetPack.Tests.Utils;
 
 namespace NetPack.RequireJs.Tests
 {
@@ -20,6 +22,7 @@ namespace NetPack.RequireJs.Tests
 
         public RequireJsOptimisePipeShould()
         {
+            NodeFnmHelper.SetPath();
             // Arrange
             _server = new TestServer(new WebHostBuilder()
                 .UseStartup<RequireJsOptimisePipeTestsStartup>());

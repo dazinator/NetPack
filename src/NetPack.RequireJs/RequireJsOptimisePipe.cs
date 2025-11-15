@@ -1,6 +1,4 @@
-using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
 using NetPack.Node.Dto;
@@ -10,6 +8,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders;
 
 namespace NetPack.RequireJs
 {
@@ -33,10 +32,13 @@ namespace NetPack.RequireJs
             _options = options;
             _script = new Lazy<StringAsTempFile>(() =>
             {
-                Assembly assy = GetType().GetAssemblyFromType();
-                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
-                string scriptContent = script.ReadAllContent();
-                return _nodeServices.CreateStringAsTempFile(scriptContent);
+                return new StringAsTempFile(name, () =>
+                {
+                    Assembly assy = GetType().GetAssemblyFromType();
+                    Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, "Embedded/netpack-requirejs-optimise.js");
+                    string scriptContent = script.ReadAllContent();
+                    return scriptContent;
+                });
             });
         }
 
@@ -68,11 +70,11 @@ namespace NetPack.RequireJs
 
            
                 cancelationToken.ThrowIfCancellationRequested();
-                RequireJsOptimiseResult result = await _nodeServices.InvokeAsync<RequireJsOptimiseResult>(_script.Value.FileName, optimiseRequest);
+                var result = await _nodeServices.InvokeExportAsync<RequireJsOptimiseRequestDto, RequireJsOptimiseResult>(_script.Value, null, optimiseRequest, cancelationToken);
                 foreach (NodeInMemoryFile file in result.Files)
                 {
                     string filePath = file.Path.Replace('\\', '/');
-                    SubPathInfo subPathInfo = SubPathInfo.Parse(filePath);
+                    var subPathInfo = SubPathInfo.Parse(filePath);
                     PathString dir = subPathInfo.Directory.ToPathString();
                     context.AddOutput(dir, new StringFileInfo(file.Contents, subPathInfo.Name));
                 }

@@ -1,10 +1,8 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using DotNet.SourceMaps;
+﻿using DotNet.SourceMaps;
 using NetPack.Pipeline;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -67,14 +65,14 @@ namespace NetPack.JsMin
                     {
                         // seperate file.
 
-                        state.AddOutput(item.Directory, new StringFileInfo(jsonSourceMap, mapFileName));
+                        state.AddStringFile(item.Directory, jsonSourceMap, mapFileName);
                         sourceMappingURL = $"//# sourceMappingURL={mapFileName.ToString()}";
                     }
 
                     output.Append(sourceMappingURL);
                 }
 
-                state.AddOutput(item.Directory, new StringFileInfo(output.ToString(), outPutFileName));
+                state.AddStringFile(item.Directory, output.ToString(), outPutFileName);
 
             }
 
@@ -83,11 +81,11 @@ namespace NetPack.JsMin
 
         private string GetJson(SourceMap sourceMap)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings
+            var options = new JsonSerializerOptions
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
-            string json = JsonConvert.SerializeObject(sourceMap, settings);
+            string json = JsonSerializer.Serialize(sourceMap, options);
             return json;
         }
 

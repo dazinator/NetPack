@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 
 namespace NetPack.Requirements
 {
@@ -39,17 +39,29 @@ namespace NetPack.Requirements
         {
             return _dependencies.Any();
         }
-
-        public JObject ToJObject()
+        
+        public JsonObject ToJsonObject()
         {
-            JObject deps = new JObject();
+            var deps = new JsonObject();
 
             foreach (var item in _dependencies)
             {
-                deps[item.PackageName] = item.Version;
+                deps[item.PackageName] = JsonValue.Create(item.Version);
             }
 
             return deps;
         }
+
+        // public JObject ToJObject()
+        // {
+        //     JObject deps = new JObject();
+        //
+        //     foreach (var item in _dependencies)
+        //     {
+        //         deps[item.PackageName] = item.Version;
+        //     }
+        //
+        //     return deps;
+        // }
     }
 }

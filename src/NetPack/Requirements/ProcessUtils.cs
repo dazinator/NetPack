@@ -9,7 +9,11 @@ namespace NetPack.Requirements
     {
         public static Process CreateNpmProcess(string args, string workingDirectory = null)
         {
-            return CreateProcess("npm.cmd", args, workingDirectory);
+            // On Windows, npm is npm.cmd, on Linux/Mac it's just npm
+            var npmExe = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) 
+                ? "npm.cmd" 
+                : "npm";
+            return CreateProcess(npmExe, args, workingDirectory);
         }
 
         public static Process CreateProcess(string exeName, string args, string workingDirectory = null)
@@ -40,7 +44,11 @@ namespace NetPack.Requirements
         private static string ResolveExecutablePathFromEnvironmentPath(string exe)
         {
             var enviromentPath = System.Environment.GetEnvironmentVariable("PATH");
-            var paths = enviromentPath.Split(';');
+            // On Windows, PATH uses ';' as separator, on Linux/Mac it uses ':'
+            var pathSeparator = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) 
+                ? ';' 
+                : ':';
+            var paths = enviromentPath.Split(pathSeparator);
 
             var exePath = paths
                 .Select(x => Path.Combine(x, exe))

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using NetPack;
 using NetPack.Pipeline;
 
 namespace NetPack.Web.Controllers

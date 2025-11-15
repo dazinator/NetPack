@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using NetPack.Requirements;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 

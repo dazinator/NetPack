@@ -1,6 +1,6 @@
 ﻿using NetPack.Requirements;
-using Newtonsoft.Json.Linq;
 using System;
+using System.Text.Json.Nodes;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -18,22 +18,22 @@ namespace NetPack
         IRollupPluginStepConfigurationBuilder HasDefaultExportName(string name);
         IRollupPluginStepConfigurationBuilder HasOptionsOfKind(OptionsKind kind, Action<dynamic> configureOptions);
         IRollupPluginStepConfigurationBuilder RunsBeforeSystemPlugins();
-        IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JObject> configureOptions);
-        IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JArray> configureOptions);     
+        IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JsonObject> configureOptions);
+        IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JsonArray> configureOptions);     
     }
 
     public class RollupPluginOptionsBuilder : IRollupPluginOptionsBuilder, IRollupPluginStepConfigurationBuilder
     {
-        private JObject _options = null;
-        private JArray _optionsArray = null;
+        private JsonNode _options = null;
+       // private JsonArray _optionsArray = null;
         // private RollupPipeOptionsBuilder _builder;
         private NpmDependency _npmDependency = null;
         private bool _importOnly = false;
         private string _defaultExportName = null;
 
         public NpmDependency NpmDependency { get => _npmDependency; set => _npmDependency = value; }
-        public JObject Options { get => _options; set => _options = value; }
-        public JArray OptionsArray { get => _optionsArray; set => _optionsArray = value; }
+        public JsonNode Options { get => _options; set => _options = value; }
+      //  public JsonArray OptionsArray { get => _optionsArray; set => _optionsArray = value; }
 
         public string DefaultExportName { get => _defaultExportName; set => _defaultExportName = value; }
         public bool IsImportOnly { get => _importOnly; set => _importOnly = value; }
@@ -42,7 +42,6 @@ namespace NetPack
         {
             IsImportOnly = false;
             Options = null;
-            OptionsArray = null;
         }
 
         public IRollupPluginStepConfigurationBuilder HasNpmDependency(Action<NpmDependencyBuilder> configureNpmModuleRequirement)
@@ -71,27 +70,27 @@ namespace NetPack
 
         public bool PluginRunsBeforeSystemPlugins { get; set; }
 
-        public IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JObject> configureOptions)
+        public IRollupPluginStepConfigurationBuilder HasOptionsObject(Action<JsonObject> configureOptions)
         {
             OptionsKind =  OptionsKind.Object;
             if (configureOptions != null)
             {
               
-                    JObject options = new JObject();
+                var options = new JsonObject();
                     configureOptions?.Invoke(options);
                     Options = options;   
             }
             return this;
         }
 
-        public IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JArray> configureOptions)
+        public IRollupPluginStepConfigurationBuilder HasOptionsArray(Action<JsonArray> configureOptions)
         {
             OptionsKind = OptionsKind.Array;
             if (configureOptions != null)
             {
-                JArray options = new JArray();
+                JsonArray options = new JsonArray();
                 configureOptions?.Invoke(options);
-                OptionsArray = options;
+                Options = options;
             }
             return this;
         }
@@ -103,15 +102,15 @@ namespace NetPack
             {
                 if (OptionsKind == OptionsKind.Object)
                 {
-                    JObject options = new JObject();
+                    JsonObject options = new JsonObject();
                     configureOptions?.Invoke(options);
                     Options = options;
                 }
                 else if (OptionsKind == OptionsKind.Array)
                 {
-                    JArray options = new JArray();
+                    JsonArray options = new JsonArray();
                     configureOptions?.Invoke(options);
-                    OptionsArray = options;
+                    Options = options;
                 }
                 else
                 {
@@ -122,9 +121,9 @@ namespace NetPack
             return this;
         }
 
-        public object GetJsonConfigurationObject()
+        public JsonNode GetJsonConfigurationObject()
         {
-            return (object)Options ?? OptionsArray;
+            return Options;
         }
 
         /// <summary>

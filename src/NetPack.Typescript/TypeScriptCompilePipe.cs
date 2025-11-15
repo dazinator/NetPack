@@ -1,6 +1,3 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.NodeServices;
 using NetPack.Extensions;
 using NetPack.Pipeline;
 using NetPack.Utils;
@@ -13,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace NetPack.Typescript
 {
-    public class TypeScriptCompilePipe : BasePipe, IDisposable
+    public class TypeScriptCompilePipe : BasePipe
     {
         private INetPackNodeServices _nodeServices;
         private TypeScriptPipeOptions _options;
@@ -22,9 +19,9 @@ namespace NetPack.Typescript
         private readonly PipeState _previousState;
 
         public TypeScriptCompilePipe(INetPackNodeServices nodeServices,
-            IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider, new TypeScriptPipeOptions())
+            IEmbeddedResourceProvider embeddedResourceProvider) : this(nodeServices, embeddedResourceProvider,
+            new TypeScriptPipeOptions())
         {
-
         }
 
         public TypeScriptCompilePipe(INetPackNodeServices nodeServices,
@@ -36,16 +33,19 @@ namespace NetPack.Typescript
             _options = options;
             _script = new Lazy<StringAsTempFile>(() =>
             {
-                Assembly assy = GetType().GetAssemblyFromType();
-                string scriptName = (_options.TestMode ?? false) ? "Embedded/netpack-testfiles.js" : "Embedded/netpack-typescript.js";
-                Microsoft.Extensions.FileProviders.IFileInfo script = _embeddedResourceProvider.GetResourceFile(assy, scriptName);
-                string scriptContent = script.ReadAllContent();
-
-                return _nodeServices.CreateStringAsTempFile(scriptContent);
+                return new StringAsTempFile(name, () =>
+                {
+                    Assembly assy = GetType().GetAssemblyFromType();
+                    string scriptName = (_options.TestMode ?? false)
+                        ? "Embedded/netpack-testfiles.js"
+                        : "Embedded/netpack-typescript.js";
+                    Microsoft.Extensions.FileProviders.IFileInfo script =
+                        _embeddedResourceProvider.GetResourceFile(assy, scriptName);
+                    string scriptContent = script.ReadAllContent();
+                    return scriptContent;
+                });
             });
         }
-
-
 
 
         public override async Task ProcessAsync(PipeState context, CancellationToken cancelationToken)
@@ -73,11 +73,12 @@ namespace NetPack.Typescript
 
             if (context.InputFiles != null)
             {
-
                 // get modified files.
                 inputFiles = context.GetInputFiles();
 
-                FileWithDirectory[] modifiedInputs = _previousState != null ? context.GetModifiedInputs(_previousState).ToArray() : inputFiles;
+                FileWithDirectory[] modifiedInputs = _previousState != null
+                    ? context.GetModifiedInputs(_previousState).ToArray()
+                    : inputFiles;
 
                 foreach (FileWithDirectory item in inputFiles)
                 {
@@ -95,7 +96,6 @@ namespace NetPack.Typescript
                     string contents = item.FileInfo.ReadAllContent();
                     requestDto.Files.Add(item.UrlPath, contents);
                 }
-
             }
 
 
@@ -114,12 +114,16 @@ namespace NetPack.Typescript
 
                 StringAsTempFile nodeScript = _script.Value;
                 cancelationToken.ThrowIfCancellationRequested();
-                TypeScriptCompileResult result = await _nodeServices.InvokeExportAsync<TypeScriptCompileResult>(nodeScript.FileName, "build", requestDto);
+                TypeScriptCompileResult result =
+                    await _nodeServices.InvokeExportAsync<TypescriptCompileRequestDto, TypeScriptCompileResult>(nodeScript, "build",
+                        requestDto, cancelationToken);
                 cancelationToken.ThrowIfCancellationRequested();
                 if (result.Errors != null && result.Errors.Any())
                 {
                     // Throwing an exception will halt further processing of the pipeline.
-                    TypeScriptCompileException typescriptCompilationException = new TypeScriptCompileException("Could not compile typescript due to compilation errors.", result.Errors);
+                    TypeScriptCompileException typescriptCompilationException =
+                        new TypeScriptCompileException("Could not compile typescript due to compilation errors.",
+                            result.Errors);
                     throw typescriptCompilationException;
                 }
 
@@ -127,10 +131,7 @@ namespace NetPack.Typescript
                 {
                     foreach (KeyValuePair<string, string> item in result.EchoFiles)
                     {
-                        SubPathInfo subPathInfo = SubPathInfo.Parse(item.Key);
-                        StringFileInfo outputFileInfo = new StringFileInfo(item.Value, subPathInfo.Name);
-
-                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
+                        context.AddStringFile(item.Key, item.Value);
                     }
                 }
 
@@ -138,11 +139,7 @@ namespace NetPack.Typescript
                 {
                     foreach (KeyValuePair<string, string> output in result.Sources)
                     {
-                        SubPathInfo subPathInfo = SubPathInfo.Parse(output.Key);
-                        var outputFileInfo = new StringFileInfo(output.Value, subPathInfo.Name);
-
-                        context.AddOutput(subPathInfo.Directory.ToPathString(), outputFileInfo);
-
+                        context.AddStringFile(output.Key, output.Value);
                     }
                 }
 
@@ -164,30 +161,13 @@ namespace NetPack.Typescript
                         // {
                         // source file is already being served.
                         //    }
-
                     }
-
                 }
-
             }
             catch (System.Exception e)
             {
-
                 throw;
-            }
-
-        }
-
-        public void Dispose()
-        {
-            if (_script.IsValueCreated)
-            {
-                _script.Value.Dispose();
             }
         }
     }
-
-
-
-
 }

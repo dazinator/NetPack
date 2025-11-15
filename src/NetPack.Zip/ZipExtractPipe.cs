@@ -1,12 +1,12 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using NetPack.Pipeline;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders;
+using NetPack.Utils;
 
 namespace NetPack.Zip
 {
@@ -65,13 +65,12 @@ namespace NetPack.Zip
                 var ms = new MemoryStream();
                 var readStream = entry.Open();
 
-                await readStream.CopyToAsync(ms);
+                await readStream.CopyToAsync(ms, cancelationToken);
 
-                var memoryStreamFile = new MemoryStreamFileInfo(ms, null, entry.Name);
-
+                var memoryStreamFile = new MemoryStreamFileInfo(ms,  entry.Name);
+               
                 var subPath = SubPathInfo.Parse(entry.FullName);
                 var pathString = new PathString($"/{subPath.Directory}");
-
                 state.AddOutput(pathString, memoryStreamFile);
             }
         }

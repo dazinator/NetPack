@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>NetPack.Rollup</AssemblyName>
     <PackageId>NetPack.Rollup</PackageId>
   </PropertyGroup>
@@ -12,6 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--    Direct reference to this package always reqquired.-->
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.0"/>
     <EmbeddedResource Include="Embedded\RollupCodeSplittingTemplate.txt">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -23,10 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />

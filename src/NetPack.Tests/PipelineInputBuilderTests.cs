@@ -1,9 +1,5 @@
-using System.IO;
-using Microsoft.Extensions.FileProviders;
-using NetPack.File;
 using NetPack.Pipeline;
 using Xunit;
-using Dazinator.AspNet.Extensions.FileProviders;
 using System.Linq;
 
 namespace NetPack.Tests

@@ -2,9 +2,8 @@
 using Microsoft.Extensions.FileProviders;
 using NetPack.Pipeline;
 using System.Collections.Generic;
-using Dazinator.AspNet.Extensions.FileProviders;
 using System.Linq;
-using System;
+using Dazinator.Extensions.FileProviders;
 
 namespace NetPack
 {

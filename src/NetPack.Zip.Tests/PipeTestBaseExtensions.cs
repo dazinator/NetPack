@@ -1,10 +1,9 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.FileInfo;
-using Microsoft.Extensions.FileProviders;
+﻿using Dazinator.Extensions.FileProviders;
 using NetPack.Tests.Pipes;
 using System;
 using System.IO;
 using System.IO.Compression;
+using NetPack.Utils;
 
 namespace NetPack.Zip.Tests
 {
@@ -22,13 +21,12 @@ namespace NetPack.Zip.Tests
             }
             stream.Position = 0;
 
+         //   throw new NotImplementedException("SubPathInfo gone");
             var subPath = SubPathInfo.Parse(path);
-            var fileInfo = new MemoryStreamFileInfo(stream, null, subPath.Name);
+            var fileInfo = new MemoryStreamFileInfo(stream, subPath.Name);
             testBase.Directory.AddFile(subPath.Directory, fileInfo);
-
             return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
-
-            //return fileInfo;
+           
         }
     }
 }

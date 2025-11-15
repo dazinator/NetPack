@@ -1,6 +1,7 @@
 
 using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetPack.BrowserReload;
@@ -21,21 +22,27 @@ namespace NetPack
             services.ConfigureOptions(typeof(BrowserReloadOptionsConfigureOptions));
             return services;
         }
-
-        public static IApplicationBuilder UseBrowserReload(this IApplicationBuilder app)
+        
+        public static IEndpointRouteBuilder MapBrowserReloadHub(this IEndpointRouteBuilder endpoints, string path = DefaultHubPathString)
         {
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<BrowserReloadHub>(DefaultHubPathString);
-            });
-            return app;
+            endpoints.MapHub<BrowserReloadHub>(path);
+            return endpoints;
         }
 
-        public static HubRouteBuilder MapBrowserReloadHub(this HubRouteBuilder builder, string path = DefaultHubPathString)
-        {
-            builder.MapHub<BrowserReloadHub>(path);
-            return builder;
-        }
+        // public static IApplicationBuilder UseBrowserReload(this IApplicationBuilder app)
+        // {
+        //     app.UseSignalR(routes =>
+        //     {
+        //         routes.MapHub<BrowserReloadHub>(DefaultHubPathString);
+        //     });
+        //     return app;
+        // }
+
+        // public static HubRouteBuilder MapBrowserReloadHub(this HubRouteBuilder builder, string path = DefaultHubPathString)
+        // {
+        //     builder.MapHub<BrowserReloadHub>(path);
+        //     return builder;
+        // }
 
     }
 }

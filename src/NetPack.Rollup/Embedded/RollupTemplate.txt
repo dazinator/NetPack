@@ -104,7 +104,7 @@ module.exports = {
 		    var outputOptionsDto = outputOptionsArray[i];				
 			var outputOptions = getOutputOptions(outputOptionsDto);
 			var key = outputOptions.file;
-		    var inputOptions = getInputOptions(inputOptionsDto);
+		    var inputOptions = getInputOptions(inputOptionsDto, key);
 		    results[key] = [];
 
 			
@@ -118,7 +118,7 @@ module.exports = {
 	    }   
 
 		Promise.all(promises).then(function(values) {
-		   var response = { Results: results, EchoArray: values };
+		   var response = { results: results, echoArray: values };
 		   callback(null, response); 
 		}).catch((reason) => {
 			    errorMessage = reason;				

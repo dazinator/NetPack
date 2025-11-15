@@ -1,33 +1,26 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.NodeServices;
-using Microsoft.AspNetCore.Hosting;
+using Jering.Javascript.NodeJS;
 
 namespace NetPack
 {
     public class NetPackNodeServices : INetPackNodeServices
     {
-        private readonly INodeServices _nodeServices;
+        private readonly INodeJSService _nodeServices;
 
-        public string ProjectDir { get; }
+        public string ProjectDir { get; set; } 
 
-#if NODESERVICESASYNC
-        private readonly IApplicationLifetime _lifetime;
 
-        public NetPackNodeServices(INodeServices nodeServices, string projectDir, IApplicationLifetime lifetime)
+        //  private readonly IApplicationLifetime _lifetime;
+
+        public NetPackNodeServices(INodeJSService nodeServices)
         {
+            ProjectDir=   Environment.CurrentDirectory;
             _nodeServices = nodeServices;
-            ProjectDir = projectDir;
-           _lifetime = lifetime;
+                // ProjectDir = projectDir;
+            // _lifetime = lifetime;
         }
-#else
-        public NetPackNodeServices(INodeServices nodeServices, string projectDir)
-        {
-            _nodeServices = nodeServices;
-            ProjectDir = projectDir;
-        }
-#endif
 
 
         public void Dispose()
@@ -35,53 +28,55 @@ namespace NetPack
             _nodeServices.Dispose();
         }
 
-        [Obsolete]
-        public Task<T> Invoke<T>(string moduleName, params object[] args)
-        {
-#if NODESERVICESASYNC
-             return _nodeServices.InvokeAsync<T>(moduleName, args);
-#else
-            return _nodeServices.Invoke<T>(moduleName, args);
-#endif
+//         [Obsolete]
+//         public Task<T> Invoke<T>(string moduleName, params object[] args)
+//         {
+// #if NODESERVICESASYNC
+//              return _nodeServices.InvokeAsync<T>(moduleName, args);
+// #else
+//             return _nodeServices.Invoke<T>(moduleName, args);
+// #endif
+//
+//         }
 
-        }
+        // public Task<T> InvokeAsync<T>(string moduleName, params object[] args)
+        // {
+        //     return _nodeServices.InvokeAsync<T>(moduleName, args);
+        // }
 
-        public Task<T> InvokeAsync<T>(string moduleName, params object[] args)
-        {
-            return _nodeServices.InvokeAsync<T>(moduleName, args);
-        }
+        // public Task<T> InvokeAsync<T>(CancellationToken cancellationToken, string moduleName, params object[] args)
+        // {
+        //     return _nodeServices.InvokeAsync<T>(cancellationToken, moduleName, args);
+        // }
 
-        public Task<T> InvokeAsync<T>(CancellationToken cancellationToken, string moduleName, params object[] args)
+        public async Task<T> InvokeExportAsync<T>(StringAsTempFile script, string exportedFunctionName, object[] args = null,
+            CancellationToken cancellationToken = default)
         {
-            return _nodeServices.InvokeAsync<T>(cancellationToken, moduleName, args);
-        }
+            var factory = script.contentFactory;
+            var scriptContent = factory(); // Call the factory to get the actual script string
 
-        [Obsolete]
-        public Task<T> InvokeExport<T>(string moduleName, string exportedFunctionName, params object[] args)
-        {
-#if NODESERVICESASYNC
-             return _nodeServices.InvokeExportAsync<T>(moduleName, exportedFunctionName, args);
-#else
-            return _nodeServices.InvokeExport<T>(moduleName, exportedFunctionName, args);
-#endif
-        }
+            var result = await _nodeServices.InvokeFromStringAsync<T>(scriptContent, script.cacheIdentifier,
+                exportedFunctionName, args: args, cancellationToken);
 
-        public Task<T> InvokeExportAsync<T>(string moduleName, string exportedFunctionName, params object[] args)
-        {
-            return _nodeServices.InvokeExportAsync<T>(moduleName, exportedFunctionName, args);
+            return result;
         }
 
-        public Task<T> InvokeExportAsync<T>(CancellationToken cancellationToken, string moduleName, string exportedFunctionName, params object[] args)
+        public Task<TResult> InvokeExportAsync<TRequest, TResult>(StringAsTempFile script, string exportedFunctionName, TRequest request,
+            CancellationToken cancellationToken = default)
         {
-            return _nodeServices.InvokeExportAsync<T>(cancellationToken, moduleName, exportedFunctionName, args);
+            var args = new object[] { request };
+            return InvokeExportAsync<TResult>(script, exportedFunctionName, args, cancellationToken);
         }
-        public StringAsTempFile CreateStringAsTempFile(string content)
-        {
-#if NODESERVICESASYNC
-            return new StringAsTempFile(content, _lifetime.ApplicationStopping);
-#else
-            return new StringAsTempFile(content);
-#endif
-        }
+
+        // public Task<T> InvokeExportAsync<T>(CancellationToken cancellationToken, string moduleName, string exportedFunctionName, params object[] args)
+        // {
+        //     return _nodeServices.InvokeExportAsync<T>(cancellationToken, moduleName, exportedFunctionName, args);
+        // }
+        // public StringAsTempFile CreateStringAsTempFile(string content, string cacheIdentifier)
+        // {
+        //     return new StringAsTempFile(cacheIdentifier);
+        // }
     }
+
+    public record StringAsTempFile(string cacheIdentifier, Func<string> contentFactory);
 }

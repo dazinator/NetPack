@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Http;
-using Polly;
 using System.IO;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
+using Polly;
+using Polly.Retry;
 
 namespace NetPack.Pipeline
 {
@@ -29,7 +30,7 @@ namespace NetPack.Pipeline
 
         }
 
-        public Policy Policy { get; set; }
+        public AsyncRetryPolicy  RetryPolicy { get; set; }
 
         public PipelineContext(
             IFileProvider fileProvider,
@@ -42,17 +43,17 @@ namespace NetPack.Pipeline
             GeneratedOutput = directory;
             BaseRequestPath = baseRequestPath;
             //Input = input;
-
-            Policy = Policy.Handle<IOException>()
-                    .WaitAndRetryAsync(new[]
-  {
-    TimeSpan.FromSeconds(1),
-    TimeSpan.FromSeconds(2),
-    TimeSpan.FromSeconds(3)
-  }, (exception, timeSpan) =>
-  {
-      // TODO: Log exception    
-  });
+            RetryPolicy = Policy.Handle<IOException>()
+                .WaitAndRetryAsync(new[]
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(3)
+                }, onRetry: (ex, timeSpan, retryAttempt, context) =>
+                {
+                    // Log the exception
+                    Console.WriteLine($"Retry {retryAttempt} after {timeSpan.Seconds} seconds due to: {ex.Message}");
+                });
 
         }
 

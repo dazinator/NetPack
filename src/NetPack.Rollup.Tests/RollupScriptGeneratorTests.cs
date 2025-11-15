@@ -1,8 +1,10 @@
-﻿using ApprovalTests;
+﻿using System.Text.Json.Nodes;
+using ApprovalTests;
 using ApprovalTests.Reporters;
-using Dazinator.AspNet.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using NetPack.Tests.Utils;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,6 +19,7 @@ namespace NetPack.Rollup.Tests
 
         public RollupScriptGeneratorTests(ITestOutputHelper output)
         {
+            NodeFnmHelper.SetPath();
             _output = output;
         }
 
@@ -25,10 +28,14 @@ namespace NetPack.Rollup.Tests
         {
 
             RollupInputOptions rollupOptions = new RollupInputOptions();
-            dynamic pluginOptions = new Newtonsoft.Json.Linq.JObject();
-            pluginOptions.Start = true;
-            pluginOptions.Times = 1;
-            pluginOptions.Things = new JArray("foo", "bar");
+            
+            
+            var pluginOptions = new JsonObject
+            {
+                ["Start"] = JsonValue.Create(true),
+                ["Times"] = JsonValue.Create(1),
+                ["Things"] = new JsonArray("foo", "bar")
+            };
 
             rollupOptions.AddPlugin("foopackage", pluginOptions, "plugin0");
             rollupOptions.AddPlugin("barpackage", null, "plugin1");
@@ -47,10 +54,12 @@ namespace NetPack.Rollup.Tests
         {
 
             RollupInputOptions rollupOptions = new RollupInputOptions();
-            dynamic pluginOptions = new Newtonsoft.Json.Linq.JObject();
-            pluginOptions.Start = true;
-            pluginOptions.Times = 1;
-            pluginOptions.Things = new JArray("foo", "bar");
+            var pluginOptions = new JsonObject
+            {
+                ["Start"] = JsonValue.Create(true),
+                ["Times"] = JsonValue.Create(1),
+                ["Things"] = new JsonArray("foo", "bar")
+            };
 
             rollupOptions.AddPlugin("foopackage", pluginOptions);
             rollupOptions.AddPlugin("barpackage", null, "barp", true);

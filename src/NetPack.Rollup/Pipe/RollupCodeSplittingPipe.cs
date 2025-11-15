@@ -1,13 +1,11 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.NodeServices;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
 using NetPack.Node.Dto;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,8 +46,11 @@ namespace NetPack.Rollup
 
             _script = new Lazy<StringAsTempFile>(() =>
             {
-                string scriptContent = _rollupScriptGenerator.Value.GenerateScript(_inputOptions);
-                return _nodeServices.CreateStringAsTempFile(scriptContent);
+                return new StringAsTempFile(name, () =>
+                {
+                    string scriptContent = _rollupScriptGenerator.Value.GenerateScript(_inputOptions);
+                    return scriptContent;
+                });
             });
         }
 
@@ -73,7 +74,7 @@ namespace NetPack.Rollup
             optimiseRequest.OutputOptions = _outputOptions;
 
             cancelationToken.ThrowIfCancellationRequested();
-            var response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
+            var response = await _nodeServices.InvokeExportAsync<RollupRequest, RollupResponse>(_script.Value, "build", optimiseRequest);
             cancelationToken.ThrowIfCancellationRequested();
 
             foreach (var output in _outputOptions)
@@ -83,12 +84,12 @@ namespace NetPack.Rollup
                 string outDir = $"/{output.Dir}";
                 foreach (var item in outputResults)
                 {
-                    context.AddOutput(outDir, new StringFileInfo(item.Code.ToString(), item.FileName));
+                    context.AddStringFile(outDir, item.Code.ToString(), item.FileName);
 
                     if (item.SourceMap != null)
                     {
-                        var json = Newtonsoft.Json.JsonConvert.SerializeObject(item.SourceMap);
-                        context.AddOutput(outDir, new StringFileInfo(json, item.FileName + ".map"));
+                        var json =  JsonSerializer.Serialize(item.SourceMap);
+                        context.AddStringFile(outDir, json, item.FileName + ".map");
                     }
 
                 }

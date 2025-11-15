@@ -1,5 +1,4 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
@@ -12,20 +11,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using Dazinator.Extensions.FileProviders;
+using Microsoft.AspNetCore.Hosting;
 
 namespace NetPack.HotModuleReload
 {
 
     public class HotModuleReloadHostedService : IHostedService
     {
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<HotModuleReloadHostedService> _logger;
         private readonly IOptions<HotModuleReloadOptions> _options;
         private IDisposable _changeCallbackDisposable;
 
-        public HotModuleReloadHostedService(IHostingEnvironment env, IServiceScopeFactory serviceScopeFactory, ILogger<HotModuleReloadHostedService> logger, IOptions<HotModuleReloadOptions> options)
+        public HotModuleReloadHostedService(IWebHostEnvironment env, IServiceScopeFactory serviceScopeFactory, ILogger<HotModuleReloadHostedService> logger, IOptions<HotModuleReloadOptions> options)
         {
             _env = env;
             _serviceScopeFactory = serviceScopeFactory;

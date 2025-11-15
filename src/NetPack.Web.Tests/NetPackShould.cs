@@ -1,15 +1,18 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
+using NetPack.Tests.Utils;
 using Xunit;
-using Dazinator.AspNet.Extensions.FileProviders;
 using NetPack.Typescript;
+using NetPack.Utils;
 
 namespace NetPack.Web.Tests
 {
@@ -21,6 +24,7 @@ namespace NetPack.Web.Tests
 
         public NetPackShould()
         {
+            NodeFnmHelper.SetPath();
             // Arrange
             _server = new TestServer(new WebHostBuilder()
                 .UseStartup<Startup>()
@@ -185,20 +189,19 @@ namespace NetPack.Web.Tests
                         {
                             foreach (var value in values)
                             {
+                               
                                 var subPath = SubPathInfo.Parse(value);
-
+                                
                                 var existingFile = InMemoryFileProvider.GetFileInfo(value);
                                 var existingFileContents = existingFile.ReadAllContent();
                                 var modifiedFileContents = existingFileContents + Environment.NewLine +
                                                            "// modified on " + DateTime.UtcNow;
-
+                                
                                 var retrievedFolder = InMemoryFileProvider.Directory.GetFolder(subPath.Directory);
-
+                                
                                 var modifiedFile = new StringFileInfo(modifiedFileContents, subPath.Name);
-
-                                //  var fileToBeUpdated = mockFileProvider.Directory.GetFile(subPath.ToString());
                                 retrievedFolder.UpdateFile(modifiedFile);
-                                //  fileToBeUpdated.Update(modifiedFile);
+                               
 
                             }
                         }

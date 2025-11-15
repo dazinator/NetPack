@@ -1,4 +1,3 @@
-using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +7,11 @@ using Microsoft.Extensions.Primitives;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
+using NetPack.Tests.Utils;
 using Xunit;
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
@@ -22,6 +25,7 @@ namespace NetPack.Rollup.Tests
 
         public RollupPipeShould()
         {
+            NodeFnmHelper.SetPath();
             // Arrange
             _server = new TestServer(new WebHostBuilder()
                 .UseStartup<RollupPipeShouldTestsStartup>());
@@ -304,12 +308,12 @@ classA.doSomething();
                                        output.Sourcemap = SourceMapType.File;
                                        output.ConfigureGlobals(globals =>
                                        {
-                                           globals.jquery = "jjj";
+                                           globals["jquery"] = JsonValue.Create("jjj");
                                        });
                                        output.ConfigurePaths(paths =>
                                        {
                                            //  configure path for jquery module to be loaded from CDN.
-                                           paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+                                           paths["jquery"] = JsonValue.Create("https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js");
                                        });
                                    });
 
@@ -334,16 +338,16 @@ classA.doSomething();
                                         output.Sourcemap = SourceMapType.File;
                                         output.ConfigureGlobals(globals =>
                                         {
-                                            globals.jquery = "jjj";
+                                            globals["jquery"] = JsonValue.Create("jjj");
                                         });
                                         output.ConfigurePaths(paths =>
                                         {
                                             //  configure path for jquery module to be loaded from CDN.
-                                            paths.jquery = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+                                            paths["jquery"] = JsonValue.Create("https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js");
                                         });
                                         output.ConfigureAmd(amd =>
                                         {
-                                            amd.id = "custom";
+                                            amd["id"] = JsonValue.Create("custom");
                                         });
                                     });
                                     //options.OutputOptions.Sourcemap = SourceMapType.File;

@@ -1,22 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>NetPack.RequireJs</AssemblyName>
     <PackageId>NetPack.RequireJs</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
+    <!--    Direct reference to this package always reqquired.-->
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.0"/>
     <EmbeddedResource Include="Embedded\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
+  </ItemGroup> 
 
   <ItemGroup>
     <Folder Include="Properties\" />

@@ -1,11 +1,12 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using NetPack.Pipeline;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
 using Xunit;
 
 namespace NetPack.Tests

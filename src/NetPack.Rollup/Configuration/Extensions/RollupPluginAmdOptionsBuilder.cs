@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json.Nodes;
 
 namespace NetPack
 {
@@ -6,7 +6,7 @@ namespace NetPack
     {
         public class RollupPluginAmdOptionsBuilder : BaseOptionsBuilder<RollupPluginAmdOptionsBuilder>
         {
-            public RollupPluginAmdOptionsBuilder(JObject options) : base(options)
+            public RollupPluginAmdOptionsBuilder(JsonObject options) : base(options)
             {
             }
 

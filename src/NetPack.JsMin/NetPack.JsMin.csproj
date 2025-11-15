@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>NetPack.JsMin</AssemblyName>
     <PackageId>NetPack.JsMin</PackageId>
   </PropertyGroup>
@@ -13,10 +13,6 @@
   <ItemGroup>    
     <PackageReference Include="DotNet.SourceMaps" Version="0.2.0" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />

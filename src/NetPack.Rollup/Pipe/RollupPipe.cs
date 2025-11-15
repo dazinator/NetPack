@@ -1,14 +1,12 @@
-using Dazinator.AspNet.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.Logging;
 using NetPack.Extensions;
 using NetPack.Node.Dto;
 using NetPack.Pipeline;
 using NetPack.Utils;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,8 +47,11 @@ namespace NetPack.Rollup
 
             _script = new Lazy<StringAsTempFile>(() =>
             {
-                string scriptContent = _rollupScriptGenerator.Value.GenerateScript(_inputOptions);
-                return _nodeServices.CreateStringAsTempFile(scriptContent);
+                return new StringAsTempFile(name, () =>
+                {
+                    string scriptContent = _rollupScriptGenerator.Value.GenerateScript(_inputOptions);
+                    return scriptContent;
+                });
             });
         }
 
@@ -76,37 +77,56 @@ namespace NetPack.Rollup
 
             cancelationToken.ThrowIfCancellationRequested();
 
-            RollupResponse response = await _nodeServices.InvokeExportAsync<RollupResponse>(_script.Value.FileName, "build", optimiseRequest);
-            //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
-            cancelationToken.ThrowIfCancellationRequested();
-            
-            foreach (RollupOutputFileOptions output in _outputOptions)
+            try
             {
-                var outputResults = response.Results[output.File];
+                _logger.LogInformation("Invoking Rollup build with {FileCount} files", optimiseRequest.Files.Count);
                 
-                PathStringUtils.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
+                RollupResponse response = await _nodeServices.InvokeExportAsync<RollupRequest, RollupResponse>(_script.Value, "build", optimiseRequest, cancelationToken);
                 
-                foreach (var outputItem in outputResults)
+                _logger.LogInformation("Rollup build completed, response has {ResultCount} results", response?.Results?.Count ?? 0);
+                cancelationToken.ThrowIfCancellationRequested();
+                
+                foreach (RollupOutputFileOptions output in _outputOptions)
                 {
-                    if(outputItem.Modules != null)
-                    {
-                        foreach (var module in outputItem.Modules)
-                        {
-                            foreach (var export in module.Exports)
-                            {
+                    _logger.LogInformation("Processing output file: {OutputFile}", output.File);
+                    var outputResults = response.Results[output.File];
 
+                    // Ensure the file path starts with '/' for PathString compatibility
+                    string filePath = output.File;
+                    if (!filePath.StartsWith("/"))
+                    {
+                        filePath = "/" + filePath;
+                    }
+                    var filePathInfo = PathStringHelper.SplitPath(filePath);
+                    
+                  // PathStringHelper.GetPathAndFilename(output.File, out PathString rootPath, out string outputFileName);
+                    
+                    foreach (var outputItem in outputResults)
+                    {
+                        if(outputItem.Modules != null)
+                        {
+                            foreach (var module in outputItem.Modules)
+                            {
+                                foreach (var export in module.Exports)
+                                {
+
+                                }
                             }
                         }
+                        state.AddStringFile(filePathInfo.Directory, outputItem.Code.ToString(), filePathInfo.FileName);
+                        if (outputItem.SourceMap != null)
+                        {
+                            string json =  JsonSerializer.Serialize(outputItem.SourceMap);
+                            state.AddStringFile(filePathInfo.Directory, json, filePathInfo.FileName + ".map");
+                        }
                     }
-                   
-                    state.AddOutput(rootPath, new StringFileInfo(outputItem.Code.ToString(), outputFileName));
-                    if (outputItem.SourceMap != null)
-                    {
-                        string json = Newtonsoft.Json.JsonConvert.SerializeObject(outputItem.SourceMap);
-                        state.AddOutput(rootPath, new StringFileInfo(json, outputFileName + ".map"));
-                    }
-                }
 
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during Rollup processing");
+                throw;
             }          
 
         }

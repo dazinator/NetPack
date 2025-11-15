@@ -1,13 +1,14 @@
-
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.NodeServices;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
+using Jering.Javascript.NodeJS;
 
 // ReSharper disable once CheckNamespace
 // Extension method put in root namespace for discoverability purposes.
@@ -15,16 +16,15 @@ namespace NetPack
 {
     public static class NetPackServicesExtensions
     {
-
         private class PipelineSetup
         {
             public IPipeLine Pipeline { get; set; }
-
         }
 
         public class FileProcessingOptions
         {
             private readonly IServiceCollection _services;
+
             public FileProcessingOptions(IServiceCollection services)
             {
                 _services = services;
@@ -34,7 +34,6 @@ namespace NetPack
             {
                 _services.AddTransient<PipelineSetup>((sp) =>
                 {
-
                     IDirectory sourcesDirectory = sp.GetService<IDirectory>();
                     PipelineConfigurationBuilder builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
 
@@ -48,13 +47,13 @@ namespace NetPack
 
                 return this;
             }
-
-
         }
 
-        public static IServiceCollection AddNetPack(this IServiceCollection services, Action<FileProcessingOptions> configureOptions, Action<NodeServicesOptions> configureGlobalNodeOptions = null)
-        {         
-
+        public static IServiceCollection AddNetPack(this IServiceCollection services,
+            Action<FileProcessingOptions> configureOptions
+            //Action<NodeServicesOptions> configureGlobalNodeOptions = null
+        )
+        {
             services.AddSingleton(new NodeJsIsInstalledRequirement());
             services.AddSingleton<IRequirement, NpmDependenciesRequirement>();
             services.AddSingleton<NpmDependencyList>();
@@ -63,7 +62,9 @@ namespace NetPack
             // services.AddSingleton<INetPackPipelineFileProvider, NetPackPipelineFileProvider>();
             services.AddSingleton<IEmbeddedResourceProvider, EmbeddedResourceProvider>();
             services.AddSingleton<IPipelineWatcher, PipelineWatcher>();
-            services.AddTransient<IDirectory, InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
+            services
+                .AddTransient<IDirectory,
+                    InMemoryDirectory>(); // directory used for exposing source files that need be served up when source mapping is enabled.
 
 
             if (configureOptions != null)
@@ -72,23 +73,34 @@ namespace NetPack
                 configureOptions(opts);
             }
 
+            services.AddNodeJS();
+            
+            // TODO: Configure JSON serialization for Jering NodeJS service if needed
+            // The [JsonDerivedType] attributes on base classes should handle polymorphic serialization
+            
+            // Configure NodeJS process options to match where npm dependencies are installed
+            services.Configure<NodeJSProcessOptions>(options =>
+            {
+                // Set ProjectPath to current directory where package.json and node_modules will be
+                // In test scenarios, this will be the test output directory (bin/Debug/net8.0)
+                options.ProjectPath = Environment.CurrentDirectory;
+                
+                // Fix IPv6/IPv4 issue: Force Node.js to prefer IPv4 DNS resolution
+                // Node v17+ defaults to IPv6 which causes connection failures when server binds to IPv4
+                if (!options.EnvironmentVariables.ContainsKey("NODE_OPTIONS"))
+                {
+                    options.EnvironmentVariables.Add("NODE_OPTIONS", "--dns-result-order=ipv4first");
+                }
+            });
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {
                 //var nodeServices = serviceProvider.GetRequiredService<INodeServices>();
-
-                NodeServicesOptions options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
+                //  NodeServicesOptions options = new NodeServicesOptions(serviceProvider); // Obtains default options from DI config
                 // otherwise node services restarts automatically when file changes are made, losing state - we want to handle watch on netcore side.
-                options.WatchFileExtensions = null;
-                configureGlobalNodeOptions?.Invoke(options);
-              
-                INodeServices nodeServices = NodeServicesFactory.CreateNodeServices(options);
-#if NODESERVICESASYNC
-                IApplicationLifetime lifetime = serviceProvider.GetRequiredService<IApplicationLifetime>();
-                return new NetPackNodeServices(nodeServices, options.ProjectPath, lifetime);
-#else
-                return new NetPackNodeServices(nodeServices, options.ProjectPath);
-#endif
-               
+                //  options.WatchFileExtensions = null;
+                //  configureGlobalNodeOptions?.Invoke(options);
+                var nodeServices = serviceProvider.GetRequiredService<INodeJSService>();
+                return new NetPackNodeServices(nodeServices);
             });
 
             return services;
@@ -102,7 +114,8 @@ namespace NetPack
         /// For example, if you change a file, and a pipeline needs to re-process it to produce some output, a request for the output file will be delayed until the output is up to date, or this timeout is reached.
         /// If null then default of 1 minute is used.</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseNetPack(this IApplicationBuilder appBuilder, TimeSpan? requestTimeout = null)
+        public static IApplicationBuilder UseNetPack(this IApplicationBuilder appBuilder,
+            TimeSpan? requestTimeout = null)
         {
             PipelineManager pipeLineManager = appBuilder.ApplicationServices.GetService<PipelineManager>();
             if (pipeLineManager == null)
@@ -112,13 +125,15 @@ namespace NetPack
             }
 
             // Triggers all pipeline to be initialised and registered with pipeline manager.
-            System.Collections.Generic.IEnumerable<PipelineSetup> initialisedPipelines = appBuilder.ApplicationServices.GetServices<PipelineSetup>();
+            System.Collections.Generic.IEnumerable<PipelineSetup> initialisedPipelines =
+                appBuilder.ApplicationServices.GetServices<PipelineSetup>();
 
             RequestHaltingMiddlewareOptions middlewareOptions = new RequestHaltingMiddlewareOptions();
             if (requestTimeout != null)
             {
                 middlewareOptions.Timeout = requestTimeout.Value;
             }
+
             appBuilder.UseMiddleware<RequestHaltingMiddleware>(middlewareOptions);
 
             return appBuilder;
@@ -126,6 +141,4 @@ namespace NetPack
             // return new NetPackApplicationBuilder(appBuilder, pipeline);
         }
     }
-
-
 }

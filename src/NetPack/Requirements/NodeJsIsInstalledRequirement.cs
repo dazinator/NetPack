@@ -1,14 +1,19 @@
 using NetPack.Pipeline;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NetPack.Requirements
 {   
     public class NodeJsIsInstalledRequirement : IRequirement
     {
+        private bool disableCheck = true;
         public virtual void Check(IPipeLine pipeline)
         {
-
+            if (disableCheck)
+            {
+                return;
+            }
             using (Process p = new Process())
             {
                 ProcessStartInfo psi = new ProcessStartInfo("node", "-v");

@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
+﻿using Dazinator.Extensions.FileProviders.InMemory.Directory;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 
 namespace NetPack.Pipeline

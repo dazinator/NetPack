@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
 
 namespace NetPack.Rollup
 {
@@ -37,7 +37,7 @@ namespace NetPack.Rollup
                     return null;
                 }
 
-                string json = Newtonsoft.Json.JsonConvert.SerializeObject(PluginConfiguration)
+                string json =  JsonSerializer.Serialize(PluginConfiguration)
                     .Replace("\"FUNC", "").Replace("FUNC\"", ""); // hack to allow javascript functions to be sent via json see: https://stackoverflow.com/questions/4901859/send-javascript-function-over-json-using-json-net-lib
                 return json;
             }

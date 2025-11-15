@@ -1,5 +1,3 @@
-using Dazinator.AspNet.Extensions.FileProviders;
-using NetPack.File;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,14 +1,13 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetPack.Requirements;
-using NetPack.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 
 namespace NetPack.Pipeline
 {
@@ -102,6 +101,7 @@ namespace NetPack.Pipeline
             bool shouldCheckRequirements = _shouldPerformRequirementsCheck?.Invoke(this) ?? true;
             if(shouldCheckRequirements)
             {
+                Console.WriteLine("=== Checking requirements ===");
                 CheckRequirements();
             }
             else
@@ -113,7 +113,7 @@ namespace NetPack.Pipeline
             // we want to block becausewe dont want the app to finish starting
             // before all assets have been processed..
             //todo: exception handling here.
-            ProcessUninitialisedPipesAsync(CancellationToken.None).Wait(DefaultInitialiseTimeout);
+            ProcessUninitialisedPipesAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
         }
 

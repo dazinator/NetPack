@@ -1,20 +1,23 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.NodeServices;
 using Moq;
 using NetPack.Requirements;
 using NetPack.Utils;
 using Xunit;
-using Dazinator.AspNet.Extensions.FileProviders;
-using NetPack.Typescript;
 using NetPack.Tests.Pipes;
 using System.Threading;
+using Dazinator.Extensions.FileProviders;
+using NetPack.Tests.Utils;
 
 namespace NetPack.Typescript.Tests
 {
     public class TypeScriptCompilePipeTests : PipeTestBase
     {
+        public TypeScriptCompilePipeTests()
+        {
+            NodeFnmHelper.SetPath();
+        }
 
         [Fact]
         public async Task Compiles_TypescriptFiles_Into_Js_Files_With_SourceMaps()
@@ -22,7 +25,7 @@ namespace NetPack.Typescript.Tests
 
             // arrange
             var mockNodeInstance = new Moq.Mock<INetPackNodeServices>();
-            mockNodeInstance.Setup(a => a.InvokeExportAsync<TypeScriptCompileResult>(It.IsAny<string>(),"build", It.IsAny<TypescriptCompileRequestDto>()))
+            mockNodeInstance.Setup(a => a.InvokeExportAsync<TypescriptCompileRequestDto, TypeScriptCompileResult>(It.IsAny<StringAsTempFile>(),"build", It.IsAny<TypescriptCompileRequestDto>(), It.IsAny<CancellationToken>()))
                                          .ReturnsAsync(new TypeScriptCompileResult()
                                          {
                                              Sources = new Dictionary<string, string>()
@@ -32,7 +35,7 @@ namespace NetPack.Typescript.Tests
                                              }
                                          });
 
-            mockNodeInstance.Setup(a => a.CreateStringAsTempFile(It.IsAny<string>())).Returns(new StringAsTempFile("blah", CancellationToken.None));
+          //  mockNodeInstance.Setup(a => a.CreateStringAsTempFile(It.IsAny<string>())).Returns(new StringAsTempFile("blah", CancellationToken.None));
 
             var mockJsRequirement = new Moq.Mock<NodeJsIsInstalledRequirement>();
             mockJsRequirement.Setup(a => a.Check(null));

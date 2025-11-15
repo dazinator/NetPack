@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using Dazinator.Extensions.FileProviders.PrependBasePath;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders;
 
 namespace NetPack.Pipeline
 {
@@ -37,7 +37,7 @@ namespace NetPack.Pipeline
             var outputFileProvider = pipeline.WebrootFileProvider;
             if (!string.IsNullOrWhiteSpace(pipeline.Context.BaseRequestPath))
             {
-                outputFileProvider = new RequestPathFileProvider(pipeline.Context.BaseRequestPath, outputFileProvider);
+                outputFileProvider = new PrependBasePathFileProvider(pipeline.Context.BaseRequestPath, outputFileProvider);
             }
 
 

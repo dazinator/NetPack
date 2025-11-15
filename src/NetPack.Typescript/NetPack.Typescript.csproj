@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>NetPack.Typescript</AssemblyName>
     <PackageId>NetPack.Typescript</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
+    <!--    Direct reference to this package always reqquired.-->
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.0"/>
     <EmbeddedResource Include="Embedded\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
   </ItemGroup>
 
@@ -19,12 +21,8 @@
     <ProjectReference Include="..\NetPack\NetPack.csproj" />
   </ItemGroup> 
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup> 
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD;NODESERVICESASYNC</DefineConstants>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);NODESERVICESASYNC</DefineConstants>
   </PropertyGroup> 
 
   <ItemGroup>

@@ -1,9 +1,9 @@
-﻿using Dazinator.AspNet.Extensions.FileProviders.Directory;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using NetPack.Pipeline;
 using System;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 
 namespace NetPack.RequireJs
 {

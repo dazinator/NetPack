@@ -3,8 +3,8 @@
 }
 
 <p>
-    Netpack offers a RequireJS TagHelper for optimising AMD modules into a bundle using r.js optimiser, within your Razor pages directly:
-    <pre>
+Netpack offers a RequireJS TagHelper for optimising AMD modules into a bundle using r.js optimiser, within your Razor pages directly:
+<pre>
         &#x3C;require-js-optimise include=&#x22;amd/*.js, js/requireConfig.js&#x22;
                          require-js-src=&#x22;/lib/require.js/require.min.js&#x22;
                          main=&#x22;SomePage&#x22;
@@ -12,7 +12,6 @@
                          out-path=&#x22;/netpack&#x22;&#x3E;
         &#x3C;/require-js-optimise&#x3E;
 </pre>
-</p>
 
 
 <ul>
@@ -21,7 +20,7 @@
     </li>
     <li>
         exclude = A comma separated list of glob file patterns for the AMD format javascript files to be excluded if they have been included by a greedy include glob pattern.
-    </li>   
+    </li>
     <li>
         main = the AMD module that is the entry point to be loaded on the page.
     </li>
@@ -34,13 +33,12 @@
 </ul>
 
 
-
 <p>For example, on this page, these AMD modules have been loaded from an optimised file:</p>
 <ul id="modules"></ul>
 
 
 @section scripts
-    {
+{
 
 
     @*<script data-main="/netpack/built.js" src="~/lib/require.js/require.min.js"></script>*@
@@ -49,12 +47,10 @@
                          main="SomePage"
                          out-name="built.js"
                          out-path="/netpack">
-   </require-js-optimise>
+    </require-js-optimise>
     @*<script type="text/javascript" asp-src-include="/netpack/built.js"></script>*@
 
     @*<script type="text/javascript" src="/netpack/ts/Greeter.js"></script>
         <script type="text/javascript" src="/netpack/ts/Another.js"></script>*@
 
 }
-
-

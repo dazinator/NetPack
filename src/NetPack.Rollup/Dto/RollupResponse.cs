@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Nodes;
 
 namespace NetPack.Rollup
 {
@@ -7,10 +7,10 @@ namespace NetPack.Rollup
     {
         public Dictionary<string, RollupResult[]> Results { get; set; }
 
-        public JObject Echo { get; set; }
+        public JsonObject Echo { get; set; }
 
-        public JArray EchoArray { get; set; }
+        public JsonArray EchoArray { get; set; }
 
-        public JValue EchoValue { get; set; }
+        public JsonValue EchoValue { get; set; }
     }
 }

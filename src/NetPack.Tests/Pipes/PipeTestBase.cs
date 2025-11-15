@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dazinator.Extensions.FileProviders;
+using Dazinator.Extensions.FileProviders.InMemory;
+using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using NetPack.Pipeline;
-using Dazinator.AspNet.Extensions.FileProviders;
-using Dazinator.AspNet.Extensions.FileProviders.Directory;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using NetPack.Utils;
 
 namespace NetPack.Tests.Pipes
 {
@@ -20,7 +22,6 @@ namespace NetPack.Tests.Pipes
         {
             var subPath = SubPathInfo.Parse(path);
             var content = TestUtils.GenerateString(length) + Environment.NewLine + "//# sourceMappingURL=/" + subPath.ToString();
-            //  _fileProvider.AddFile(subPath, content);
             var fileInfo = new StringFileInfo(content, subPath.Name);
             Directory.AddFile(subPath.Directory, fileInfo);
             return new FileWithDirectory() { Directory = subPath.Directory, FileInfo = fileInfo };
@@ -30,7 +31,6 @@ namespace NetPack.Tests.Pipes
         {
             var subPath = SubPathInfo.Parse(fileName);
             var fileContent = content();
-            //  _fileProvider.AddFile(subPath, content);
             var fileInfo = new StringFileInfo(fileContent, subPath.Name);
             Directory.AddFile(subPath.Directory, fileInfo);
             return new FileWithDirectory() { Directory = "/" + subPath.Directory, FileInfo = fileInfo };
@@ -47,7 +47,7 @@ namespace NetPack.Tests.Pipes
                 input.AddInclude(item.UrlPath);
             }
             Sut = pipeFactory();
-            var loggerFactory = new LoggerFactory().AddConsole();
+            var loggerFactory =  LoggerFactory.Create(c=>c.AddConsole());
 
             var pipeContext = new PipeProcessor(input, Sut, loggerFactory.CreateLogger<PipeProcessor>());
             var pipes = new List<PipeProcessor>() { pipeContext };
