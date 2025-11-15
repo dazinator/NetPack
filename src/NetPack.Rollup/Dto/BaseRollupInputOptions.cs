@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace NetPack.Rollup
 {
+    [JsonDerivedType(typeof(RollupInputOptions))]
+    [JsonDerivedType(typeof(RollupCodeSplittingInputOptions))]
     public class BaseRollupInputOptions
     {
         public BaseRollupInputOptions()

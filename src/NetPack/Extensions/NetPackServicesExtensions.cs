@@ -6,6 +6,7 @@ using NetPack.Requirements;
 using NetPack.Utils;
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Jering.Javascript.NodeJS;
 
@@ -73,6 +74,10 @@ namespace NetPack
             }
 
             services.AddNodeJS();
+            
+            // TODO: Configure JSON serialization for Jering NodeJS service if needed
+            // The [JsonDerivedType] attributes on base classes should handle polymorphic serialization
+            
             // Configure NodeJS process options to match where npm dependencies are installed
             services.Configure<NodeJSProcessOptions>(options =>
             {
