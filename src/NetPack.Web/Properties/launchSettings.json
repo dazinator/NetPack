@@ -20,8 +20,7 @@
       "launchBrowser": true,
       "launchUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "PATH": "C:\\Users\\darre\\AppData\\Local\\fnm_multishells\\12124_1716904606883;"       
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }
