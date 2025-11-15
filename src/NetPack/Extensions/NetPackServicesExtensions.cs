@@ -71,22 +71,12 @@ namespace NetPack
             }
 
             services.AddNodeJS();
-            // Configure NodeJS process options
+            // Configure NodeJS process options to match where npm dependencies are installed
             services.Configure<NodeJSProcessOptions>(options =>
             {
-                // Set environment variables for Node.js module resolution
-                // NODE_PATH helps Node.js find modules in custom locations
-                var currentDir = Environment.CurrentDirectory;
-                var nodeModulesPath = System.IO.Path.Combine(currentDir, "node_modules");
-                
-                if (options.EnvironmentVariables.ContainsKey("NODE_PATH"))
-                {
-                    options.EnvironmentVariables["NODE_PATH"] = nodeModulesPath;
-                }
-                else
-                {
-                    options.EnvironmentVariables.Add("NODE_PATH", nodeModulesPath);
-                }
+                // Set ProjectPath to current directory where package.json and node_modules will be
+                // In test scenarios, this will be the test output directory (bin/Debug/net8.0)
+                options.ProjectPath = Environment.CurrentDirectory;
             });
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {
