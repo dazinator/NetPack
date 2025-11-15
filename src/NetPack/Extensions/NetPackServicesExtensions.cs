@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
