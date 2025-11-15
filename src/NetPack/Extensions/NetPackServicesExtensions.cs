@@ -77,6 +77,13 @@ namespace NetPack
                 // Set ProjectPath to current directory where package.json and node_modules will be
                 // In test scenarios, this will be the test output directory (bin/Debug/net8.0)
                 options.ProjectPath = Environment.CurrentDirectory;
+                
+                // Fix IPv6/IPv4 issue: Force Node.js to prefer IPv4 DNS resolution
+                // Node v17+ defaults to IPv6 which causes connection failures when server binds to IPv4
+                if (!options.EnvironmentVariables.ContainsKey("NODE_OPTIONS"))
+                {
+                    options.EnvironmentVariables.Add("NODE_OPTIONS", "--dns-result-order=ipv4first");
+                }
             });
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {

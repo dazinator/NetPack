@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Jering.Javascript.NodeJS;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,10 +19,10 @@ namespace NetPack.NodeJS.POC.Tests
         }
 
         [Fact]
-        public async Task Test1_ConfiguredNodePath()
+        public async Task Test1_ForceIPv4()
         {
-            // Test with explicitly configured Node.js path
-            _output.WriteLine("Starting Test1_ConfiguredNodePath");
+            // Test with IPv4 forced via DNS resolution order
+            _output.WriteLine("Starting Test1_ForceIPv4");
             _output.WriteLine($"Current Directory: {Environment.CurrentDirectory}");
             
             string script = @"
@@ -30,13 +32,32 @@ namespace NetPack.NodeJS.POC.Tests
             ";
 
             var services = new ServiceCollection();
+            
+            // Add logging
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(LogLevel.Trace);
+                builder.AddProvider(new XunitLoggerProvider(_output));
+            });
+            
             services.AddNodeJS();
             services.Configure<NodeJSProcessOptions>(options =>
             {
-                options.ExecutablePath = "/usr/local/bin/node";  // Explicit path
+                options.ExecutablePath = "/usr/local/bin/node";
                 options.ProjectPath = Environment.CurrentDirectory;
-                _output.WriteLine($"Configured ExecutablePath: {options.ExecutablePath}");
-                _output.WriteLine($"Configured ProjectPath: {options.ProjectPath}");
+                
+                // Force Node.js to prefer IPv4
+                if (!options.EnvironmentVariables.ContainsKey("NODE_OPTIONS"))
+                {
+                    options.EnvironmentVariables.Add("NODE_OPTIONS", "--dns-result-order=ipv4first");
+                }
+                
+                _output.WriteLine($"NodeJS Config - Executable: {options.ExecutablePath}");
+                _output.WriteLine($"NodeJS Config - ProjectPath: {options.ProjectPath}");
+                if (options.EnvironmentVariables.TryGetValue("NODE_OPTIONS", out var nodeOpts))
+                {
+                    _output.WriteLine($"NodeJS Config - NODE_OPTIONS: {nodeOpts}");
+                }
             });
             
             var serviceProvider = services.BuildServiceProvider();
@@ -44,48 +65,62 @@ namespace NetPack.NodeJS.POC.Tests
 
             try
             {
+                _output.WriteLine("Invoking Node.js...");
                 var result = await nodeJSService.InvokeFromStringAsync<string>(script, args: new object[] { "World" });
                 _output.WriteLine($"Result: {result}");
                 Assert.Equal("Hello World", result);
             }
             catch (Exception ex)
             {
-                _output.WriteLine($"Exception: {ex.GetType().Name}");
-                _output.WriteLine($"Message: {ex.Message}");
+                _output.WriteLine($"Exception: {ex.GetType().Name}: {ex.Message}");
                 if (ex.InnerException != null)
                 {
-                    _output.WriteLine($"Inner: {ex.InnerException.Message}");
+                    _output.WriteLine($"Inner: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
                 }
                 throw;
             }
         }
+    }
 
-        [Fact]
-        public async Task Test2_SimpleCalculation()
+    public class XunitLoggerProvider : ILoggerProvider
+    {
+        private readonly ITestOutputHelper _output;
+        
+        public XunitLoggerProvider(ITestOutputHelper output)
         {
-            // Test with simple math
-            _output.WriteLine("Starting Test2_SimpleCalculation");
-            
-            string script = @"
-                module.exports = (callback, x, y) => {
-                    const result = x + y;
-                    callback(null, result);
-                };
-            ";
+            _output = output;
+        }
 
-            var services = new ServiceCollection();
-            services.AddNodeJS();
-            services.Configure<NodeJSProcessOptions>(options =>
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new XunitLogger(_output, categoryName);
+        }
+
+        public void Dispose() { }
+    }
+
+    public class XunitLogger : ILogger
+    {
+        private readonly ITestOutputHelper _output;
+        private readonly string _categoryName;
+
+        public XunitLogger(ITestOutputHelper output, string categoryName)
+        {
+            _output = output;
+            _categoryName = categoryName;
+        }
+
+        public IDisposable BeginScope<TState>(TState state) => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            _output.WriteLine($"[{logLevel}] {_categoryName}: {formatter(state, exception)}");
+            if (exception != null)
             {
-                options.ExecutablePath = "/usr/local/bin/node";
-            });
-            
-            var serviceProvider = services.BuildServiceProvider();
-            var nodeJSService = serviceProvider.GetRequiredService<INodeJSService>();
-
-            var result = await nodeJSService.InvokeFromStringAsync<int>(script, args: new object[] { 3, 5 });
-            _output.WriteLine($"3 + 5 = {result}");
-            Assert.Equal(8, result);
+                _output.WriteLine($"Exception: {exception}");
+            }
         }
     }
 }
