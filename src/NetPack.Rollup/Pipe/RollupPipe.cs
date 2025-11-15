@@ -58,10 +58,8 @@ namespace NetPack.Rollup
 
         public override async Task ProcessAsync(PipeState state, CancellationToken cancelationToken)
         {
-            System.IO.File.AppendAllText("/tmp/rollup_debug.log", $"=== RollupPipe.ProcessAsync called at {DateTime.Now} ===\n");
             RollupRequest optimiseRequest = new RollupRequest();
             var inputFiles = state.GetInputFiles();
-            System.IO.File.AppendAllText("/tmp/rollup_debug.log", $"=== Input files count: {inputFiles.Length} ===\n");
             foreach (FileWithDirectory file in inputFiles)
             {
                 string fileContent = file.FileInfo.ReadAllContent();
@@ -82,9 +80,7 @@ namespace NetPack.Rollup
             try
             {
                 _logger.LogInformation("Invoking Rollup build with {FileCount} files", optimiseRequest.Files.Count);
-                System.IO.File.AppendAllText("/tmp/rollup_debug.log", $"=== About to invoke Node.js at {DateTime.Now} ===\n");
                 RollupResponse response = await _nodeServices.InvokeExportAsync<RollupRequest, RollupResponse>(_script.Value, "build", optimiseRequest, cancelationToken);
-                System.IO.File.AppendAllText("/tmp/rollup_debug.log", $"=== Node.js invocation completed at {DateTime.Now}, response is null: {response == null} ===\n");
                 _logger.LogInformation("Rollup build completed, response has {ResultCount} results", response?.Results?.Count ?? 0);
                 //Queue<RollupResult> results = new Queue<RollupResult>(response.Result);
                 cancelationToken.ThrowIfCancellationRequested();
@@ -92,7 +88,6 @@ namespace NetPack.Rollup
                 foreach (RollupOutputFileOptions output in _outputOptions)
                 {
                     _logger.LogInformation("Processing output file: {OutputFile}", output.File);
-                    System.IO.File.AppendAllText("/tmp/rollup_debug.log", $"=== Processing output: {output.File} ===\n");
                     var outputResults = response.Results[output.File];
 
                     var filePathInfo = PathStringHelper.SplitPath(output.File);
@@ -124,7 +119,6 @@ namespace NetPack.Rollup
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during Rollup processing");
-                System.IO.File.AppendAllText("/tmp/rollup_debug.log", $"=== Exception: {ex.Message} ===\n{ex.StackTrace}\n");
                 throw;
             }          
 
