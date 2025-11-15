@@ -97,10 +97,12 @@ namespace NetPack.Pipeline
 
         public void Initialise()
         {
+            System.IO.File.AppendAllText("/tmp/pipeline_debug.log", $"=== Pipeline.Initialise called at {DateTime.Now} ===\n");
             // run checks for requirements.
             bool shouldCheckRequirements = _shouldPerformRequirementsCheck?.Invoke(this) ?? true;
             if(shouldCheckRequirements)
             {
+                Console.WriteLine("=== Checking requirements ===");
                 CheckRequirements();
             }
             else
@@ -112,7 +114,11 @@ namespace NetPack.Pipeline
             // we want to block becausewe dont want the app to finish starting
             // before all assets have been processed..
             //todo: exception handling here.
-            ProcessUninitialisedPipesAsync(CancellationToken.None).Wait(DefaultInitialiseTimeout);
+            Console.WriteLine("=== Calling ProcessUninitialisedPipesAsync ===");
+            System.IO.File.AppendAllText("/tmp/pipeline_debug.log", $"=== About to call ProcessUninitialisedPipesAsync at {DateTime.Now} ===\n");
+            ProcessUninitialisedPipesAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            Console.WriteLine("=== ProcessUninitialisedPipesAsync completed ===");
+            System.IO.File.AppendAllText("/tmp/pipeline_debug.log", $"=== ProcessUninitialisedPipesAsync completed at {DateTime.Now} ===\n");
 
         }
 

@@ -33,6 +33,7 @@ namespace NetPack
             {
                 _services.AddTransient<PipelineSetup>((sp) =>
                 {
+                    System.IO.File.AppendAllText("/tmp/pipeline_factory_debug.log", $"=== PipelineSetup factory called at {DateTime.Now} ===\n");
                     IDirectory sourcesDirectory = sp.GetService<IDirectory>();
                     PipelineConfigurationBuilder builder = new PipelineConfigurationBuilder(sp, sourcesDirectory);
 
