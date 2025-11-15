@@ -1,4 +1,6 @@
-﻿namespace NetPack.Rollup
+using System.Text.Json.Serialization;
+
+namespace NetPack.Rollup
 {
     public class RollupOutputFileOptions : BaseRollupOutputOptions
     {
@@ -10,6 +12,7 @@
         /// <summary>
         /// The bundle file to be produced.
         /// </summary>
+        [JsonPropertyName("file")]
         public string File { get; set; }
 
     }
