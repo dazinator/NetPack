@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NetPack.Pipeline;
 using NetPack.Requirements;
 using NetPack.Utils;
 using System;
+using System.Text.Json;
 using Dazinator.Extensions.FileProviders.InMemory.Directory;
 using Jering.Javascript.NodeJS;
 

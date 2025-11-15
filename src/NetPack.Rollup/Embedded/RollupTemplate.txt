@@ -104,7 +104,7 @@ module.exports = {
 		    var outputOptionsDto = outputOptionsArray[i];				
 			var outputOptions = getOutputOptions(outputOptionsDto);
 			var key = outputOptions.file;
-		    var inputOptions = getInputOptions(inputOptionsDto);
+		    var inputOptions = getInputOptions(inputOptionsDto, key);
 		    results[key] = [];
 
 			
