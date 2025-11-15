@@ -53,8 +53,9 @@ namespace NetPack
             CancellationToken cancellationToken = default)
         {
             var factory = script.contentFactory;
+            var scriptContent = factory(); // Call the factory to get the actual script string
 
-            var result = await _nodeServices.InvokeFromStringAsync<T>(factory, script.cacheIdentifier,
+            var result = await _nodeServices.InvokeFromStringAsync<T>(scriptContent, script.cacheIdentifier,
                 exportedFunctionName, args: args, cancellationToken);
 
             return result;

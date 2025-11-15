@@ -71,11 +71,22 @@ namespace NetPack
             }
 
             services.AddNodeJS();
+            // Configure NodeJS process options
             services.Configure<NodeJSProcessOptions>(options =>
             {
-                // Configure NodeJS to use the current directory as the project path
-                // This ensures node_modules can be resolved correctly
-                options.ProjectPath = Environment.CurrentDirectory;
+                // Set environment variables for Node.js module resolution
+                // NODE_PATH helps Node.js find modules in custom locations
+                var currentDir = Environment.CurrentDirectory;
+                var nodeModulesPath = System.IO.Path.Combine(currentDir, "node_modules");
+                
+                if (options.EnvironmentVariables.ContainsKey("NODE_PATH"))
+                {
+                    options.EnvironmentVariables["NODE_PATH"] = nodeModulesPath;
+                }
+                else
+                {
+                    options.EnvironmentVariables.Add("NODE_PATH", nodeModulesPath);
+                }
             });
             services.AddSingleton(typeof(INetPackNodeServices), serviceProvider =>
             {
