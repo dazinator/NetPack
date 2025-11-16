@@ -49,5 +49,28 @@ namespace NetPack.Rollup.Tests
             // Should contain readable JavaScript with single quotes
             Assert.Contains("'/hmr/amd'", json);
         }
+
+        [Fact]
+        public void PluginConfigurationJson_Should_Handle_Multiple_Single_Quotes()
+        {
+            // Arrange - Test with multiple single quotes in the function
+            var pluginOptions = new JsonObject
+            {
+                ["test"] = "FUNCfunction() { var a = 'hello'; var b = 'world'; return a + ' ' + b; }FUNC"
+            };
+
+            var plugin = new RollupPlugin("test-plugin", pluginOptions, "test", false, false);
+
+            // Act
+            var json = plugin.PluginConfigurationJson;
+
+            // Assert
+            // Should not contain Unicode escape sequences
+            Assert.DoesNotContain("\\u0027", json);
+            // Should contain all single quotes properly
+            Assert.Contains("'hello'", json);
+            Assert.Contains("'world'", json);
+            Assert.Contains("' '", json);
+        }
     }
 }
