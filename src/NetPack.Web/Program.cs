@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using NetPack.Utils;
 
 namespace NetPack.Web
 {
@@ -8,6 +9,8 @@ namespace NetPack.Web
     {
         public static void Main(string[] args)
         {
+            NodeFnmHelper.SetPath();
+
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())

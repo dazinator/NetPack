@@ -10,8 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Dazinator.Extensions.FileProviders;
 using Dazinator.Extensions.FileProviders.InMemory;
-using NetPack.Tests.Utils;
 using Xunit;
+using NetPack.Utils;
 
 namespace NetPack.Rollup.Tests
 {

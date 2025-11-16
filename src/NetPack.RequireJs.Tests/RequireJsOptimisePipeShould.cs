@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Microsoft.AspNetCore.Http;
 using NetPack.Tests.Utils;
+using NetPack.Utils;
 
 namespace NetPack.RequireJs.Tests
 {

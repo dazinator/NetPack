@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NetPack.Tests.Utils;
 using Xunit;
 using Xunit.Abstractions;
+using NetPack.Utils;
 
 namespace NetPack.Rollup.Tests
 {

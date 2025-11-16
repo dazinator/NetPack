@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace NetPack.Tests.Utils;
+namespace NetPack.Utils;
 
 public static class NodeFnmHelper
 {
