@@ -110,7 +110,7 @@ namespace NetPack.Requirements
                     continue;
                 }
 
-                if (line.Contains("WARN"))
+                if (line.Contains("WARN", StringComparison.OrdinalIgnoreCase) || line.Contains("warn", StringComparison.Ordinal))
                 {
                     warnings.Add(line);
                     // WARNINGS ARE OK.
