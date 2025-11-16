@@ -4,7 +4,6 @@ using ApprovalTests.Reporters;
 using Dazinator.Extensions.FileProviders;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
-using NetPack.Tests.Utils;
 using Xunit;
 using Xunit.Abstractions;
 using NetPack.Utils;
