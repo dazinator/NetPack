@@ -109,7 +109,7 @@ namespace NetPack.Utils
                             string line = e.Data;
                             if (!string.IsNullOrWhiteSpace(line))
                             {
-                                if (line.Contains("WARN"))
+                                if (line.Contains("WARN", StringComparison.OrdinalIgnoreCase) || line.Contains("warn", StringComparison.Ordinal))
                                 {
                                     warnings.Add(line);
                                     // WARNINGS ARE OK.
@@ -172,7 +172,7 @@ namespace NetPack.Utils
                     string line = p.StandardError.ReadLine();
                     if (!string.IsNullOrWhiteSpace(line))
                     {
-                        if (line.Contains("WARN"))
+                        if (line.Contains("WARN", StringComparison.OrdinalIgnoreCase) || line.Contains("warn", StringComparison.Ordinal))
                         {
                             warnings.Add(line);
                             // WARNINGS ARE OK.
