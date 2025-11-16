@@ -5,10 +5,21 @@
 <p>
     As explained <a href="https://github.com/rollup/rollup-starter-code-splitting">here</a>
 
-    Notice that the seven modules in our /esm folder have been optimised into four modules — two for the 'entry points' on this page, and two more for code that is shared by multiple entry points or is loaded dynamically. Rollup will automatically create chunks in such a way that no code is duplicated between them.
+    Multiple files in our /esm folder have been optimised into chunks based on the dependency tree, ensuring no code module is duplicated in each chunk.
+
+    The three chunks are indicated by the row colouring below.
 
     You can read about code splitting <a href="https://medium.com/rollup/rollup-now-has-code-splitting-and-we-need-your-help-46defd901c82">here</a>
 </p>
+
+<ol>
+    <li>`main-a.js` and `main-b.js` are top level entry points loaded directly.</li>
+    <li>`used-by-a.js` is a module that `main-a.js` imports</li>
+    <li>`used-by-b.js` is a module that `main-b.js` imports</li>
+    <li>`used-by-both.js` is a module that both import.</li>
+</ol>
+
+<p>Rather than loading individual scripts, the javascript is bundled up into dicrete chunks automatically, and when an entry level module is loaded, only the necessary dependency chunks are loaded. </p>
 
 
 <h1>Rollup code-splitting demo</h1>
@@ -23,9 +34,26 @@
     <div data-used-by='both'></div>
 </div>
 
+<p>Here is the JS used on this <a href="#">page</a></p>
+
+<pre><code>
+import("/netpack/rollup/module/main-a.js");
+import("/netpack/rollup/module/main-b.js");
+window.supportsDynamicImport = true;
+
+if (!window.supportsDynamicImport) {
+    const systemJsLoaderTag = document.createElement('script');
+    systemJsLoaderTag.src = 'https://unpkg.com/systemjs@2.0.0-alpha.1/dist/s.min.js';
+    systemJsLoaderTag.addEventListener('load', function () {
+        System.import('/netpack/rollup/nomodule/main-a.js');
+        System.import('/netpack/rollup/nomodule/main-b.js');
+    });
+    document.head.appendChild(systemJsLoaderTag);
+}
+</code></pre>
 
 @section scripts
-    {    
+{
 
     <script>
         import("/netpack/rollup/module/main-a.js");

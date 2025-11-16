@@ -1,7 +1,7 @@
 ﻿export class Another {
     constructor() { }
     greet() {
-        return "Loaded /ts/Another.ts";
+        return "Loaded /ts/Another.ts yeah";
     }
 };
 

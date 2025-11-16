@@ -4,7 +4,7 @@
 
     var self = {};
     
-    self.state = moduleA.addModuleToList("modules", "ModuleB");
+    self.state = moduleA.addModuleToList("modules", "ModuleB is here");
     self.addModuleToList = moduleA.addModuleToList;
     self.moduleA = moduleA;
 

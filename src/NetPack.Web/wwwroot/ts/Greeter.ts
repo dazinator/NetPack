@@ -3,7 +3,7 @@
 export class Greeter {
     constructor() { }
     greet() {
-        return "Hi!!!!"
+        return "Hi there partner!!!!"
     }
 };
 
