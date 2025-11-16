@@ -38,7 +38,8 @@ namespace NetPack.Rollup
                 }
 
                 string json =  JsonSerializer.Serialize(PluginConfiguration)
-                    .Replace("\"FUNC", "").Replace("FUNC\"", ""); // hack to allow javascript functions to be sent via json see: https://stackoverflow.com/questions/4901859/send-javascript-function-over-json-using-json-net-lib
+                    .Replace("\"FUNC", "").Replace("FUNC\"", "") // hack to allow javascript functions to be sent via json see: https://stackoverflow.com/questions/4901859/send-javascript-function-over-json-using-json-net-lib
+                    .Replace("\\u0027", "'"); // Decode Unicode-escaped single quotes that JsonSerializer creates
                 return json;
             }
         }
