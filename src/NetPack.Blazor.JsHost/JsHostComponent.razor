@@ -1,0 +1,109 @@
+@using NetPack.Blazor.JsHost.HostCapabilities
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<div @ref="_hostElement" id="@ElementId" class="netpack-js-host"></div>
+
+@code {
+    private ElementReference _hostElement;
+    private JsHostInterop _interop;
+    private IHostCapabilities _hostCapabilities;
+
+    /// <summary>
+    /// The unique identifier for this host element.
+    /// </summary>
+    [Parameter]
+    public string ElementId { get; set; } = $"netpack-host-{Guid.NewGuid():N}";
+
+    /// <summary>
+    /// The URL or path to the JavaScript application entry point.
+    /// </summary>
+    [Parameter]
+    public string AppUrl { get; set; }
+
+    /// <summary>
+    /// The name of the JavaScript function to call to start the app.
+    /// Expected signature: function(element, env)
+    /// </summary>
+    [Parameter]
+    public string StartFunction { get; set; } = "start";
+
+    /// <summary>
+    /// Host capabilities to expose to the JavaScript application.
+    /// If not provided, a default implementation will be created.
+    /// </summary>
+    [Parameter]
+    public IHostCapabilities HostCapabilities { get; set; }
+
+    /// <summary>
+    /// Event raised when the JavaScript app raises a host event.
+    /// </summary>
+    [Parameter]
+    public EventCallback<HostEventArgs> OnHostEvent { get; set; }
+
+    /// <summary>
+    /// Additional CSS class for the host element.
+    /// </summary>
+    [Parameter]
+    public string CssClass { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeHostAsync();
+        }
+    }
+
+    private async Task InitializeHostAsync()
+    {
+        if (string.IsNullOrEmpty(AppUrl))
+        {
+            throw new InvalidOperationException("AppUrl parameter is required.");
+        }
+
+        // Create or use provided host capabilities
+        _hostCapabilities = HostCapabilities;
+        if (_hostCapabilities == null)
+        {
+            // Create a basic default implementation
+            // In a real application, these dependencies would be injected
+            var httpClient = new System.Net.Http.HttpClient();
+            _hostCapabilities = new DefaultHostCapabilities(httpClient);
+        }
+
+        // Wire up events if we have a DefaultHostCapabilities
+        if (_hostCapabilities is DefaultHostCapabilities defaultHost)
+        {
+            defaultHost.HostEventRaised += async (sender, args) =>
+            {
+                if (OnHostEvent.HasDelegate)
+                {
+                    await OnHostEvent.InvokeAsync(args);
+                }
+            };
+        }
+
+        // Initialize the JavaScript interop
+        _interop = new JsHostInterop(_hostCapabilities, JSRuntime);
+        await _interop.InitializeAsync(ElementId);
+
+        // Load and start the JavaScript application
+        await JSRuntime.InvokeVoidAsync("NetPackJsHost.loadAndStart", ElementId, AppUrl, StartFunction);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _interop?.Dispose();
+
+        // Clean up the JavaScript app
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("NetPackJsHost.dispose", ElementId);
+        }
+        catch
+        {
+            // Ignore errors during disposal
+        }
+    }
+}
