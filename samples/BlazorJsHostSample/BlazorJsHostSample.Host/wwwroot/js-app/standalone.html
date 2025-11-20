@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standalone JS App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        #app {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>NetPack JS App - Standalone Mode</h1>
+    
+    <div class="info">
+        <strong>ℹ️ This is the standalone version</strong>
+        <p>
+            The same JavaScript application running without Blazor.
+            It uses browser APIs (fetch) instead of Blazor's HttpClient.
+            This demonstrates the portability of the host-aware design.
+        </p>
+        <p>
+            Compare this with the <strong>hosted version</strong> at 
+            <code>/jshost-demo</code> when running the Blazor app to see the difference.
+        </p>
+    </div>
+
+    <div id="app"></div>
+
+    <script type="module">
+        // Import the app
+        import { start } from './app.js';
+
+        // Create a fallback transport using browser fetch
+        const fallbackTransport = {
+            async fetch(request) {
+                const response = await window.fetch(request.url, {
+                    method: request.method || 'GET',
+                    headers: request.headers,
+                    body: request.body
+                });
+
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+
+                return {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    headers: headers,
+                    body: await response.text()
+                };
+            }
+        };
+
+        // Create environment without host capabilities (standalone mode)
+        const env = {
+            hostCapabilities: undefined,  // No host capabilities in standalone
+            fallbackTransport: fallbackTransport
+        };
+
+        // Start the app
+        const appElement = document.getElementById('app');
+        start(appElement, env);
+    </script>
+</body>
+</html>

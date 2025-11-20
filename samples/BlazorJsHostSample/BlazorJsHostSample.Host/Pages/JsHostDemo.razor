@@ -1,0 +1,62 @@
+@page "/jshost-demo"
+@using NetPack.Blazor.JsHost
+@using NetPack.Blazor.JsHost.HostCapabilities
+
+<PageTitle>JS Host Demo</PageTitle>
+
+<h1>Blazor JS Host Demo</h1>
+
+<p>This page demonstrates hosting a JavaScript application within Blazor with host capabilities.</p>
+
+<div class="alert alert-info">
+    <strong>Features demonstrated:</strong>
+    <ul>
+        <li>JavaScript app running inside Blazor component</li>
+        <li>Access to host capabilities (HTTP, user info, config, events)</li>
+        <li>Dual-mode operation (hosted vs standalone)</li>
+        <li>No monkey-patching of global APIs</li>
+    </ul>
+</div>
+
+@if (_eventMessages.Any())
+{
+    <div class="alert alert-success">
+        <h4>Events Received from JS:</h4>
+        <ul>
+            @foreach (var msg in _eventMessages)
+            {
+                <li>@msg</li>
+            }
+        </ul>
+    </div>
+}
+
+<JsHostComponent 
+    AppUrl="/js-app/app.js" 
+    StartFunction="start"
+    OnHostEvent="HandleHostEvent" />
+
+@code {
+    private List<string> _eventMessages = new List<string>();
+
+    private async Task HandleHostEvent(HostEventArgs args)
+    {
+        var message = $"[{DateTime.Now:HH:mm:ss}] Event '{args.EventName}' received";
+        
+        if (args.EventData != null)
+        {
+            try
+            {
+                var json = System.Text.Json.JsonSerializer.Serialize(args.EventData);
+                message += $" with data: {json}";
+            }
+            catch
+            {
+                message += $" with data: {args.EventData}";
+            }
+        }
+
+        _eventMessages.Add(message);
+        StateHasChanged();
+    }
+}
